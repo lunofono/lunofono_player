@@ -5,7 +5,7 @@ import 'package:provider/provider.dart' show ChangeNotifierProvider, Consumer;
 import 'package:lunofono_bundle/lunofono_bundle.dart' show MultiMedium;
 
 import 'media_player/controller_registry.dart' show ControllerRegistry;
-import 'media_player/multi_medium_controller.dart' show MultiMediumController;
+import 'media_player/multi_medium_state.dart' show MultiMediumState;
 import 'media_player/multi_medium_player.dart' show MultiMediumPlayer;
 
 /// A media player widget.
@@ -22,7 +22,7 @@ import 'media_player/multi_medium_player.dart' show MultiMediumPlayer;
 /// instead of that medium.
 ///
 /// All the orchestration behind the scenes is performed by
-/// a [MultiMediumController] that is provided via a [ChangeNotifierProvider].
+/// a [MultiMediumState] that is provided via a [ChangeNotifierProvider].
 class MediaPlayer extends StatelessWidget {
   /// The medium to play by this player.
   final MultiMedium multimedium;
@@ -59,13 +59,13 @@ class MediaPlayer extends StatelessWidget {
   /// Builds the UI for this widget.
   @override
   Widget build(BuildContext context) =>
-      ChangeNotifierProvider<MultiMediumController>(
-        create: (context) => MultiMediumController(
+      ChangeNotifierProvider<MultiMediumState>(
+        create: (context) => MultiMediumState(
           multimedium,
           registry ?? ControllerRegistry.instance,
           onMediumFinished: onMediaStopped,
         )..initialize(context),
-        child: Consumer<MultiMediumController>(
+        child: Consumer<MultiMediumState>(
             child: Material(
               elevation: 0,
               color: backgroundColor,
@@ -73,13 +73,13 @@ class MediaPlayer extends StatelessWidget {
                 child: MultiMediumPlayer(),
               ),
             ),
-            builder: (context, model, child) {
+            builder: (context, dynamic state, child) {
               return GestureDetector(
                 onTap: () {
                   // XXX: For now the stop reaction is hardcoded to the tap.
                   // Also we should handle errors in the pause()'s future
-                  model.mainTrackController.pauseCurrent(context);
-                  model.backgroundTrackController.pauseCurrent(context);
+                  state.mainTrackState.pauseCurrent(context);
+                  state.backgroundTrackState.pauseCurrent(context);
                   onMediaStopped?.call(context);
                 },
                 child: child,

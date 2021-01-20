@@ -7,8 +7,8 @@ import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:provider/provider.dart' show ChangeNotifierProvider, Provider;
 
-import 'package:lunofono_player/src/media_player/multi_medium_controller.dart'
-    show MultiMediumController, MultiMediumTrackController, SingleMediumState;
+import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
+    show MultiMediumState, MultiMediumTrackState, SingleMediumState;
 import 'package:lunofono_player/src/media_player/media_player_error.dart'
     show MediaPlayerError;
 import 'package:lunofono_player/src/media_player/multi_medium_player.dart'
@@ -63,13 +63,13 @@ void main() {
         size: Size(10.0, 10.0),
         widgetKey: GlobalKey(debugLabel: 'initializedStateKey'));
 
-    Future<void> pumpPlayer(WidgetTester tester,
-            FakeMultiMediumTrackController controller) async =>
+    Future<void> pumpPlayer(
+            WidgetTester tester, FakeMultiMediumTrackState state) async =>
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
-            child: ChangeNotifierProvider<MultiMediumTrackController>.value(
-              value: controller,
+            child: ChangeNotifierProvider<MultiMediumTrackState>.value(
+              value: state,
               child: MultiMediumTrackPlayer(),
             ),
           ),
@@ -78,9 +78,9 @@ void main() {
     group('error if', () {
       Future<void> testError(
         WidgetTester tester,
-        FakeMultiMediumTrackController controller,
+        FakeMultiMediumTrackState state,
       ) async {
-        await pumpPlayer(tester, controller);
+        await pumpPlayer(tester, state);
 
         expect(find.byKey(errorState.widgetKey), findsNothing);
         expect(find.byKey(initializedState.widgetKey), findsNothing);
@@ -92,25 +92,25 @@ void main() {
       }
 
       testWidgets('current is erroneous', (WidgetTester tester) async {
-        final controller = FakeMultiMediumTrackController(
+        final state = FakeMultiMediumTrackState(
             current: errorState, last: initializedState, isVisualizable: true);
-        await testError(tester, controller);
+        await testError(tester, state);
       });
 
       testWidgets('last is erroneous', (WidgetTester tester) async {
-        final controller = FakeMultiMediumTrackController(last: errorState);
-        await testError(tester, controller);
+        final state = FakeMultiMediumTrackState(last: errorState);
+        await testError(tester, state);
       });
     });
 
     group('progress indicator if initializing a', () {
       Future<void> testProgress(WidgetTester tester, bool visualizable) async {
-        final controller = FakeMultiMediumTrackController(
+        final state = FakeMultiMediumTrackState(
             current: uninitializedState,
             last: initializedState,
             isVisualizable: visualizable);
 
-        await pumpPlayer(tester, controller);
+        await pumpPlayer(tester, state);
         expect(find.byType(MediaPlayerError), findsNothing);
         expect(find.byKey(errorState.widgetKey), findsNothing);
         expect(find.byKey(initializedState.widgetKey), findsNothing);
@@ -120,24 +120,24 @@ void main() {
         final progressFinder = find.byType(MediaProgressIndicator);
         expect(progressFinder, findsOneWidget);
         final widget = tester.widget(progressFinder) as MediaProgressIndicator;
-        expect(widget.isVisualizable, controller.isVisualizable);
+        expect(widget.isVisualizable, state.isVisualizable);
       }
 
-      testWidgets('visualizable controller', (WidgetTester tester) async {
+      testWidgets('visualizable state', (WidgetTester tester) async {
         await testProgress(tester, true);
       });
-      testWidgets('non-visualizable controller', (WidgetTester tester) async {
+      testWidgets('non-visualizable state', (WidgetTester tester) async {
         await testProgress(tester, false);
       });
     });
     group('initialized shows', () {
       Future<Widget> testPlayer(
         WidgetTester tester,
-        FakeMultiMediumTrackController controller, [
+        FakeMultiMediumTrackState state, [
         FakeSingleMediumState playerState,
       ]) async {
         playerState ??= initializedState;
-        await pumpPlayer(tester, controller);
+        await pumpPlayer(tester, state);
         expect(find.byType(MediaPlayerError), findsNothing);
         expect(find.byKey(errorState.widgetKey), findsNothing);
         expect(find.byKey(uninitializedState.widgetKey), findsNothing);
@@ -150,33 +150,33 @@ void main() {
 
       group('a Container for non-visualizable', () {
         testWidgets('initialized current state', (WidgetTester tester) async {
-          final controller = FakeMultiMediumTrackController(
+          final state = FakeMultiMediumTrackState(
             current: initializedState,
             last: uninitializedState,
             isVisualizable: false,
           );
-          final playerWidget = await testPlayer(tester, controller);
+          final playerWidget = await testPlayer(tester, state);
           expect(playerWidget, isA<Container>());
           expect(find.byType(RotatedBox), findsNothing);
         });
 
         testWidgets('initialized last state', (WidgetTester tester) async {
-          final controller = FakeMultiMediumTrackController(
+          final state = FakeMultiMediumTrackState(
             last: initializedState,
             isVisualizable: false,
           );
-          final playerWidget = await testPlayer(tester, controller);
+          final playerWidget = await testPlayer(tester, state);
           expect(playerWidget, isA<Container>());
           expect(find.byType(RotatedBox), findsNothing);
         });
       });
 
       testWidgets('player for last state', (WidgetTester tester) async {
-        final controller = FakeMultiMediumTrackController(
+        final state = FakeMultiMediumTrackState(
           last: initializedState,
           isVisualizable: true,
         );
-        await testPlayer(tester, controller);
+        await testPlayer(tester, state);
       });
 
       testWidgets('no RotatedBox for square media',
@@ -185,12 +185,12 @@ void main() {
           size: Size(10.0, 10.0),
           widgetKey: GlobalKey(debugLabel: 'squareKey'),
         );
-        final controller = FakeMultiMediumTrackController(
+        final state = FakeMultiMediumTrackState(
           current: squareState,
           last: errorState,
           isVisualizable: true,
         );
-        await testPlayer(tester, controller, squareState);
+        await testPlayer(tester, state, squareState);
         expect(find.byType(RotatedBox), findsNothing);
       });
 
@@ -200,12 +200,12 @@ void main() {
           size: Size(100.0, 180.0),
           widgetKey: GlobalKey(debugLabel: 'portraitKey'),
         );
-        final controller = FakeMultiMediumTrackController(
+        final state = FakeMultiMediumTrackState(
           current: portraitState,
           last: errorState,
           isVisualizable: true,
         );
-        await testPlayer(tester, controller, portraitState);
+        await testPlayer(tester, state, portraitState);
         expect(find.byType(RotatedBox), findsNothing);
       });
 
@@ -215,12 +215,12 @@ void main() {
           size: Size(100.0, 80.0),
           widgetKey: GlobalKey(debugLabel: 'landscapeKey'),
         );
-        final controller = FakeMultiMediumTrackController(
+        final state = FakeMultiMediumTrackState(
           current: landscapeState,
           last: errorState,
           isVisualizable: true,
         );
-        await testPlayer(tester, controller, landscapeState);
+        await testPlayer(tester, state, landscapeState);
         expect(find.byType(RotatedBox), findsOneWidget);
       });
     });
@@ -235,11 +235,11 @@ void main() {
     });
 
     Future<void> pumpPlayer(
-        WidgetTester tester, FakeMultiMediumController controller) async {
+        WidgetTester tester, FakeMultiMediumState controller) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: ChangeNotifierProvider<MultiMediumController>.value(
+          child: ChangeNotifierProvider<MultiMediumState>.value(
             value: controller,
             child: TestMultiMediumPlayer(),
           ),
@@ -249,7 +249,7 @@ void main() {
 
     testWidgets('shows progress if not all initialized',
         (WidgetTester tester) async {
-      final controller = FakeMultiMediumController(allInitialized: false);
+      final controller = FakeMultiMediumState(allInitialized: false);
 
       await pumpPlayer(tester, controller);
       expect(find.byType(MediaPlayerError), findsNothing);
@@ -259,18 +259,18 @@ void main() {
     });
 
     group('shows MultiMediumTrackPlayer', () {
-      final audibleTrack = FakeMultiMediumTrackController(
+      final audibleTrack = FakeMultiMediumTrackState(
         current: FakeSingleMediumState(size: Size(0.0, 0.0)),
         isVisualizable: false,
       );
-      final visualTrack = FakeMultiMediumTrackController(
+      final visualTrack = FakeMultiMediumTrackState(
         current: FakeSingleMediumState(size: Size(10.0, 10.0)),
         isVisualizable: true,
       );
 
       Future<void> testMainTrackOnly(
-          WidgetTester tester, FakeMultiMediumTrackController track) async {
-        final controller = FakeMultiMediumController(mainTrack: track);
+          WidgetTester tester, FakeMultiMediumTrackState track) async {
+        final controller = FakeMultiMediumState(mainTrack: track);
 
         await pumpPlayer(tester, controller);
         expect(find.byType(MediaPlayerError), findsNothing);
@@ -295,7 +295,7 @@ void main() {
       });
 
       Future<void> test2Tracks(
-          WidgetTester tester, FakeMultiMediumController controller) async {
+          WidgetTester tester, FakeMultiMediumState controller) async {
         await pumpPlayer(tester, controller);
         expect(find.byType(MediaPlayerError), findsNothing);
         expect(find.byType(MediaProgressIndicator), findsNothing);
@@ -315,10 +315,10 @@ void main() {
           matching: find.byType(TestMultiMediumTrackPlayer),
         );
         expect(firstTrackFinder, findsOneWidget);
-        final firstController = Provider.of<MultiMediumTrackController>(
+        final firstState = Provider.of<MultiMediumTrackState>(
             tester.element(firstTrackFinder),
             listen: false);
-        expect(firstController, same(visualTrack));
+        expect(firstState, same(visualTrack));
 
         // Second track should be the audible one
         final secondTrackFinder = find.descendant(
@@ -332,23 +332,23 @@ void main() {
               matching: find.byType(Center),
             ),
             findsNothing);
-        final secondController = Provider.of<MultiMediumTrackController>(
+        final secondState = Provider.of<MultiMediumTrackState>(
             tester.element(secondTrackFinder),
             listen: false);
-        expect(secondController, same(audibleTrack));
+        expect(secondState, same(audibleTrack));
       }
 
       testWidgets('with 2 tracks the visualizable track is always the first',
           (WidgetTester tester) async {
         await test2Tracks(
             tester,
-            FakeMultiMediumController(
+            FakeMultiMediumState(
               mainTrack: audibleTrack,
               backgroundTrack: visualTrack,
             ));
         await test2Tracks(
             tester,
-            FakeMultiMediumController(
+            FakeMultiMediumState(
               mainTrack: visualTrack,
               backgroundTrack: audibleTrack,
             ));
@@ -385,9 +385,9 @@ class FakeSingleMediumState extends Fake
   }) : widgetKey = widgetKey ?? GlobalKey(debugLabel: 'widgetKey');
 }
 
-class FakeMultiMediumTrackController extends Fake
+class FakeMultiMediumTrackState extends Fake
     with FakeDiagnosticableMixin, ChangeNotifier
-    implements MultiMediumTrackController {
+    implements MultiMediumTrackState {
   @override
   FakeSingleMediumState current;
   @override
@@ -401,45 +401,45 @@ class FakeMultiMediumTrackController extends Fake
   @override
   Future<void> dispose() async => super.dispose();
   @override
-  String toStringShort() => 'FakeMultiMediumTrackController('
+  String toStringShort() => 'FakeMultiMediumTrackState('
       'current: $current, '
       'last: $last, '
       'isVisualizable: $isVisualizable'
       ')';
-  FakeMultiMediumTrackController({
+  FakeMultiMediumTrackState({
     this.current,
     FakeSingleMediumState last,
     this.isVisualizable = false,
   }) : last = last ?? current;
 }
 
-class FakeMultiMediumController extends Fake
+class FakeMultiMediumState extends Fake
     with FakeDiagnosticableMixin, ChangeNotifier
-    implements MultiMediumController {
-  FakeMultiMediumTrackController mainTrack;
-  FakeMultiMediumTrackController backgroundTrack;
+    implements MultiMediumState {
+  FakeMultiMediumTrackState mainTrack;
+  FakeMultiMediumTrackState backgroundTrack;
   @override
   bool allInitialized;
   @override
-  MultiMediumTrackController get mainTrackController => mainTrack;
+  MultiMediumTrackState get mainTrackState => mainTrack;
   @override
-  MultiMediumTrackController get backgroundTrackController => backgroundTrack;
+  MultiMediumTrackState get backgroundTrackState => backgroundTrack;
   @override
-  String toStringShort() => 'FakeMultiMediumController('
+  String toStringShort() => 'FakeMultiMediumState('
       'allInitialized: $allInitialized, '
       'mainTrack: $mainTrack, '
       'backgroundTrack: $backgroundTrack'
       ')';
   @override
   Future<void> dispose() async => super.dispose();
-  FakeMultiMediumController({
-    FakeMultiMediumTrackController mainTrack,
-    FakeMultiMediumTrackController backgroundTrack,
+  FakeMultiMediumState({
+    FakeMultiMediumTrackState mainTrack,
+    FakeMultiMediumTrackState backgroundTrack,
     bool allInitialized,
   })  : allInitialized = allInitialized ?? mainTrack != null,
         mainTrack = mainTrack ??
-            FakeMultiMediumTrackController(current: FakeSingleMediumState()),
-        backgroundTrack = backgroundTrack ?? FakeMultiMediumTrackController();
+            FakeMultiMediumTrackState(current: FakeSingleMediumState()),
+        backgroundTrack = backgroundTrack ?? FakeMultiMediumTrackState();
 }
 
 class TestMultiMediumPlayer extends MultiMediumPlayer {

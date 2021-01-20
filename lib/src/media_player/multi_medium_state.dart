@@ -16,18 +16,17 @@ import 'package:lunofono_bundle/lunofono_bundle.dart'
 import 'controller_registry.dart' show ControllerRegistry;
 import 'single_medium_controller.dart' show SingleMediumController, Size;
 
-/// A controller for playing a [MultiMedium] and sending updates to the UI.
-class MultiMediumController with ChangeNotifier, DiagnosticableTreeMixin {
-  MultiMediumTrackController _mainTrackController;
+/// A player state for playing a [MultiMedium] and notifying changes.
+class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
+  MultiMediumTrackState _mainTrackState;
 
-  /// The controller that takes care of playing the main track.
-  MultiMediumTrackController get mainTrackController => _mainTrackController;
+  /// The state of the main track.
+  MultiMediumTrackState get mainTrackState => _mainTrackState;
 
-  MultiMediumTrackController _backgroundTrackController;
+  MultiMediumTrackState _backgroundTrackState;
 
-  /// The controller that takes care of playing the background track.
-  MultiMediumTrackController get backgroundTrackController =>
-      _backgroundTrackController;
+  /// The state of the background track.
+  MultiMediumTrackState get backgroundTrackState => _backgroundTrackState;
 
   bool _allInitialized = false;
 
@@ -37,28 +36,28 @@ class MultiMediumController with ChangeNotifier, DiagnosticableTreeMixin {
   /// The function that will be called when the main track finishes playing.
   final void Function(BuildContext context) onMediumFinished;
 
-  /// Constructs a [MultiMediumController] for playing [multimedium].
+  /// Constructs a [MultiMediumState] for playing [multimedium].
   ///
   /// Both [multimedium] and [registry] must be non-null. If [onMediumFinished]
   /// is provided, it will be called when the medium finishes playing the
   /// [multimedium.mainTrack].
-  MultiMediumController(MultiMedium multimedium, ControllerRegistry registry,
+  MultiMediumState(MultiMedium multimedium, ControllerRegistry registry,
       {this.onMediumFinished})
       : assert(multimedium != null),
         assert(registry != null) {
-    _mainTrackController = MultiMediumTrackController.main(
+    _mainTrackState = MultiMediumTrackState.main(
       track: multimedium.mainTrack,
       registry: registry,
       onMediumFinished: _onMainTrackFinished,
     );
-    _backgroundTrackController = MultiMediumTrackController.background(
+    _backgroundTrackState = MultiMediumTrackState.background(
       track: multimedium.backgroundTrack,
       registry: registry,
     );
   }
 
   void _onMainTrackFinished(BuildContext context) {
-    backgroundTrackController.pauseCurrent(context);
+    backgroundTrackState.pauseCurrent(context);
     onMediumFinished?.call(context);
   }
 
@@ -67,13 +66,12 @@ class MultiMediumController with ChangeNotifier, DiagnosticableTreeMixin {
   /// When initialization is done, [allInitialized] is set to true, it starts
   /// playing the first medium in both tracks and it notifies the listeners.
   Future<void> initialize(BuildContext context) => Future.forEach(
-              [mainTrackController, backgroundTrackController],
-              (MultiMediumTrackController ts) => ts.initializeAll(context))
-          .then<void>(
+          [mainTrackState, backgroundTrackState],
+          (MultiMediumTrackState ts) => ts.initializeAll(context)).then<void>(
         (dynamic _) {
           _allInitialized = true;
-          mainTrackController.playCurrent(context);
-          backgroundTrackController.playCurrent(context);
+          mainTrackState.playCurrent(context);
+          backgroundTrackState.playCurrent(context);
           notifyListeners();
         },
       );
@@ -82,17 +80,17 @@ class MultiMediumController with ChangeNotifier, DiagnosticableTreeMixin {
   @override
   Future<void> dispose() async {
     await Future.wait(
-        [mainTrackController.dispose(), backgroundTrackController.dispose()]);
+        [mainTrackState.dispose(), backgroundTrackState.dispose()]);
     super.dispose();
   }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final initialized = allInitialized ? 'initialized, ' : '';
-    final main = 'main: $mainTrackController';
-    final back = backgroundTrackController.isEmpty
+    final main = 'main: $mainTrackState';
+    final back = backgroundTrackState.isEmpty
         ? ''
-        : ', background: $backgroundTrackController';
+        : ', background: $backgroundTrackState';
     return '$runtimeType($initialized$main$back)';
   }
 
@@ -104,24 +102,22 @@ class MultiMediumController with ChangeNotifier, DiagnosticableTreeMixin {
           value: allInitialized, ifTrue: 'all tracks are initialized'))
       ..add(ObjectFlagProperty('onMediumFinished', onMediumFinished,
           ifPresent: 'notifies when all media finished'))
-      ..add(DiagnosticsProperty('main', mainTrackController,
-          expandableValue: true));
-    if (backgroundTrackController.isNotEmpty) {
-      properties.add(DiagnosticsProperty(
-          'background', backgroundTrackController,
+      ..add(DiagnosticsProperty('main', mainTrackState, expandableValue: true));
+    if (backgroundTrackState.isNotEmpty) {
+      properties.add(DiagnosticsProperty('background', backgroundTrackState,
           expandableValue: true));
     }
   }
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-        mainTrackController.toDiagnosticsNode(name: 'main'),
-        backgroundTrackController.toDiagnosticsNode(name: 'background'),
+        mainTrackState.toDiagnosticsNode(name: 'main'),
+        backgroundTrackState.toDiagnosticsNode(name: 'background'),
       ];
 }
 
-/// A controller for playing a [MultiMediumTrack] and sending updates to the UI.
-class MultiMediumTrackController with ChangeNotifier, DiagnosticableTreeMixin {
+/// A player state for playing a [MultiMediumTrack] and notifying changes.
+class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// If true, then a proper widget needs to be shown for this track.
   final bool isVisualizable;
 
@@ -151,7 +147,7 @@ class MultiMediumTrackController with ChangeNotifier, DiagnosticableTreeMixin {
   /// The last [SingleMediumState] in this track.
   SingleMediumState get last => mediaState.last;
 
-  /// Constructs a [MultiMediumTrackController] from a [SingleMedium] list.
+  /// Constructs a [MultiMediumTrackState] from a [SingleMedium] list.
   ///
   /// The [media] list must be non-null and not empty. Also [visualizable] must
   /// not be null and it indicates if the media should be displayed or not.
@@ -168,7 +164,7 @@ class MultiMediumTrackController with ChangeNotifier, DiagnosticableTreeMixin {
   /// the [mediaState] elements, otherwise a default const
   /// [SingleMediumStateFactory()] will be used.
   @protected
-  MultiMediumTrackController.internal({
+  MultiMediumTrackState.internal({
     @required List<SingleMedium> media,
     @required bool visualizable,
     @required ControllerRegistry registry,
@@ -205,16 +201,16 @@ class MultiMediumTrackController with ChangeNotifier, DiagnosticableTreeMixin {
 
   /// Constructs an empty track state that [isFinished].
   @protected
-  MultiMediumTrackController.empty()
+  MultiMediumTrackState.empty()
       : isVisualizable = false,
         currentIndex = 1;
 
-  /// Constructs a [MultiMediumTrackController] for a [MultiMediumTrack].
+  /// Constructs a [MultiMediumTrackState] for a [MultiMediumTrack].
   ///
   /// [track] and [registry] must be non-null. If [onMediumFinished] is
   /// provided and non-null, it will be called when all the tracks finished
   /// playing.
-  MultiMediumTrackController.main({
+  MultiMediumTrackState.main({
     @required MultiMediumTrack track,
     @required ControllerRegistry registry,
     void Function(BuildContext context) onMediumFinished,
@@ -228,24 +224,24 @@ class MultiMediumTrackController with ChangeNotifier, DiagnosticableTreeMixin {
           singleMediumStateFactory: singleMediumStateFactory,
         );
 
-  /// Constructs a [MultiMediumTrackController] for
+  /// Constructs a [MultiMediumTrackState] for
   /// a [BackgroundMultiMediumTrack].
   ///
-  /// If [track] is [NoTrack], an empty [MultiMediumTrackController] will be
+  /// If [track] is [NoTrack], an empty [MultiMediumTrackState] will be
   /// created, which is not visualizable and has already finished (and has an
-  /// empty [mediaState]). Otherwise a regular [MultiMediumTrackController] will
+  /// empty [mediaState]). Otherwise a regular [MultiMediumTrackState] will
   /// be constructed.
   ///
   /// [track] and [registry] must be non-null.
-  static MultiMediumTrackController background({
+  static MultiMediumTrackState background({
     @required BackgroundMultiMediumTrack track,
     @required ControllerRegistry registry,
     SingleMediumStateFactory singleMediumStateFactory =
         const SingleMediumStateFactory(),
   }) =>
       track is NoTrack
-          ? MultiMediumTrackController.empty()
-          : MultiMediumTrackController.internal(
+          ? MultiMediumTrackState.empty()
+          : MultiMediumTrackState.internal(
               media: track?.media,
               visualizable: track is VisualizableBackgroundMultiMediumTrack,
               registry: registry,
@@ -266,7 +262,7 @@ class MultiMediumTrackController with ChangeNotifier, DiagnosticableTreeMixin {
     super.dispose();
   }
 
-  /// Initialize all (non-erroneous) the [mediaState] controllers.
+  /// Initialize all (non-erroneous) [mediaState] states.
   ///
   /// If a state is already erroneous, it is because there was a problem
   /// creating the controller, so in this case it won't be initialized.

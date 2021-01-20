@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart' show ChangeNotifierProvider, Consumer;
 
 import 'media_player_error.dart' show MediaPlayerError;
-import 'multi_medium_controller.dart'
-    show MultiMediumController, MultiMediumTrackController;
+import 'multi_medium_state.dart' show MultiMediumState, MultiMediumTrackState;
 
 /// A player for a [MultiMedium].
 ///
-/// This player is a [Consumer] of [MultiMediumController], which controls the
+/// This player is a [Consumer] of [MultiMediumState], which controls the
 /// playing of the medium and just notifies this widget about updates.
 ///
-/// If the controller has an error, then a [MediaPlayerError] will be show to
+/// If the state has an error, then a [MediaPlayerError] will be show to
 /// display the error.
 ///
 /// Otherwise, if both main and background tracks initialization is completed,
@@ -38,12 +37,12 @@ class MultiMediumPlayer extends StatelessWidget {
 
   /// Builds the UI for this widget.
   @override
-  Widget build(BuildContext context) => Consumer<MultiMediumController>(
-        builder: (context, controller, child) {
-          final mainTrack = controller.mainTrackController;
-          final backgroundTrack = controller.backgroundTrackController;
+  Widget build(BuildContext context) => Consumer<MultiMediumState>(
+        builder: (context, state, child) {
+          final mainTrack = state.mainTrackState;
+          final backgroundTrack = state.backgroundTrackState;
 
-          if (controller.allInitialized) {
+          if (state.allInitialized) {
             final mainWidget = ChangeNotifierProvider.value(
               value: mainTrack,
               child: createTrackPlayer(),
@@ -92,7 +91,7 @@ class MultiMediumPlayer extends StatelessWidget {
 
 /// A player for a [MultiMediumTrack].
 ///
-/// This player is a [Consumer] of [MultiMediumTrackController], which controls
+/// This player is a [Consumer] of [MultiMediumTrackState], which controls
 /// the playing of the track and just notifies this widget about updates.
 ///
 /// If the track has an error, then a [MediaPlayerError] will be show to display
@@ -118,16 +117,16 @@ class MultiMediumTrackPlayer extends StatelessWidget {
       // For the background track, the user might want to be able to override
       // this behaviour. See:
       // https://gitlab.com/lunofono/lunofono-app/-/issues/37
-      Consumer<MultiMediumTrackController>(
-        builder: (context, controller, child) {
-          final current = controller.current ?? controller.last;
+      Consumer<MultiMediumTrackState>(
+        builder: (context, state, child) {
+          final current = state.current ?? state.last;
 
           if (current.isErroneous) {
             return MediaPlayerError(current.error);
           }
 
           if (current.isInitialized) {
-            if (!controller.isVisualizable) {
+            if (!state.isVisualizable) {
               // FIXME: This is a bit hacky. At some point it might be better to
               // have 2 build methods in SingleMediumController: buildAudible()
               // and buildVisualizable() and use then depeding on what kind of
@@ -146,8 +145,7 @@ class MultiMediumTrackPlayer extends StatelessWidget {
           }
 
           // Still initializing
-          return MediaProgressIndicator(
-              visualizable: controller.isVisualizable);
+          return MediaProgressIndicator(visualizable: state.isVisualizable);
         },
       );
 }

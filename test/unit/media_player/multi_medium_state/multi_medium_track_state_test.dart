@@ -12,16 +12,13 @@ import 'package:lunofono_player/src/media_player/controller_registry.dart'
 import 'package:lunofono_player/src/media_player/single_medium_controller.dart'
     show SingleMediumController, Size;
 
-import 'package:lunofono_player/src/media_player/multi_medium_controller.dart'
-    show
-        MultiMediumTrackController,
-        SingleMediumState,
-        SingleMediumStateFactory;
+import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
+    show MultiMediumTrackState, SingleMediumState, SingleMediumStateFactory;
 
 import '../../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
-  group('MultiMediumTrackController', () {
+  group('MultiMediumTrackState', () {
     final registry = ControllerRegistry();
     _registerControllers(registry);
 
@@ -37,7 +34,7 @@ void main() {
       group('.internal() asserts on', () {
         test('null media', () {
           expect(
-            () => _TestMultiMediumTrackController(
+            () => _TestMultiMediumTrackState(
               media: null,
               visualizable: true,
               registry: registry,
@@ -48,7 +45,7 @@ void main() {
         });
         test('empty media', () {
           expect(
-            () => _TestMultiMediumTrackController(
+            () => _TestMultiMediumTrackState(
               media: [],
               visualizable: true,
               registry: registry,
@@ -59,7 +56,7 @@ void main() {
         });
         test('null visualizable', () {
           expect(
-            () => _TestMultiMediumTrackController(
+            () => _TestMultiMediumTrackState(
               visualizable: null,
               media: audibleMainTrack.media,
               registry: registry,
@@ -70,7 +67,7 @@ void main() {
         });
         test('null registry', () {
           expect(
-            () => _TestMultiMediumTrackController(
+            () => _TestMultiMediumTrackState(
               registry: null,
               media: audibleMainTrack.media,
               visualizable: true,
@@ -81,7 +78,7 @@ void main() {
         });
         test('null singleMediumStateFactory', () {
           expect(
-            () => _TestMultiMediumTrackController(
+            () => _TestMultiMediumTrackState(
               singleMediumStateFactory: null,
               media: audibleMainTrack.media,
               visualizable: true,
@@ -95,7 +92,7 @@ void main() {
       group('.main() asserts on', () {
         test('null track', () {
           expect(
-            () => MultiMediumTrackController.main(
+            () => MultiMediumTrackState.main(
               track: null,
               registry: registry,
               singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -105,7 +102,7 @@ void main() {
         });
         test('null registry', () {
           expect(
-            () => MultiMediumTrackController.main(
+            () => MultiMediumTrackState.main(
               registry: null,
               track: audibleMainTrack,
               singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -115,7 +112,7 @@ void main() {
         });
         test('null singleMediumStateFactory', () {
           expect(
-            () => MultiMediumTrackController.main(
+            () => MultiMediumTrackState.main(
               singleMediumStateFactory: null,
               track: audibleMainTrack,
               registry: registry,
@@ -128,7 +125,7 @@ void main() {
       group('.background() asserts on', () {
         test('null track', () {
           expect(
-            () => MultiMediumTrackController.background(
+            () => MultiMediumTrackState.background(
               track: null,
               registry: registry,
               singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -138,7 +135,7 @@ void main() {
         });
         test('null registry', () {
           expect(
-            () => MultiMediumTrackController.background(
+            () => MultiMediumTrackState.background(
               registry: null,
               track: audibleBakgroundTrack,
               singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -148,7 +145,7 @@ void main() {
         });
         test('null singleMediumStateFactory', () {
           expect(
-            () => MultiMediumTrackController.background(
+            () => MultiMediumTrackState.background(
               singleMediumStateFactory: null,
               track: audibleBakgroundTrack,
               registry: registry,
@@ -159,7 +156,7 @@ void main() {
       });
 
       void testContructorWithMedia(
-          MultiMediumTrackController controller, List<SingleMedium> media) {
+          MultiMediumTrackState controller, List<SingleMedium> media) {
         expect(controller.isVisualizable, isFalse);
         expect(controller.mediaState.length, media.length);
         expect(controller.currentIndex, 0);
@@ -183,7 +180,7 @@ void main() {
           audibleMedium,
           _FakeUnregisteredAudibleSingleMedium(),
         ]);
-        final controller = MultiMediumTrackController.main(
+        final controller = MultiMediumTrackState.main(
           track: track,
           registry: registry,
           singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -196,7 +193,7 @@ void main() {
           audibleMedium,
           _FakeUnregisteredAudibleSingleMedium(),
         ]);
-        final controller = MultiMediumTrackController.background(
+        final controller = MultiMediumTrackState.background(
           track: track,
           registry: registry,
           singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -206,7 +203,7 @@ void main() {
 
       test('.background() create empty track with NoTrack', () {
         final track = NoTrack();
-        final controller = MultiMediumTrackController.background(
+        final controller = MultiMediumTrackState.background(
           track: track,
           registry: registry,
           singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -223,7 +220,7 @@ void main() {
         audibleMedium,
         _FakeUnregisteredAudibleSingleMedium(),
       ]);
-      final controller = MultiMediumTrackController.main(
+      final controller = MultiMediumTrackState.main(
         track: track,
         registry: registry,
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -242,7 +239,7 @@ void main() {
         audibleMedium,
         _FakeUnregisteredAudibleSingleMedium(),
       ]);
-      final controller = MultiMediumTrackController.main(
+      final controller = MultiMediumTrackState.main(
         track: track,
         registry: registry,
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -274,7 +271,7 @@ void main() {
         audibleMedium,
         audibleMedium2,
       ]);
-      final controller = MultiMediumTrackController.main(
+      final controller = MultiMediumTrackState.main(
         track: track,
         registry: registry,
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -331,7 +328,7 @@ void main() {
 
       var finished = false;
 
-      final controller = MultiMediumTrackController.main(
+      final controller = MultiMediumTrackState.main(
           track: track,
           registry: registry,
           singleMediumStateFactory: _fakeSingleMediumStateFactory,
@@ -354,7 +351,7 @@ void main() {
     test('listening for updates work', () async {
       final track =
           _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]);
-      final controller = MultiMediumTrackController.main(
+      final controller = MultiMediumTrackState.main(
           track: track,
           registry: registry,
           singleMediumStateFactory: _fakeSingleMediumStateFactory);
@@ -380,29 +377,29 @@ void main() {
     });
 
     test('toString()', () async {
-      var controller = MultiMediumTrackController.main(
+      var controller = MultiMediumTrackState.main(
         track: _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]),
         registry: registry,
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
       );
 
       expect(controller.toString(),
-          'MultiMediumTrackController(audible, current: 0, media: 2)');
+          'MultiMediumTrackState(audible, current: 0, media: 2)');
       await controller.initializeAll(_FakeContext());
       expect(controller.toString(),
-          'MultiMediumTrackController(audible, current: 0, media: 2)');
+          'MultiMediumTrackState(audible, current: 0, media: 2)');
 
-      controller = MultiMediumTrackController.background(
+      controller = MultiMediumTrackState.background(
         track: const NoTrack(),
         registry: registry,
       );
       expect(
-        MultiMediumTrackController.background(
+        MultiMediumTrackState.background(
           track: const NoTrack(),
           registry: registry,
           singleMediumStateFactory: _fakeSingleMediumStateFactory,
         ).toString(),
-        'MultiMediumTrackController(empty)',
+        'MultiMediumTrackState(empty)',
       );
     });
 
@@ -412,11 +409,11 @@ void main() {
       // XXX: No fake singleMediumStateFactory here because we would have to
       // fake all the diagnostics class hierarchy too, which is overkill.
       expect(
-        MultiMediumTrackController.main(
+        MultiMediumTrackState.main(
           track: _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]),
           registry: registry,
         ).toStringDeep().replaceAll(identityHash, ''),
-        'MultiMediumTrackController\n'
+        'MultiMediumTrackState\n'
         ' │ audible\n'
         ' │ currentIndex: 0\n'
         ' │ mediaState.length: 2\n'
@@ -431,11 +428,11 @@ void main() {
         '',
       );
       expect(
-        MultiMediumTrackController.background(
+        MultiMediumTrackState.background(
           track: const NoTrack(),
           registry: registry,
         ).toStringDeep().replaceAll(identityHash, ''),
-        'MultiMediumTrackController\n'
+        'MultiMediumTrackState\n'
         '   empty\n'
         '',
       );
@@ -443,8 +440,8 @@ void main() {
   });
 }
 
-class _TestMultiMediumTrackController extends MultiMediumTrackController {
-  _TestMultiMediumTrackController({
+class _TestMultiMediumTrackState extends MultiMediumTrackState {
+  _TestMultiMediumTrackState({
     @required List<SingleMedium> media,
     @required bool visualizable,
     @required ControllerRegistry registry,

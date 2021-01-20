@@ -9,7 +9,7 @@ import 'package:lunofono_bundle/lunofono_bundle.dart';
 import 'package:lunofono_player/src/media_player/single_medium_controller.dart'
     show SingleMediumController, Size;
 
-import 'package:lunofono_player/src/media_player/multi_medium_controller.dart'
+import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
     show SingleMediumState, SingleMediumStateFactory;
 
 void main() {
