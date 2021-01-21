@@ -11,48 +11,14 @@ import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
     show MultiMediumState, MultiMediumTrackState, SingleMediumState;
 import 'package:lunofono_player/src/media_player/media_player_error.dart'
     show MediaPlayerError;
+import 'package:lunofono_player/src/media_player/media_progress_indicator.dart'
+    show MediaProgressIndicator;
 import 'package:lunofono_player/src/media_player/multi_medium_player.dart'
-    show MediaProgressIndicator, MultiMediumPlayer, MultiMediumTrackPlayer;
+    show MultiMediumPlayer, MultiMediumTrackPlayer;
 
 import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
-  group('MediaProgressIndicator', () {
-    testWidgets('constructor asserts if visualizable is null',
-        (WidgetTester tester) async {
-      expect(() => MediaProgressIndicator(visualizable: null),
-          throwsAssertionError);
-    });
-
-    Future<void> testInnerWidgets(WidgetTester tester,
-        {@required IconData icon, @required bool visualizable}) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaProgressIndicator(visualizable: visualizable),
-        ),
-      );
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      final iconFinder = find.byType(Icon);
-      expect(iconFinder, findsOneWidget);
-      expect((tester.widget(iconFinder) as Icon).icon, icon);
-    }
-
-    testWidgets(
-        'if not visualizable has a CircularProgressIndicator and '
-        'a musical note icon', (WidgetTester tester) async {
-      await testInnerWidgets(tester,
-          visualizable: false, icon: Icons.music_note);
-    });
-
-    testWidgets(
-        'if t is visualizable has a CircularProgressIndicator and '
-        'a movie film icon', (WidgetTester tester) async {
-      await testInnerWidgets(tester,
-          visualizable: true, icon: Icons.local_movies);
-    });
-  });
-
   group('MultiMediumTrackPlayer', () {
     final uninitializedState = FakeSingleMediumState(
         widgetKey: GlobalKey(debugLabel: 'uninitializedStateKey'));
