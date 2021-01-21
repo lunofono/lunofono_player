@@ -9,7 +9,7 @@ import 'package:lunofono_bundle/lunofono_bundle.dart';
 import 'package:lunofono_player/src/media_player/single_medium_controller.dart'
     show SingleMediumController, Size;
 
-import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
+import 'package:lunofono_player/src/media_player/single_medium_state.dart'
     show SingleMediumState, SingleMediumStateFactory;
 
 void main() {
@@ -148,6 +148,11 @@ void main() {
 
       test('constructor asserts on null controller', () {
         expect(() => SingleMediumState(null), throwsAssertionError);
+      });
+
+      test('constructor asserts on null isVisualizable', () {
+        expect(() => SingleMediumState(controller, isVisualizable: null),
+            throwsAssertionError);
       });
 
       test('the state is properly initialized', () {
@@ -309,5 +314,3 @@ class _FakeSingleMediumController extends Fake
     return Container(key: widgetKey);
   }
 }
-
-// vim: set foldmethod=syntax foldminlines=3 :
