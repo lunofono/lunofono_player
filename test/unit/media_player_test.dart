@@ -25,14 +25,14 @@ void main() {
     tearDown(() => playerTester?.dispose());
 
     test('constructor asserts on null media', () {
-      expect(() => MediaPlayer(multimedium: null), throwsAssertionError);
+      expect(() => MediaPlayer(playable: null), throwsAssertionError);
     });
 
     Future<void> testUnregisteredMedium(
         WidgetTester tester, FakeSingleMedium medium) async {
       // TODO: Second medium in a track is unregistered
       final player = MediaPlayer(
-        multimedium: MultiMedium.fromSingleMedium(medium),
+        playable: MultiMedium.fromSingleMedium(medium),
       );
 
       // Since controller creation is done asynchronously, first the progress
@@ -572,7 +572,7 @@ class MediaPlayerTester {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaPlayer(
-        multimedium: medium,
+        playable: medium,
         backgroundColor: Colors.red,
         onMediaStopped: (context) {
           playerHasStoppedTimes++;
