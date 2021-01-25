@@ -5,7 +5,7 @@ import 'package:provider/provider.dart' show ChangeNotifierProvider, Consumer;
 import 'media_player_error.dart' show MediaPlayerError;
 import 'media_progress_indicator.dart' show MediaProgressIndicator;
 import 'multi_medium_state.dart' show MultiMediumState;
-import 'multi_medium_track_player.dart' show MultiMediumTrackPlayer;
+import 'multi_medium_track_widget.dart' show MultiMediumTrackWidget;
 
 /// A player for a [MultiMedium].
 ///
@@ -17,7 +17,7 @@ import 'multi_medium_track_player.dart' show MultiMediumTrackPlayer;
 ///
 /// Otherwise, if both main and background tracks initialization is completed,
 /// then the state of the current medium of the visualizable track will be shown
-/// using a [MultiMediumTrackPlayer]. But only if a track is visualizable. If
+/// using a [MultiMediumTrackWidget]. But only if a track is visualizable. If
 /// none of the tracks are visualizable (for example, it is an [Audible] main
 /// track and an empty background track, then an empty [Container] will be
 /// shown.
@@ -25,17 +25,17 @@ import 'multi_medium_track_player.dart' show MultiMediumTrackPlayer;
 /// If there is no error and tracks are not done with initialization, then
 /// a [CircularProgressIndicator] will be shown to let the user know
 /// initialization is still in progress.
-class MultiMediumPlayer extends StatelessWidget {
-  /// Constructs a [MultiMediumPlayer].
-  const MultiMediumPlayer({
+class MultiMediumWidget extends StatelessWidget {
+  /// Constructs a [MultiMediumWidget].
+  const MultiMediumWidget({
     Key key,
   }) : super(key: key);
 
-  /// Creates a [MultiMediumTrackPlayer].
+  /// Creates a [MultiMediumTrackWidget].
   ///
   /// This is mainly useful for testing.
   @protected
-  MultiMediumTrackPlayer createTrackPlayer() => MultiMediumTrackPlayer();
+  MultiMediumTrackWidget createTrackWidget() => MultiMediumTrackWidget();
 
   /// Builds the UI for this widget.
   @override
@@ -47,11 +47,11 @@ class MultiMediumPlayer extends StatelessWidget {
           if (state.allInitialized) {
             final mainWidget = ChangeNotifierProvider.value(
               value: mainTrack,
-              child: createTrackPlayer(),
+              child: createTrackWidget(),
             );
             final backgroundWiget = ChangeNotifierProvider.value(
               value: backgroundTrack,
-              child: createTrackPlayer(),
+              child: createTrackWidget(),
             );
 
             // The first widget in the stack, should be visualizable track. If

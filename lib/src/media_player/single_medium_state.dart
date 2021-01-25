@@ -17,7 +17,7 @@ class SingleMediumStateFactory {
       SingleMediumState.erroneous(medium, error);
 }
 
-/// A state of a [SingleMediumPlayer].
+/// A state of a [SingleMediumWidget].
 ///
 /// The medium can have 3 states:
 /// 1. Uninitialized, represented by [error] and [size] being null.

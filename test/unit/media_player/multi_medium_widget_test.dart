@@ -17,20 +17,20 @@ import 'package:lunofono_player/src/media_player/media_player_error.dart'
     show MediaPlayerError;
 import 'package:lunofono_player/src/media_player/media_progress_indicator.dart'
     show MediaProgressIndicator;
-import 'package:lunofono_player/src/media_player/multi_medium_player.dart'
-    show MultiMediumPlayer;
-import 'package:lunofono_player/src/media_player/multi_medium_track_player.dart'
-    show MultiMediumTrackPlayer;
+import 'package:lunofono_player/src/media_player/multi_medium_widget.dart'
+    show MultiMediumWidget;
+import 'package:lunofono_player/src/media_player/multi_medium_track_widget.dart'
+    show MultiMediumTrackWidget;
 
 import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
-  group('MultiMediumPlayer', () {
-    testWidgets('createTrackPlayer() returns a MultiMediumTrackPlayer',
+  group('MultiMediumWidget', () {
+    testWidgets('createTrackWidget() returns a MultiMediumTrackWidget',
         (WidgetTester tester) async {
-      final player = _TestMultiMediumPlayer();
+      final player = _TestMultiMediumWidget();
       expect(
-          player.createTrackPlayerFromSuper(), isA<MultiMediumTrackPlayer>());
+          player.createTrackWidgetFromSuper(), isA<MultiMediumTrackWidget>());
     });
 
     Future<void> pumpPlayer(
@@ -40,7 +40,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ChangeNotifierProvider<MultiMediumState>.value(
             value: state,
-            child: _TestMultiMediumPlayer(),
+            child: _TestMultiMediumWidget(),
           ),
         ),
       );
@@ -52,12 +52,12 @@ void main() {
 
       await pumpPlayer(tester, state);
       expect(find.byType(MediaPlayerError), findsNothing);
-      expect(find.byType(MultiMediumTrackPlayer), findsNothing);
+      expect(find.byType(MultiMediumTrackWidget), findsNothing);
 
       expect(find.byType(MediaProgressIndicator), findsOneWidget);
     });
 
-    group('shows MultiMediumTrackPlayer', () {
+    group('shows MultiMediumTrackWidget', () {
       final audibleTrack = _FakeMultiMediumTrackState(
           current: _FakeSingleMediumState('audible'));
       final visualTrack = _FakeMultiMediumTrackState(
@@ -81,7 +81,7 @@ void main() {
         expect(
             find.descendant(
               of: find.byWidget(stack.children.first),
-              matching: find.byType(_FakeMultiMediumTrackPlayer),
+              matching: find.byType(_FakeMultiMediumTrackWidget),
             ),
             findsOneWidget);
       }
@@ -98,7 +98,7 @@ void main() {
         expect(find.byType(MediaProgressIndicator), findsNothing);
 
         expect(find.byType(Center), findsOneWidget);
-        expect(find.byType(_FakeMultiMediumTrackPlayer), findsNWidgets(2));
+        expect(find.byType(_FakeMultiMediumTrackWidget), findsNWidgets(2));
 
         final stackFinder = find.byType(Stack);
         expect(stackFinder, findsOneWidget);
@@ -109,7 +109,7 @@ void main() {
         expect(stack.children.first, isA<Center>());
         final firstTrackFinder = find.descendant(
           of: find.byWidget(stack.children.first),
-          matching: find.byType(_FakeMultiMediumTrackPlayer),
+          matching: find.byType(_FakeMultiMediumTrackWidget),
         );
         expect(firstTrackFinder, findsOneWidget);
         final firstState = Provider.of<MultiMediumTrackState>(
@@ -120,7 +120,7 @@ void main() {
         // Second track should be the audible one
         final secondTrackFinder = find.descendant(
           of: find.byWidget(stack.children.last),
-          matching: find.byType(_FakeMultiMediumTrackPlayer),
+          matching: find.byType(_FakeMultiMediumTrackWidget),
         );
         expect(secondTrackFinder, findsOneWidget);
         expect(
@@ -224,14 +224,14 @@ class _FakeMultiMediumState extends Fake
         backgroundTrack = backgroundTrack ?? _FakeMultiMediumTrackState();
 }
 
-class _TestMultiMediumPlayer extends MultiMediumPlayer {
-  MultiMediumTrackPlayer createTrackPlayerFromSuper() =>
-      super.createTrackPlayer();
+class _TestMultiMediumWidget extends MultiMediumWidget {
+  MultiMediumTrackWidget createTrackWidgetFromSuper() =>
+      super.createTrackWidget();
   @override
-  MultiMediumTrackPlayer createTrackPlayer() => _FakeMultiMediumTrackPlayer();
+  MultiMediumTrackWidget createTrackWidget() => _FakeMultiMediumTrackWidget();
 }
 
-class _FakeMultiMediumTrackPlayer extends MultiMediumTrackPlayer {
+class _FakeMultiMediumTrackWidget extends MultiMediumTrackWidget {
   @override
   Widget build(BuildContext context) => Container();
 }

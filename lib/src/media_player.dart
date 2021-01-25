@@ -7,11 +7,11 @@ import 'package:lunofono_bundle/lunofono_bundle.dart'
 
 import 'media_player/controller_registry.dart' show ControllerRegistry;
 import 'media_player/media_player_error.dart' show MediaPlayerError;
+import 'media_player/multi_medium_widget.dart' show MultiMediumWidget;
 import 'media_player/multi_medium_state.dart' show MultiMediumState;
-import 'media_player/multi_medium_player.dart' show MultiMediumPlayer;
-import 'media_player/single_medium_player.dart' show SingleMediumPlayer;
 import 'media_player/single_medium_state.dart'
     show SingleMediumState, SingleMediumStateFactory;
+import 'media_player/single_medium_widget.dart' show SingleMediumWidget;
 
 /// A media player widget.
 ///
@@ -89,7 +89,7 @@ class MediaPlayer extends StatelessWidget {
               elevation: 0,
               color: backgroundColor,
               child: Center(
-                child: SingleMediumPlayer(),
+                child: SingleMediumWidget(),
               ),
             ),
             builder: (context, dynamic state, child) {
@@ -118,7 +118,7 @@ class MediaPlayer extends StatelessWidget {
               elevation: 0,
               color: backgroundColor,
               child: Center(
-                child: MultiMediumPlayer(),
+                child: MultiMediumWidget(),
               ),
             ),
             builder: (context, dynamic state, child) {

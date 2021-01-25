@@ -4,7 +4,7 @@ import 'package:provider/provider.dart' show ChangeNotifierProvider, Consumer;
 
 import 'media_player_error.dart' show MediaPlayerError;
 import 'multi_medium_track_state.dart' show MultiMediumTrackState;
-import 'single_medium_player.dart' show SingleMediumPlayer;
+import 'single_medium_widget.dart' show SingleMediumWidget;
 
 /// A player for a [MultiMediumTrack].
 ///
@@ -22,16 +22,16 @@ import 'single_medium_player.dart' show SingleMediumPlayer;
 /// If there is no error and initialization is not done yet, then
 /// a [CircularProgressIndicator] will be shown to let the user know
 /// initialization is still in progress.
-class MultiMediumTrackPlayer extends StatelessWidget {
-  /// Constructs a [MultiMediumTrackPlayer].
-  const MultiMediumTrackPlayer({Key key}) : super(key: key);
+class MultiMediumTrackWidget extends StatelessWidget {
+  /// Constructs a [MultiMediumTrackWidget].
+  const MultiMediumTrackWidget({Key key}) : super(key: key);
 
-  /// Creates a [MultiMediumTrackPlayer].
+  /// Creates a [MultiMediumTrackWidget].
   ///
   /// This is mainly useful for testing.
   @protected
   @visibleForTesting
-  Widget createSingleMediumPlayer() => SingleMediumPlayer();
+  Widget createSingleMediumWidget() => SingleMediumWidget();
 
   /// Builds the UI for this widget.
   @override
@@ -43,7 +43,7 @@ class MultiMediumTrackPlayer extends StatelessWidget {
           // override this behaviour. See:
           // https://gitlab.com/lunofono/lunofono-app/-/issues/37
           value: state.current ?? state.last,
-          child: createSingleMediumPlayer(),
+          child: createSingleMediumWidget(),
         ),
       );
 }

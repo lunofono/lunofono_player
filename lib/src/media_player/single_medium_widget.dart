@@ -21,9 +21,9 @@ import 'single_medium_state.dart' show SingleMediumState;
 /// If there is no error and initialization is not done yet, then
 /// a [MediaProgressIndicator] will be shown to let the user know initialization
 /// is still in progress.
-class SingleMediumPlayer extends StatelessWidget {
-  /// Creates a [SingleMediumPlayer].
-  const SingleMediumPlayer({Key key}) : super(key: key);
+class SingleMediumWidget extends StatelessWidget {
+  /// Creates a [SingleMediumWidget].
+  const SingleMediumWidget({Key key}) : super(key: key);
 
   /// Builds the UI for this widget.
   @override

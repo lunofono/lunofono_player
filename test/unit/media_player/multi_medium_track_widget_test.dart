@@ -7,24 +7,24 @@ import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:provider/provider.dart' show ChangeNotifierProvider, Provider;
 
-import 'package:lunofono_player/src/media_player/multi_medium_track_player.dart'
-    show MultiMediumTrackPlayer;
+import 'package:lunofono_player/src/media_player/multi_medium_track_widget.dart'
+    show MultiMediumTrackWidget;
 import 'package:lunofono_player/src/media_player/multi_medium_track_state.dart'
     show MultiMediumTrackState;
-import 'package:lunofono_player/src/media_player/single_medium_player.dart'
-    show SingleMediumPlayer;
+import 'package:lunofono_player/src/media_player/single_medium_widget.dart'
+    show SingleMediumWidget;
 import 'package:lunofono_player/src/media_player/single_medium_state.dart'
     show SingleMediumState;
 
 import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
-  group('MultiMediumTrackPlayer', () {
-    testWidgets('createTrackPlayer() returns a MultiMediumTrackPlayer',
+  group('MultiMediumTrackWidget', () {
+    testWidgets('createTrackWidget() returns a MultiMediumTrackWidget',
         (WidgetTester tester) async {
-      final player = _TestMultiMediumTrackPlayer();
-      expect(player.createSingleMediumPlayerFromSuper(),
-          isA<SingleMediumPlayer>());
+      final player = _TestMultiMediumTrackWidget();
+      expect(player.createSingleMediumWidgetFromSuper(),
+          isA<SingleMediumWidget>());
     });
 
     group('passes SingleMediumState for ', () {
@@ -36,12 +36,12 @@ void main() {
                 textDirection: TextDirection.ltr,
                 child: ChangeNotifierProvider<MultiMediumTrackState>.value(
                   value: trackState,
-                  child: _TestMultiMediumTrackPlayer(),
+                  child: _TestMultiMediumTrackWidget(),
                 ),
               ),
             );
 
-            final playerFinder = find.byType(_FakeSingleMediumPlayer);
+            final playerFinder = find.byType(_FakeSingleMediumWidget);
             expect(playerFinder, findsOneWidget);
             final playerContext = tester.element(playerFinder);
             final playerState = Provider.of<SingleMediumState>(
@@ -80,14 +80,14 @@ class _FakeSingleMediumState extends Fake
   Future<void> dispose() async => super.dispose();
 }
 
-class _TestMultiMediumTrackPlayer extends MultiMediumTrackPlayer {
-  Widget createSingleMediumPlayerFromSuper() =>
-      super.createSingleMediumPlayer();
+class _TestMultiMediumTrackWidget extends MultiMediumTrackWidget {
+  Widget createSingleMediumWidgetFromSuper() =>
+      super.createSingleMediumWidget();
   @override
-  Widget createSingleMediumPlayer() => _FakeSingleMediumPlayer();
+  Widget createSingleMediumWidget() => _FakeSingleMediumWidget();
 }
 
-class _FakeSingleMediumPlayer extends StatelessWidget {
+class _FakeSingleMediumWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container();
 }

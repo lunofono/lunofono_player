@@ -52,7 +52,7 @@ class MediumPlayer extends PlayablePlayer {
   @override
   final Medium playable;
 
-  /// Constructs a [SingleMediumPlayer] using [playable] as the underlaying
+  /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
   /// [Playable].
   MediumPlayer(this.playable) : assert(playable != null);
 

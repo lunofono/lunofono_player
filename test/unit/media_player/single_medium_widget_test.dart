@@ -13,13 +13,13 @@ import 'package:lunofono_player/src/media_player/media_player_error.dart'
     show MediaPlayerError;
 import 'package:lunofono_player/src/media_player/media_progress_indicator.dart'
     show MediaProgressIndicator;
-import 'package:lunofono_player/src/media_player/single_medium_player.dart'
-    show SingleMediumPlayer;
+import 'package:lunofono_player/src/media_player/single_medium_widget.dart'
+    show SingleMediumWidget;
 
 import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
-  group('SingleMediumPlayer', () {
+  group('SingleMediumWidget', () {
     final uninitializedState = _FakeSingleMediumState(
         widgetKey: GlobalKey(debugLabel: 'uninitializedStateKey'));
     final errorState = _FakeSingleMediumState(
@@ -33,7 +33,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: ChangeNotifierProvider<SingleMediumState>.value(
               value: state,
-              child: SingleMediumPlayer(),
+              child: SingleMediumWidget(),
             ),
           ),
         );
