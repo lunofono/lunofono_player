@@ -5,7 +5,7 @@ import 'package:lunofono_bundle/lunofono_bundle.dart'
     show Audio, Color, Image, MultiMedium, Playable, SingleMedium, Video;
 
 import 'dynamic_dispatch_registry.dart' show DynamicDispatchRegistry;
-import 'media_player.dart' show MediaPlayer, SingleMediumPlayer;
+import 'media_player.dart' show MultiMediumPlayer, SingleMediumPlayer;
 
 /// Register all builtin types
 ///
@@ -19,8 +19,8 @@ void _registerBuiltin(PlayablePlayerRegistry registry) {
       (playable) => SingleMediumPlayablePlayer(playable as SingleMedium));
   registry.register(Video,
       (playable) => SingleMediumPlayablePlayer(playable as SingleMedium));
-  registry.register(
-      MultiMedium, (playable) => MediumPlayer(playable as MultiMedium));
+  registry.register(MultiMedium,
+      (playable) => MultiMediumPlayablePlayer(playable as MultiMedium));
 }
 
 /// A wrapper to manage how a [Playable] is played by the player.
@@ -79,25 +79,26 @@ class SingleMediumPlayablePlayer extends PlayablePlayer {
   }
 }
 
-class MediumPlayer extends PlayablePlayer {
+class MultiMediumPlayablePlayer extends PlayablePlayer {
   /// The underlaying model's [SingleMedium].
   @override
   final MultiMedium playable;
 
   /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
   /// [Playable].
-  MediumPlayer(this.playable) : assert(playable != null);
+  MultiMediumPlayablePlayer(this.playable) : assert(playable != null);
 
-  /// Plays a [SingleMedium] by pushing a new page with a [MediaPlayer].
+  /// Plays a [SingleMedium] by pushing a new page with a [MultiMediumPlayer].
   ///
   /// If [backgroundColor] is provided and non-null, it will be used as the
-  /// [MediaPlayer.backgroundColor]. Otherwise, [Colors.black] will be used.
+  /// [MultiMediumPlayer.backgroundColor]. Otherwise, [Colors.black] will be
+  /// used.
   @override
   void play(BuildContext context, [Color backgroundColor]) {
-    Navigator.push<MediaPlayer>(
+    Navigator.push<MultiMediumPlayer>(
       context,
-      MaterialPageRoute<MediaPlayer>(
-        builder: (BuildContext context) => MediaPlayer(
+      MaterialPageRoute<MultiMediumPlayer>(
+        builder: (BuildContext context) => MultiMediumPlayer(
           medium: playable,
           backgroundColor: backgroundColor ?? Colors.black,
           onMediaStopped: (context) => Navigator.pop(context),

@@ -7,7 +7,7 @@ import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart';
 import 'package:lunofono_player/src/media_player.dart'
-    show MediaPlayer, SingleMediumPlayer;
+    show MultiMediumPlayer, SingleMediumPlayer;
 import 'package:lunofono_player/src/playable_player.dart';
 
 void main() {
@@ -97,7 +97,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(home: homeWidget));
         final homeFinder = find.byKey(homeKey);
         expect(homeFinder, findsOneWidget);
-        expect(find.byType(MediaPlayer), findsNothing);
+        expect(find.byType(MultiMediumPlayer), findsNothing);
 
         // We tap on the HomeWidget to call playable.play()
         await tester.tap(homeFinder);
@@ -108,9 +108,9 @@ void main() {
         // The second pump we wait a bit because Navigator is animated
         await tester.pump(Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
-        final playerFinder = find.byType(MediaPlayer);
+        final playerFinder = find.byType(MultiMediumPlayer);
         expect(playerFinder, findsOneWidget);
-        final mediaPlayer = tester.widget(playerFinder) as MediaPlayer;
+        final mediaPlayer = tester.widget(playerFinder) as MultiMediumPlayer;
         final context = tester.element(playerFinder);
 
         // The HomeWidget should be back
@@ -118,7 +118,7 @@ void main() {
         await tester.pump(); // Same with .push() about the double pump()
         await tester.pump(Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
-        expect(find.byType(MediaPlayer), findsNothing);
+        expect(find.byType(MultiMediumPlayer), findsNothing);
       }
 
       testWidgets('MultiMedium', (WidgetTester tester) async {

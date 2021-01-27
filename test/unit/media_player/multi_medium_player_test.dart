@@ -12,26 +12,26 @@ import 'package:lunofono_player/src/media_player/controller_registry.dart';
 import 'package:lunofono_player/src/media_player/media_player_error.dart';
 import 'package:lunofono_player/src/media_player.dart';
 
-import '../util/finders.dart' show findSubString;
+import '../../util/finders.dart' show findSubString;
 
 // XXX: This test should ideally fake the ControllerRegistry, but we can't do so
 // now because of a very obscure problem with the dart compiler/flutter test
 // driver. For details please see this issue:
 // https://github.com/flutter/flutter/issues/65324
 void main() {
-  group('MediaPlayer', () {
+  group('MultiMediumPlayer', () {
     MediaPlayerTester playerTester;
 
     tearDown(() => playerTester?.dispose());
 
     test('constructor asserts on null media', () {
-      expect(() => MediaPlayer(medium: null), throwsAssertionError);
+      expect(() => MultiMediumPlayer(medium: null), throwsAssertionError);
     });
 
     Future<void> testUnregisteredMedium(
         WidgetTester tester, FakeSingleMedium medium) async {
       // TODO: Second medium in a track is unregistered
-      final player = MediaPlayer(
+      final player = MultiMediumPlayer(
         medium: MultiMedium.fromSingleMedium(medium),
       );
 
@@ -496,12 +496,13 @@ void main() {
       await tester.tap(widgetToTap);
       await tester.pump();
       playerTester.expectPlayerWidget(mainMediumIndex: 1);
-      // medium1 should be finished and the MediaPlayer should have stopped
+      // medium1 should be finished and the MultiMediumPlayer should have
+      // stopped
       playerTester.expectPlayingStatus(
           mainMediumIndex: 0, finished: true, stoppedTimes: 1);
-      // medium2 and medium3 should NOT be finished (and the MediaPlayer should
-      // have stopped). medium2's controller should have received the stop
-      // reaction.
+      // medium2 and medium3 should NOT be finished (and the MultiMediumPlayer
+      // should have stopped). medium2's controller should have received the
+      // stop reaction.
       playerTester.expectPlayingStatus(
           mainMediumIndex: 1, finished: false, stoppedTimes: 1, paused: true);
       playerTester.expectPlayingStatus(
@@ -510,7 +511,7 @@ void main() {
   });
 }
 
-/// A [MediaPlayer] tester.
+/// A [MultiMediumPlayer] tester.
 ///
 /// This class provide 3 main family of useful methods:
 ///
@@ -571,7 +572,7 @@ class MediaPlayerTester {
   Widget _createPlayer() {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaPlayer(
+      child: MultiMediumPlayer(
         medium: medium,
         backgroundColor: Colors.red,
         onMediaStopped: (context) {
@@ -684,7 +685,8 @@ class MediaPlayerTester {
     if (untilMainIndex == mainTrack.length) {
       // After all media was played, the last medium should still be shown
       expectPlayerWidget(mainMediumIndex: mainTrack.length - 1);
-      // All the media should be finished, the MediaPlayer should be stopped.
+      // All the media should be finished, the MultiMediumPlayer should be
+      // stopped.
       mainTrack.asMap().keys.forEach((m) => expectPlayingStatus(
           mainMediumIndex: m, finished: true, stoppedTimes: 1));
     }
