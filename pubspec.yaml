@@ -18,7 +18,7 @@ dependencies:
   lunofono_bundle:
     git:
       url: https://github.com/lunofono/lunofono_bundle.git
-      ref: v1.x.x
+      ref: v0.1.0
 
   flutter_grid_button: ^1.1.6
   pausable_timer: ^0.1.0

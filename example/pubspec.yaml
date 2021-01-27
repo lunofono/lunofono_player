@@ -15,7 +15,7 @@ dependencies:
   lunofono_bundle:
     git:
       url: https://github.com/lunofono/lunofono_bundle.git
-      ref: v1.x.x
+      ref: v0.1.0
 
 dev_dependencies:
   flutter_test:
