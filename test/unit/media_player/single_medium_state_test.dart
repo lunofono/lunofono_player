@@ -164,6 +164,13 @@ void main() {
         verifyStateInitialized();
       });
 
+      test('.initialize(startPlaying) gets the size and starts playing',
+          () async {
+        await state.initialize(_FakeContext(), startPlaying: true);
+        verifyStateInitialized();
+        expect(controller.calls, ['initialize', 'play']);
+      });
+
       test('.initialize() sets error with assertion', () async {
         await state.initialize(_FakeContext());
         expect(() async => await state.initialize(_FakeContext()),

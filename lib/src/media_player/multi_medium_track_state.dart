@@ -32,6 +32,10 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// finished playing.
   int currentIndex = 0;
 
+  /// True when all [mediaState] is initialized.
+  bool get isInitialized => _allInitialized;
+  bool _allInitialized = false;
+
   /// If true, all the media in this track has finished playing.
   bool get isFinished => currentIndex >= mediaState.length;
 
@@ -167,17 +171,27 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   ///
   /// If a state is already erroneous, it is because there was a problem
   /// creating the controller, so in this case it won't be initialized.
-  Future<void> initializeAll(BuildContext context) => Future.wait(mediaState
-      .where((s) => !s.isErroneous)
-      .map((s) => s.initialize(context)));
+  ///
+  /// If [startPlaying] is true, then [play()] will be called after the
+  /// initialization is done.
+  Future<void> initialize(BuildContext context,
+      {bool startPlaying = false}) async {
+    await Future.wait(mediaState
+        .where((s) => !s.isErroneous)
+        .map((s) => s.initialize(context)));
+    _allInitialized = true;
+    notifyListeners();
+    if (startPlaying) await play(context);
+  }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     if (isEmpty) {
       return '$runtimeType(empty)';
     }
+    final initialized = isInitialized ? 'initialized, ' : '';
     final visualizable = isVisualizable ? 'visualizable' : 'audible';
-    return '$runtimeType($visualizable, current: $currentIndex, '
+    return '$runtimeType($initialized$visualizable, current: $currentIndex, '
         'media: ${mediaState.length})';
   }
 
@@ -189,6 +203,8 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
       return;
     }
     properties
+      ..add(FlagProperty('isInitialized',
+          value: isInitialized, ifTrue: 'all tracks are initialized'))
       ..add(FlagProperty('visualizable',
           value: isVisualizable, ifTrue: 'visualizble', ifFalse: 'audible'))
       ..add(IntProperty('currentIndex', currentIndex))

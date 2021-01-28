@@ -48,7 +48,7 @@ void main() {
 
     testWidgets('shows progress if not all initialized',
         (WidgetTester tester) async {
-      final state = _FakeMultiMediumState(allInitialized: false);
+      final state = _FakeMultiMediumState(isInitialized: false);
 
       await pumpPlayer(tester, state);
       expect(find.byType(MediaPlayerError), findsNothing);
@@ -201,7 +201,7 @@ class _FakeMultiMediumState extends Fake
   _FakeMultiMediumTrackState mainTrack;
   _FakeMultiMediumTrackState backgroundTrack;
   @override
-  bool allInitialized;
+  bool isInitialized;
   @override
   MultiMediumTrackState get mainTrackState => mainTrack;
   @override
@@ -209,7 +209,7 @@ class _FakeMultiMediumState extends Fake
   @override
   String toStringFakeImpl() => toStringShort();
   @override
-  String toStringShort() => 'allInitialized: $allInitialized, '
+  String toStringShort() => 'isInitialized: $isInitialized, '
       'mainTrack: $mainTrack, '
       'backgroundTrack: $backgroundTrack';
   @override
@@ -217,8 +217,8 @@ class _FakeMultiMediumState extends Fake
   _FakeMultiMediumState({
     _FakeMultiMediumTrackState mainTrack,
     _FakeMultiMediumTrackState backgroundTrack,
-    bool allInitialized,
-  })  : allInitialized = allInitialized ?? mainTrack != null,
+    bool isInitialized,
+  })  : isInitialized = isInitialized ?? mainTrack != null,
         mainTrack = mainTrack ??
             _FakeMultiMediumTrackState(current: _FakeSingleMediumState('main')),
         backgroundTrack = backgroundTrack ?? _FakeMultiMediumTrackState();

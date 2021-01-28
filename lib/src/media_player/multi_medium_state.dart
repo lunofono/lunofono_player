@@ -18,10 +18,9 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   /// The state of the background track.
   MultiMediumTrackState get backgroundTrackState => _backgroundTrackState;
 
-  bool _allInitialized = false;
-
   /// True when all the media in both tracks is initialized.
-  bool get allInitialized => _allInitialized;
+  bool get isInitialized => _allInitialized;
+  bool _allInitialized = false;
 
   /// The function that will be called when the main track finishes playing.
   final void Function(BuildContext context) onMediumFinished;
@@ -53,18 +52,19 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
 
   /// Initializes all media in both tracks.
   ///
-  /// When initialization is done, [allInitialized] is set to true, it starts
+  /// When initialization is done, [isInitialized] is set to true, it starts
   /// playing the first medium in both tracks and it notifies the listeners.
-  Future<void> initialize(BuildContext context) => Future.forEach(
-          [mainTrackState, backgroundTrackState],
-          (MultiMediumTrackState ts) => ts.initializeAll(context)).then<void>(
-        (dynamic _) {
-          _allInitialized = true;
-          mainTrackState.play(context);
-          backgroundTrackState.play(context);
-          notifyListeners();
-        },
-      );
+  ///
+  /// If [startPlaying] is true, then [play()] will be called after the
+  /// initialization is done (if there was no error).
+  Future<void> initialize(BuildContext context,
+      {bool startPlaying = false}) async {
+    await Future.forEach([mainTrackState, backgroundTrackState],
+        (MultiMediumTrackState ts) => ts.initialize(context));
+    _allInitialized = true;
+    notifyListeners();
+    if (startPlaying) await play(context);
+  }
 
   /// Starts or resumes playing this [MultiMediumState].
   ///
@@ -92,7 +92,7 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    final initialized = allInitialized ? 'initialized, ' : '';
+    final initialized = isInitialized ? 'initialized, ' : '';
     final main = 'main: $mainTrackState';
     final back = backgroundTrackState.isEmpty
         ? ''
@@ -104,8 +104,8 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(FlagProperty('allInitialized',
-          value: allInitialized, ifTrue: 'all tracks are initialized'))
+      ..add(FlagProperty('isInitialized',
+          value: isInitialized, ifTrue: 'all tracks are initialized'))
       ..add(ObjectFlagProperty('onMediumFinished', onMediumFinished,
           ifPresent: 'notifies when all media finished'))
       ..add(DiagnosticsProperty('main', mainTrackState, expandableValue: true));

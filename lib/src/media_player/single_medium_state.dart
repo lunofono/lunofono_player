@@ -87,15 +87,19 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   ///
   /// Sets [size] on success, and [error] on error. Should be called only once
   /// and before invoking any other method of this class.
-  Future<void> initialize(BuildContext context) {
+  ///
+  /// If [startPlaying] is true, then [play()] will be called after the
+  /// initialization is done.
+  Future<void> initialize(BuildContext context,
+      {bool startPlaying = false}) async {
     assert(size == null);
-    return controller.initialize(context).then<void>((size) {
-      this.size = size;
-      notifyListeners();
-    }).catchError((dynamic error) {
-      this.error = error;
-      notifyListeners();
-    });
+    try {
+      size = await controller.initialize(context);
+    } catch (e) {
+      error = e;
+    }
+    notifyListeners();
+    if (startPlaying) await play(context);
   }
 
   /// Plays this medium using [controller].
@@ -104,10 +108,8 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   // FIXME: For now we show the error forever, eventually we probably have to
   // show the error only for some time and then move to the next medium in the
   // track.
-  Future<void> play(BuildContext context) => controller
-          ?.play(context)
-          ?.then<void>((_) => notifyListeners())
-          ?.catchError((dynamic error) {
+  Future<void> play(BuildContext context) =>
+      controller?.play(context)?.catchError((dynamic error) {
         this.error = error;
         notifyListeners();
       });
@@ -118,10 +120,8 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   // FIXME: For now we ignore pause() when isErroneous, eventually we probably
   // have to show the error only for some time and then move to the next medium
   // in the track.
-  Future<void> pause(BuildContext context) => controller
-          ?.pause(context)
-          ?.then<void>((_) => notifyListeners())
-          ?.catchError((dynamic error) {
+  Future<void> pause(BuildContext context) =>
+      controller?.pause(context)?.catchError((dynamic error) {
         this.error = error;
         notifyListeners();
       });

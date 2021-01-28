@@ -44,7 +44,7 @@ class MultiMediumWidget extends StatelessWidget {
           final mainTrack = state.mainTrackState;
           final backgroundTrack = state.backgroundTrackState;
 
-          if (state.allInitialized) {
+          if (state.isInitialized) {
             final mainWidget = ChangeNotifierProvider.value(
               value: mainTrack,
               child: createTrackWidget(),

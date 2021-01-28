@@ -65,7 +65,7 @@ class MultiMediumPlayer extends StatelessWidget {
           medium,
           registry ?? ControllerRegistry.instance,
           onMediumFinished: onMediaStopped,
-        )..initialize(context),
+        )..initialize(context, startPlaying: true),
         child: Consumer<MultiMediumState>(
             child: Material(
               elevation: 0,

@@ -58,48 +58,43 @@ void main() {
       final state = MultiMediumState(audibleMultiMedium, registry,
           onMediumFinished: (context) => finished = true);
       expect(finished, isFalse);
-      expect(state.allInitialized, isFalse);
+      expect(state.isInitialized, isFalse);
       expect(state.backgroundTrackState, isEmpty);
       state.mainTrackState.mediaState
           .forEach((s) => expect(s.controller.asFake.calls, isEmpty));
 
       var notifyCalled = false;
-      final checkInitialized = () {
-        expect(finished, isFalse);
-        expect(state.allInitialized, isTrue);
-        expect(state.backgroundTrackState, isEmpty);
-        expect(state.mainTrackState.current.controller.asFake.calls,
-            ['initialize', 'play']);
-        expect(
-            state.mainTrackState.last.controller.asFake.calls, ['initialize']);
-        notifyCalled = true;
-      };
-      state.addListener(checkInitialized);
+      final updateNotifyCalled = () => notifyCalled = true;
+      state.addListener(updateNotifyCalled);
 
-      await state.initialize(_FakeContext());
+      await state.initialize(_FakeContext(), startPlaying: true);
+      expect(finished, isFalse);
+      expect(state.isInitialized, isTrue);
+      expect(state.backgroundTrackState, isEmpty);
+      expect(state.mainTrackState.current.controller.asFake.calls,
+          ['initialize', 'play']);
+      expect(state.mainTrackState.last.controller.asFake.calls, ['initialize']);
+      notifyCalled = true;
       expect(notifyCalled, isTrue);
       final first = state.mainTrackState.current;
 
       // Pause
-      state.removeListener(checkInitialized);
       notifyCalled = false;
       await state.pause(_FakeContext());
       expect(finished, isFalse);
-      expect(state.allInitialized, isTrue);
+      expect(state.isInitialized, isTrue);
       expect(state.backgroundTrackState, isEmpty);
       expect(state.mainTrackState.current.controller.asFake.calls,
           ['initialize', 'play', 'pause']);
       expect(state.mainTrackState.last.controller.asFake.calls, ['initialize']);
       notifyCalled = true;
       expect(notifyCalled, isTrue);
-      final updateNotifyCalled = () => notifyCalled = true;
-      state.addListener(updateNotifyCalled);
 
       // Play
       notifyCalled = false;
       await state.play(_FakeContext());
       expect(finished, isFalse);
-      expect(state.allInitialized, isTrue);
+      expect(state.isInitialized, isTrue);
       expect(state.backgroundTrackState, isEmpty);
       expect(state.mainTrackState.current.controller.asFake.calls,
           ['initialize', 'play', 'pause', 'play']);
@@ -119,7 +114,7 @@ void main() {
       state.mainTrackState.current.controller.onMediumFinished(_FakeContext());
       expect(notifyCalled, isFalse);
       expect(finished, isTrue);
-      expect(state.allInitialized, isTrue);
+      expect(state.isInitialized, isTrue);
       expect(state.backgroundTrackState, isEmpty);
       expect(state.mainTrackState.current, isNull);
       expect(first.controller.asFake.calls,
@@ -149,7 +144,7 @@ void main() {
         final state = MultiMediumState(multiMedium, registry,
             onMediumFinished: (context) => finished = true);
         expect(finished, isFalse);
-        expect(state.allInitialized, isFalse);
+        expect(state.isInitialized, isFalse);
         expect(state.backgroundTrackState, isNotEmpty);
         state.mainTrackState.mediaState
             .forEach((s) => expect(s.controller.asFake.calls, isEmpty));
@@ -158,22 +153,22 @@ void main() {
 
         var notifyCalled = false;
         final checkInitialized = () {
-          expect(finished, isFalse);
-          expect(state.allInitialized, isTrue);
-          expect(state.backgroundTrackState, isNotEmpty);
-          expect(state.mainTrackState.current.controller.asFake.calls,
-              ['initialize', 'play']);
-          expect(state.mainTrackState.last.controller.asFake.calls,
-              ['initialize']);
-          expect(state.backgroundTrackState.current.controller.asFake.calls,
-              ['initialize', 'play']);
-          expect(state.backgroundTrackState.last.controller.asFake.calls,
-              ['initialize']);
           notifyCalled = true;
         };
         state.addListener(checkInitialized);
 
-        await state.initialize(_FakeContext());
+        await state.initialize(_FakeContext(), startPlaying: true);
+        expect(finished, isFalse);
+        expect(state.isInitialized, isTrue);
+        expect(state.backgroundTrackState, isNotEmpty);
+        expect(state.mainTrackState.current.controller.asFake.calls,
+            ['initialize', 'play']);
+        expect(
+            state.mainTrackState.last.controller.asFake.calls, ['initialize']);
+        expect(state.backgroundTrackState.current.controller.asFake.calls,
+            ['initialize', 'play']);
+        expect(state.backgroundTrackState.last.controller.asFake.calls,
+            ['initialize']);
         expect(notifyCalled, isTrue);
 
         state.removeListener(checkInitialized);
@@ -242,7 +237,7 @@ void main() {
             .onMediumFinished(_FakeContext());
         expect(notifyCalls, 0);
         expect(finished, isTrue);
-        expect(state.allInitialized, isTrue);
+        expect(state.isInitialized, isTrue);
         expect(state.backgroundTrackState, isNotEmpty);
         expect(state.mainTrackState.current, isNull);
         expect(firstMain.controller.asFake.calls, ['initialize', 'play']);
@@ -279,7 +274,7 @@ void main() {
             .onMediumFinished(_FakeContext());
         expect(notifyCalls, 0);
         expect(finished, isTrue);
-        expect(state.allInitialized, isTrue);
+        expect(state.isInitialized, isTrue);
         expect(state.backgroundTrackState, isNotEmpty);
         expect(state.mainTrackState.current, isNull);
         expect(firstMain.controller.asFake.calls, ['initialize', 'play']);

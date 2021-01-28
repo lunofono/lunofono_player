@@ -217,7 +217,7 @@ void main() {
       });
     });
 
-    test('initializeAll() initializes media states', () async {
+    test('initialize() initializes media states', () async {
       final track = _FakeAudibleMultiMediumTrack([
         audibleMedium,
         _FakeUnregisteredAudibleSingleMedium(),
@@ -227,11 +227,30 @@ void main() {
         registry: registry,
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
       );
-      await state.initializeAll(_FakeContext());
+      await state.initialize(_FakeContext());
       expect(state.isFinished, isFalse);
       expect(state.current.isInitialized, isTrue);
       expect(state.current.isErroneous, isFalse);
       expect(state.current.asFake.calls, ['initialize']);
+      expect(state.last.isInitialized, isFalse);
+      expect(state.last.isErroneous, isTrue);
+    });
+
+    test('initialize(startPlaying) initializes media starts playing', () async {
+      final track = _FakeAudibleMultiMediumTrack([
+        audibleMedium,
+        _FakeUnregisteredAudibleSingleMedium(),
+      ]);
+      final state = MultiMediumTrackState.main(
+        track: track,
+        registry: registry,
+        singleMediumStateFactory: _fakeSingleMediumStateFactory,
+      );
+      await state.initialize(_FakeContext(), startPlaying: true);
+      expect(state.isFinished, isFalse);
+      expect(state.current.isInitialized, isTrue);
+      expect(state.current.isErroneous, isFalse);
+      expect(state.current.asFake.calls, ['initialize', 'play']);
       expect(state.last.isInitialized, isFalse);
       expect(state.last.isErroneous, isTrue);
     });
@@ -247,7 +266,7 @@ void main() {
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
       );
 
-      await state.initializeAll(_FakeContext());
+      await state.initialize(_FakeContext());
       var first = state.current;
 
       await state.play(_FakeContext());
@@ -279,7 +298,7 @@ void main() {
         singleMediumStateFactory: _fakeSingleMediumStateFactory,
       );
 
-      await state.initializeAll(_FakeContext());
+      await state.initialize(_FakeContext());
       expect(state.current.asFake.calls, ['initialize']);
       expect(state.last.asFake.calls, ['initialize']);
       final first = state.current;
@@ -336,7 +355,7 @@ void main() {
           singleMediumStateFactory: _fakeSingleMediumStateFactory,
           onMediumFinished: (BuildContext context) => finished = true);
 
-      await state.initializeAll(_FakeContext());
+      await state.initialize(_FakeContext());
       expect(finished, isFalse);
       // plays first
       await state.play(_FakeContext());
@@ -361,21 +380,21 @@ void main() {
       var notifyCalls = 0;
       state.addListener(() => notifyCalls += 1);
 
-      await state.initializeAll(_FakeContext());
-      expect(notifyCalls, 0);
+      await state.initialize(_FakeContext());
+      expect(notifyCalls, 1);
       // plays first
       await state.play(_FakeContext());
-      expect(notifyCalls, 0);
+      expect(notifyCalls, 1);
       // ends first, second starts playing
       state.current.controller.onMediumFinished(_FakeContext());
-      expect(notifyCalls, 1);
+      expect(notifyCalls, 2);
       // ends second, onMediumFinished should be called
       state.current.controller.onMediumFinished(_FakeContext());
-      expect(notifyCalls, 2);
-      expect(notifyCalls, 2);
+      expect(notifyCalls, 3);
       await state.pause(_FakeContext());
+      expect(notifyCalls, 3);
       await state.dispose();
-      expect(notifyCalls, 2);
+      expect(notifyCalls, 3);
     });
 
     test('toString()', () async {
@@ -387,9 +406,9 @@ void main() {
 
       expect(state.toString(),
           'MultiMediumTrackState(audible, current: 0, media: 2)');
-      await state.initializeAll(_FakeContext());
+      await state.initialize(_FakeContext());
       expect(state.toString(),
-          'MultiMediumTrackState(audible, current: 0, media: 2)');
+          'MultiMediumTrackState(initialized, audible, current: 0, media: 2)');
 
       state = MultiMediumTrackState.background(
         track: const NoTrack(),
@@ -569,8 +588,9 @@ class _FakeSingleMediumState extends Fake
   bool get isErroneous => error != null;
 
   @override
-  Future<void> initialize(BuildContext context) =>
-      _errorOrOk('initialize', controller?.medium?.size);
+  Future<void> initialize(BuildContext context, {bool startPlaying = false}) =>
+      _errorOrOk('initialize', controller?.medium?.size)
+          .then<void>((_) => startPlaying ? play(context) : null);
 
   @override
   Future<void> play(BuildContext context) => _errorOrOk('play');
