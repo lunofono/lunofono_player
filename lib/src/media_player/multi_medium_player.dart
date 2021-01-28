@@ -79,8 +79,8 @@ class MultiMediumPlayer extends StatelessWidget {
                 onTap: () {
                   // XXX: For now the stop reaction is hardcoded to the tap.
                   // Also we should handle errors in the pause()'s future
-                  state.mainTrackState.pauseCurrent(context);
-                  state.backgroundTrackState.pauseCurrent(context);
+                  state.mainTrackState.pause(context);
+                  state.backgroundTrackState.pause(context);
                   onMediaStopped?.call(context);
                 },
                 child: child,

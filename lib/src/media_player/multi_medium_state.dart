@@ -47,7 +47,7 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   void _onMainTrackFinished(BuildContext context) {
-    backgroundTrackState.pauseCurrent(context);
+    backgroundTrackState.pause(context);
     onMediumFinished?.call(context);
   }
 
@@ -60,11 +60,27 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
           (MultiMediumTrackState ts) => ts.initializeAll(context)).then<void>(
         (dynamic _) {
           _allInitialized = true;
-          mainTrackState.playCurrent(context);
-          backgroundTrackState.playCurrent(context);
+          mainTrackState.play(context);
+          backgroundTrackState.play(context);
           notifyListeners();
         },
       );
+
+  /// Starts or resumes playing this [MultiMediumState].
+  ///
+  /// It does nothing if it was already playing or finished.
+  Future<void> play(BuildContext context) async {
+    await mainTrackState.play(context);
+    await backgroundTrackState.play(context);
+  }
+
+  /// Pauses the playing of this [MultiMediumState].
+  ///
+  /// It does nothing if it was already paused.
+  Future<void> pause(BuildContext context) async {
+    await mainTrackState.pause(context);
+    await backgroundTrackState.pause(context);
+  }
 
   /// Disposes both tracks.
   @override

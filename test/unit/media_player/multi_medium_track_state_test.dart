@@ -250,7 +250,7 @@ void main() {
       await state.initializeAll(_FakeContext());
       var first = state.current;
 
-      await state.playCurrent(_FakeContext());
+      await state.play(_FakeContext());
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       expect(state.current.asFake.calls, ['initialize', 'play']);
@@ -284,19 +284,19 @@ void main() {
       expect(state.last.asFake.calls, ['initialize']);
       final first = state.current;
 
-      await state.playCurrent(_FakeContext());
+      await state.play(_FakeContext());
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       expect(state.current.asFake.calls, ['initialize', 'play']);
       expect(state.last.asFake.calls, ['initialize']);
 
-      await state.pauseCurrent(_FakeContext());
+      await state.pause(_FakeContext());
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       expect(state.current.asFake.calls, ['initialize', 'play', 'pause']);
       expect(state.last.asFake.calls, ['initialize']);
 
-      await state.playCurrent(_FakeContext());
+      await state.play(_FakeContext());
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       expect(
@@ -339,7 +339,7 @@ void main() {
       await state.initializeAll(_FakeContext());
       expect(finished, isFalse);
       // plays first
-      await state.playCurrent(_FakeContext());
+      await state.play(_FakeContext());
       expect(finished, isFalse);
       // ends first, second starts playing
       state.current.controller.onMediumFinished(_FakeContext());
@@ -364,7 +364,7 @@ void main() {
       await state.initializeAll(_FakeContext());
       expect(notifyCalls, 0);
       // plays first
-      await state.playCurrent(_FakeContext());
+      await state.play(_FakeContext());
       expect(notifyCalls, 0);
       // ends first, second starts playing
       state.current.controller.onMediumFinished(_FakeContext());
@@ -372,8 +372,8 @@ void main() {
       // ends second, onMediumFinished should be called
       state.current.controller.onMediumFinished(_FakeContext());
       expect(notifyCalls, 2);
-      await state.pauseCurrent(_FakeContext());
       expect(notifyCalls, 2);
+      await state.pause(_FakeContext());
       await state.dispose();
       expect(notifyCalls, 2);
     });

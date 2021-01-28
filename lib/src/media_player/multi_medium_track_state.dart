@@ -91,7 +91,7 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
         if (isFinished) {
           onMediumFinished?.call(context);
         } else {
-          playCurrent(context);
+          play(context);
         }
         notifyListeners();
       });
@@ -150,10 +150,10 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
             );
 
   /// Plays the current [SingleMediumState].
-  Future<void> playCurrent(BuildContext context) => current?.play(context);
+  Future<void> play(BuildContext context) => current?.play(context);
 
   /// Pauses the current [SingleMediumState].
-  Future<void> pauseCurrent(BuildContext context) => current?.pause(context);
+  Future<void> pause(BuildContext context) => current?.pause(context);
 
   /// Disposes all the [SingleMediumState] in [mediaState].
   @override
