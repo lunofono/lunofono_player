@@ -47,8 +47,10 @@ fi
 
 # Run flutter format, analyze and test
 (
+  pre=$(git stash list | wc -l)
   git stash --include-untracked --keep-index &&
-    trap 'r=$?; git stash pop; exit $r' EXIT
+    trap 'r=$?; test "$post" -gt "$pre" && git stash pop; exit $r' EXIT
+  post=$(git stash list | wc -l)
   git status
   $(git rev-parse --show-toplevel)/tool/ci || exit $?
 ) || exit $?
