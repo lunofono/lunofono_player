@@ -20,8 +20,12 @@ import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
 // https://github.com/flutter/flutter/issues/65324
 void main() {
   group('MultiMediumState', () {
+    final originalRegistry = ControllerRegistry.instance;
     final registry = ControllerRegistry();
     _registerControllers(registry);
+
+    setUp(() => ControllerRegistry.instance = registry);
+    tearDown(() => ControllerRegistry.instance = originalRegistry);
 
     final audibleMedium =
         _FakeAudibleSingleMedium('audible', size: Size(0.0, 0.0));
@@ -44,18 +48,14 @@ void main() {
     group('constructor', () {
       group('asserts on', () {
         test('null multimedium', () {
-          expect(() => MultiMediumState(null, registry), throwsAssertionError);
-        });
-        test('null registry', () {
-          expect(() => MultiMediumState(audibleMultiMedium, null),
-              throwsAssertionError);
+          expect(() => MultiMediumState(null), throwsAssertionError);
         });
       });
     });
 
     test('play/pause cycle works with main track only', () async {
       var finished = false;
-      final state = MultiMediumState(audibleMultiMedium, registry,
+      final state = MultiMediumState(audibleMultiMedium,
           onMediumFinished: (context) => finished = true);
       expect(finished, isFalse);
       expect(state.isInitialized, isFalse);
@@ -141,7 +141,7 @@ void main() {
       void updateNotifyCalled() => notifyCalls++;
 
       Future<MultiMediumState> testInitialize() async {
-        final state = MultiMediumState(multiMedium, registry,
+        final state = MultiMediumState(multiMedium,
             onMediumFinished: (context) => finished = true);
         expect(finished, isFalse);
         expect(state.isInitialized, isFalse);
@@ -302,15 +302,15 @@ void main() {
 
     test('toString()', () {
       expect(
-        MultiMediumState(multiMedium, registry,
-            onMediumFinished: (context) => null).toString(),
+        MultiMediumState(multiMedium, onMediumFinished: (context) => null)
+            .toString(),
         'MultiMediumState(main: MultiMediumTrackState(audible, '
         'current: 0, media: 2), '
         'background: MultiMediumTrackState(visualizable, '
         'current: 0, media: 2))',
       );
       expect(
-        MultiMediumState(audibleMultiMedium, registry).toString(),
+        MultiMediumState(audibleMultiMedium).toString(),
         'MultiMediumState(main: MultiMediumTrackState(audible, '
         'current: 0, media: 2))',
       );
@@ -320,8 +320,7 @@ void main() {
       final identityHash = RegExp(r'#[0-9a-f]{5}');
 
       expect(
-          MultiMediumState(multiMedium, registry,
-                  onMediumFinished: (context) => null)
+          MultiMediumState(multiMedium, onMediumFinished: (context) => null)
               .toStringDeep()
               .replaceAll(identityHash, ''),
           'MultiMediumState\n'
@@ -363,7 +362,7 @@ void main() {
           '');
 
       expect(
-          MultiMediumState(audibleMultiMedium, registry)
+          MultiMediumState(audibleMultiMedium)
               .toStringDeep()
               .replaceAll(identityHash, ''),
           'MultiMediumState\n'

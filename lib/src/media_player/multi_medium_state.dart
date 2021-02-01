@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart' show BuildContext;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart' show MultiMedium;
 
-import 'controller_registry.dart' show ControllerRegistry;
 import 'multi_medium_track_state.dart' show MultiMediumTrackState;
 
 /// A player state for playing a [MultiMedium] and notifying changes.
@@ -27,21 +26,17 @@ class MultiMediumState with ChangeNotifier, DiagnosticableTreeMixin {
 
   /// Constructs a [MultiMediumState] for playing [multimedium].
   ///
-  /// Both [multimedium] and [registry] must be non-null. If [onMediumFinished]
+  /// The [multimedium] must be non-null. If [onMediumFinished]
   /// is provided, it will be called when the medium finishes playing the
   /// [multimedium.mainTrack].
-  MultiMediumState(MultiMedium multimedium, ControllerRegistry registry,
-      {this.onMediumFinished})
-      : assert(multimedium != null),
-        assert(registry != null) {
+  MultiMediumState(MultiMedium multimedium, {this.onMediumFinished})
+      : assert(multimedium != null) {
     _mainTrackState = MultiMediumTrackState.main(
       track: multimedium.mainTrack,
-      registry: registry,
       onMediumFinished: _onMainTrackFinished,
     );
     _backgroundTrackState = MultiMediumTrackState.background(
       track: multimedium.backgroundTrack,
-      registry: registry,
     );
   }
 

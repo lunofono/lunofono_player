@@ -529,7 +529,7 @@ class MediaPlayerTester {
   final MultiMedium medium;
 
   // Automatically initialized
-  final ControllerRegistry registry = ControllerRegistry();
+  final ControllerRegistry originalRegistry;
   final mainControllers = <FakeSingleMediumController>[];
   Widget player;
   var playerHasStoppedTimes = 0;
@@ -541,6 +541,7 @@ class MediaPlayerTester {
       : assert(tester != null),
         assert(medium != null),
         assert(medium is SingleMedium || medium is MultiMedium),
+        originalRegistry = ControllerRegistry.instance,
         medium = medium is SingleMedium
             ? MultiMedium.fromSingleMedium(medium)
             : medium as MultiMedium {
@@ -549,6 +550,7 @@ class MediaPlayerTester {
   }
 
   void dispose() {
+    ControllerRegistry.instance = originalRegistry;
     for (final c in mainControllers) {
       c.dispose();
     }
@@ -564,9 +566,11 @@ class MediaPlayerTester {
       return c;
     }
 
+    final registry = ControllerRegistry();
     registry.register(FakeAudibleSingleMedium, createController);
     registry.register(FakeVisualizableSingleMedium, createController);
     registry.register(FakeAudibleVisualizableSingleMedium, createController);
+    ControllerRegistry.instance = registry;
   }
 
   Widget _createPlayer() {
@@ -578,7 +582,6 @@ class MediaPlayerTester {
         onMediaStopped: (context) {
           playerHasStoppedTimes++;
         },
-        registry: registry,
         key: playerKey,
       ),
     );

@@ -4,23 +4,17 @@ import 'package:provider/provider.dart' show ChangeNotifierProvider, Consumer;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart' show MultiMedium;
 
-import 'controller_registry.dart' show ControllerRegistry;
 import 'media_player_error.dart' show MediaPlayerError;
 import 'multi_medium_widget.dart' show MultiMediumWidget;
 import 'multi_medium_state.dart' show MultiMediumState;
 
 /// A media player widget.
 ///
-/// The player can play a [MultiMedium] via [SingleMediumController] plug-ins
-/// that are obtained via the [ControllerRegistry]. It handles the playing and
-/// synchronization of the [medium.mainTrack] and
-/// [medium.backgroundTrack] and also the asynchronous nature of the player
-/// controllers, by showing a progress indicator while the media is loading, and
-/// the media afterwards, or a [MediaPlayerError] if an error occurred.
-///
-/// If a medium is played for which there is no [SingleMediumController]
-/// registered in the [ControllerRegistry], a [MediaPlayerError] will be shown
-/// instead of that medium.
+/// The player can play a [MultiMedium]. It handles the playing and
+/// synchronization of the [medium.mainTrack] and [medium.backgroundTrack] and
+/// also the asynchronous nature of the player controllers, by showing
+/// a progress indicator while the media is loading, and the media afterwards,
+/// or a [MediaPlayerError] if an error occurred.
 ///
 /// All the orchestration behind the scenes is performed by
 /// a [MultiMediumState] that is provided via a [ChangeNotifierProvider].
@@ -34,9 +28,6 @@ class MultiMediumPlayer extends StatelessWidget {
   /// The action to perform when this player stops.
   final void Function(BuildContext) onMediaStopped;
 
-  /// The [ControllerRegistry] to create [SingleMediumController]s.
-  final ControllerRegistry registry;
-
   /// Constructs a new [MultiMediumPlayer].
   ///
   /// The player will play the [medium] with a background color
@@ -44,14 +35,10 @@ class MultiMediumPlayer extends StatelessWidget {
   /// playing, either because it was played completely or because it was stopped
   /// by the user, the [onMediaStopped] callback will be called (if non-null).
   ///
-  /// If a [registry] is provided, then it is used to create the controller for
-  /// the media inside the [medium]. Otherwise
-  /// [ControllerRegistry.instance] is used.
   const MultiMediumPlayer({
     @required this.medium,
     Color backgroundColor,
     this.onMediaStopped,
-    this.registry,
     Key key,
   })  : assert(medium != null),
         backgroundColor = backgroundColor ?? Colors.black,
@@ -63,7 +50,6 @@ class MultiMediumPlayer extends StatelessWidget {
       ChangeNotifierProvider<MultiMediumState>(
         create: (context) => MultiMediumState(
           medium,
-          registry ?? ControllerRegistry.instance,
           onMediumFinished: onMediaStopped,
         )..initialize(context, startPlaying: true),
         child: Consumer<MultiMediumState>(

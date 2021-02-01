@@ -1,21 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show BuildContext, Widget;
+import 'package:flutter/widgets.dart' show BuildContext;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart' show SingleMedium;
 
+import 'controller_registry.dart' show ControllerRegistry;
 import 'single_medium_controller.dart' show SingleMediumController, Size;
-
-/// Factory to construct [SingleMediumState].
-///
-/// This is used only for testing.
-class SingleMediumStateFactory {
-  const SingleMediumStateFactory();
-  SingleMediumState good(SingleMediumController controller,
-          {bool isVisualizable = true}) =>
-      SingleMediumState(controller, isVisualizable: isVisualizable);
-  SingleMediumState bad(SingleMedium medium, dynamic error) =>
-      SingleMediumState.erroneous(medium, error);
-}
+import 'single_medium_widget.dart' show SingleMediumWidget;
 
 /// A state of a [SingleMediumWidget].
 ///
@@ -31,7 +21,11 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   final SingleMedium medium;
 
   /// The player controller used to control this medium.
-  final SingleMediumController controller;
+  ///
+  /// It can be null if there was an error while creating the controller (if
+  /// it is null, error is non-null).
+  SingleMediumController get controller => _controller;
+  SingleMediumController _controller;
 
   /// If true, the medium needs to be visualized, otherwise it plays in the
   /// background without any visual representation (except for errors or
@@ -60,28 +54,28 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   /// medium is in a good state.
   bool get isInitialized => size != null;
 
-  /// The Key used by the widget produced by this [controller].
-  Key get widgetKey => controller?.widgetKey;
-
-  /// Constructs a new state using a [controller].
+  /// Creates a state from a [medium].
   ///
-  /// The [controller] must be non-null, [medium] will be set to
-  /// [controller.medium]. [isVisualizable] must be non-null too.
-  SingleMediumState(this.controller, {this.isVisualizable = true})
-      : assert(controller != null),
-        assert(isVisualizable != null),
-        medium = controller.medium;
-
-  /// Constructs a new erroneous state.
+  /// The [medium] and [isVisualizable] must be non-null. A [controller] will
+  /// be created using the global [ControllerRegistry.instance]. If there is no
+  /// controller registered for this kind of [medium], then an [error] will
+  /// be set.
   ///
-  /// This is typically used when a [controller] couldn't be created. The
-  /// [medium] and [error] must be non-null and [controller] will be set to
-  /// null.
-  SingleMediumState.erroneous(this.medium, this.error)
-      : assert(medium != null),
-        assert(error != null),
-        controller = null,
-        isVisualizable = true;
+  /// If [onMediumFinished] is provided, it will be called when the medium
+  /// finishes playing (if ever).
+  SingleMediumState(
+    this.medium, {
+    this.isVisualizable = true,
+    void Function(BuildContext context) onMediumFinished,
+  })  : assert(medium != null),
+        assert(isVisualizable != null) {
+    final create = ControllerRegistry.instance.getFunction(medium);
+    if (create == null) {
+      error = 'Unsupported type ${medium.runtimeType} for ${medium.resource}';
+      return;
+    }
+    _controller = create(medium, onMediumFinished: onMediumFinished);
+  }
 
   /// Initializes this medium's [controller].
   ///
@@ -90,9 +84,14 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   ///
   /// If [startPlaying] is true, then [play()] will be called after the
   /// initialization is done.
+  ///
+  /// If the underlaying controller couldn't be created, then this
+  /// method does nothing.
   Future<void> initialize(BuildContext context,
       {bool startPlaying = false}) async {
     assert(size == null);
+    // error should be already set
+    if (controller == null) return;
     try {
       size = await controller.initialize(context);
     } catch (e) {
@@ -137,9 +136,6 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
         ?.catchError((dynamic error) => this.error = error);
     super.dispose();
   }
-
-  /// Builds the widget to display this controller.
-  Widget build(BuildContext context) => controller.build(context);
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {

@@ -169,7 +169,7 @@ class _SingleMediumPlayerTester {
   final _FakeSingleMedium medium;
 
   // Automatically initialized
-  final ControllerRegistry registry = ControllerRegistry();
+  final ControllerRegistry originalRegistry;
   _FakeSingleMediumController controller;
   Widget player;
   var playerHasStoppedTimes = 0;
@@ -179,13 +179,15 @@ class _SingleMediumPlayerTester {
 
   _SingleMediumPlayerTester(this.tester, this.medium)
       : assert(tester != null),
-        assert(medium != null) {
+        assert(medium != null),
+        originalRegistry = ControllerRegistry.instance {
     _registerController();
     player = _createPlayer();
   }
 
   void dispose() {
     controller?.dispose();
+    ControllerRegistry.instance = originalRegistry;
   }
 
   void _registerController() {
@@ -198,9 +200,11 @@ class _SingleMediumPlayerTester {
       return c;
     }
 
+    final registry = ControllerRegistry();
     registry.register(_FakeAudibleSingleMedium, createController);
     registry.register(_FakeVisualizableSingleMedium, createController);
     registry.register(_FakeAudibleVisualizableSingleMedium, createController);
+    ControllerRegistry.instance = registry;
   }
 
   Widget _createPlayer() {
@@ -212,7 +216,6 @@ class _SingleMediumPlayerTester {
         onMediaStopped: (context) {
           playerHasStoppedTimes++;
         },
-        registry: registry,
         key: playerKey,
       ),
     );

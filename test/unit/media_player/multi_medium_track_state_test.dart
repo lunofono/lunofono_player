@@ -4,88 +4,77 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart' show Fake;
+import 'package:mockito/mockito.dart';
 
 import 'package:lunofono_bundle/lunofono_bundle.dart';
-import 'package:lunofono_player/src/media_player/controller_registry.dart'
-    show ControllerRegistry;
 import 'package:lunofono_player/src/media_player/single_medium_controller.dart'
-    show SingleMediumController, Size;
+    show Size;
 
 import 'package:lunofono_player/src/media_player/multi_medium_track_state.dart'
     show MultiMediumTrackState;
 import 'package:lunofono_player/src/media_player/single_medium_state.dart'
-    show SingleMediumState, SingleMediumStateFactory;
-
-import '../../util/foundation.dart' show FakeDiagnosticableMixin;
+    show SingleMediumState;
 
 void main() {
   group('MultiMediumTrackState', () {
-    final registry = ControllerRegistry();
-    _registerControllers(registry);
+    MultiMediumTrackState.createSingleMediumState = (
+      SingleMedium medium, {
+      bool isVisualizable,
+      void Function(BuildContext) onMediumFinished,
+    }) {
+      final state = _MockSingleMediumState(
+        medium,
+        isVisualizable: isVisualizable,
+        onMediumFinished: onMediumFinished,
+      );
+      throwOnMissingStub(state);
+      return state;
+    };
 
-    final _fakeSingleMediumStateFactory = _FakeSingleMediumStateFactory();
+    final fakeContext = _FakeContext();
 
-    final audibleMedium = _FakeAudibleSingleMedium(size: Size(0.0, 0.0));
-    final audibleMedium2 = _FakeAudibleSingleMedium(size: Size(10.0, 12.0));
+    final audibleMedium =
+        _FakeAudibleSingleMedium(name: 'audibleMedium1', size: Size(0.0, 0.0));
+    final audibleMedium2 = _FakeAudibleSingleMedium(
+        name: 'audibleMedium2', size: Size(10.0, 12.0));
     final audibleMainTrack = _FakeAudibleMultiMediumTrack([audibleMedium]);
-    final audibleBakgroundTrack =
-        _FakeAudibleBackgroundMultiMediumTrack([audibleMedium]);
+    final audibleMainTrack2 = _FakeAudibleMultiMediumTrack([
+      audibleMedium,
+      audibleMedium2,
+    ]);
+    final audibleBackTrack2 = _FakeAudibleBackgroundMultiMediumTrack([
+      audibleMedium,
+      audibleMedium2,
+    ]);
+
+    void stubAll(List<SingleMediumState> media) {
+      media.forEach((s) {
+        when(s.initialize(fakeContext, startPlaying: false))
+            .thenAnswer((_) => Future<void>.value());
+        when(s.play(fakeContext)).thenAnswer((_) => Future<void>.value());
+        when(s.pause(fakeContext)).thenAnswer((_) => Future<void>.value());
+        when(s.dispose()).thenAnswer((_) => Future<void>.value());
+      });
+    }
 
     group('constructor', () {
       group('.internal() asserts on', () {
         test('null media', () {
           expect(
-            () => _TestMultiMediumTrackState(
-              media: null,
-              visualizable: true,
-              registry: registry,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
+            () => _TestMultiMediumTrackState(media: null, visualizable: true),
             throwsAssertionError,
           );
         });
         test('empty media', () {
           expect(
-            () => _TestMultiMediumTrackState(
-              media: [],
-              visualizable: true,
-              registry: registry,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
+            () => _TestMultiMediumTrackState(media: [], visualizable: true),
             throwsAssertionError,
           );
         });
         test('null visualizable', () {
           expect(
             () => _TestMultiMediumTrackState(
-              visualizable: null,
-              media: audibleMainTrack.media,
-              registry: registry,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
-            throwsAssertionError,
-          );
-        });
-        test('null registry', () {
-          expect(
-            () => _TestMultiMediumTrackState(
-              registry: null,
-              media: audibleMainTrack.media,
-              visualizable: true,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
-            throwsAssertionError,
-          );
-        });
-        test('null singleMediumStateFactory', () {
-          expect(
-            () => _TestMultiMediumTrackState(
-              singleMediumStateFactory: null,
-              media: audibleMainTrack.media,
-              visualizable: true,
-              registry: registry,
-            ),
+                visualizable: null, media: audibleMainTrack.media),
             throwsAssertionError,
           );
         });
@@ -94,31 +83,7 @@ void main() {
       group('.main() asserts on', () {
         test('null track', () {
           expect(
-            () => MultiMediumTrackState.main(
-              track: null,
-              registry: registry,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
-            throwsAssertionError,
-          );
-        });
-        test('null registry', () {
-          expect(
-            () => MultiMediumTrackState.main(
-              registry: null,
-              track: audibleMainTrack,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
-            throwsAssertionError,
-          );
-        });
-        test('null singleMediumStateFactory', () {
-          expect(
-            () => MultiMediumTrackState.main(
-              singleMediumStateFactory: null,
-              track: audibleMainTrack,
-              registry: registry,
-            ),
+            () => MultiMediumTrackState.main(track: null),
             throwsAssertionError,
           );
         });
@@ -127,31 +92,7 @@ void main() {
       group('.background() asserts on', () {
         test('null track', () {
           expect(
-            () => MultiMediumTrackState.background(
-              track: null,
-              registry: registry,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
-            throwsAssertionError,
-          );
-        });
-        test('null registry', () {
-          expect(
-            () => MultiMediumTrackState.background(
-              registry: null,
-              track: audibleBakgroundTrack,
-              singleMediumStateFactory: _fakeSingleMediumStateFactory,
-            ),
-            throwsAssertionError,
-          );
-        });
-        test('null singleMediumStateFactory', () {
-          expect(
-            () => MultiMediumTrackState.background(
-              singleMediumStateFactory: null,
-              track: audibleBakgroundTrack,
-              registry: registry,
-            ),
+            () => MultiMediumTrackState.background(track: null),
             throwsAssertionError,
           );
         });
@@ -167,49 +108,27 @@ void main() {
         expect(state.isNotEmpty, isTrue);
         expect(state.current, state.mediaState.first);
         expect(state.last, state.mediaState.last);
-        // The current/fist one is OK but uninitialized
-        expect(state.current.controller, isNotNull);
-        expect(state.current.isInitialized, isFalse);
-        expect(state.current.isErroneous, isFalse);
-        // The last one is an unregistered medium, so it is erroneous
-        expect(state.last.controller, isNull);
-        expect(state.last.isInitialized, isFalse);
-        expect(state.last.isErroneous, isTrue);
+        expect(state.current.medium, media.first);
+        expect(state.current.isVisualizable, state.isVisualizable);
+        expect(state.current.asMock.onMediumFinished, isNotNull);
+        expect(state.last.medium, media.last);
+        expect(state.last.isVisualizable, state.isVisualizable);
+        expect(state.last.asMock.onMediumFinished, isNotNull);
       }
 
       test('.main() create mediaState correctly', () {
-        final track = _FakeAudibleMultiMediumTrack([
-          audibleMedium,
-          _FakeUnregisteredAudibleSingleMedium(),
-        ]);
-        final state = MultiMediumTrackState.main(
-          track: track,
-          registry: registry,
-          singleMediumStateFactory: _fakeSingleMediumStateFactory,
-        );
-        testContructorWithMedia(state, track.media);
+        final state = MultiMediumTrackState.main(track: audibleMainTrack2);
+        testContructorWithMedia(state, audibleMainTrack2.media);
       });
 
       test('.background() create mediaState correctly', () {
-        final track = _FakeAudibleBackgroundMultiMediumTrack([
-          audibleMedium,
-          _FakeUnregisteredAudibleSingleMedium(),
-        ]);
-        final state = MultiMediumTrackState.background(
-          track: track,
-          registry: registry,
-          singleMediumStateFactory: _fakeSingleMediumStateFactory,
-        );
-        testContructorWithMedia(state, track.media);
+        final state =
+            MultiMediumTrackState.background(track: audibleBackTrack2);
+        testContructorWithMedia(state, audibleBackTrack2.media);
       });
 
       test('.background() create empty track with NoTrack', () {
-        final track = NoTrack();
-        final state = MultiMediumTrackState.background(
-          track: track,
-          registry: registry,
-          singleMediumStateFactory: _fakeSingleMediumStateFactory,
-        );
+        final state = MultiMediumTrackState.background(track: NoTrack());
         expect(state.isVisualizable, isFalse);
         expect(state.isFinished, isTrue);
         expect(state.isEmpty, isTrue);
@@ -218,208 +137,139 @@ void main() {
     });
 
     test('initialize() initializes media states', () async {
-      final track = _FakeAudibleMultiMediumTrack([
-        audibleMedium,
-        _FakeUnregisteredAudibleSingleMedium(),
-      ]);
-      final state = MultiMediumTrackState.main(
-        track: track,
-        registry: registry,
-        singleMediumStateFactory: _fakeSingleMediumStateFactory,
-      );
-      await state.initialize(_FakeContext());
+      final state = MultiMediumTrackState.main(track: audibleMainTrack2);
+      state.mediaState.forEach(verifyNoMoreInteractions);
+      stubAll(state.mediaState);
+      await state.initialize(fakeContext);
       expect(state.isFinished, isFalse);
-      expect(state.current.isInitialized, isTrue);
-      expect(state.current.isErroneous, isFalse);
-      expect(state.current.asFake.calls, ['initialize']);
-      expect(state.last.isInitialized, isFalse);
-      expect(state.last.isErroneous, isTrue);
+      state.mediaState.forEach((s) {
+        verifyInOrder([
+          s.initialize(fakeContext),
+        ]);
+        verifyNoMoreInteractions(s);
+      });
     });
 
-    test('initialize(startPlaying) initializes media starts playing', () async {
-      final track = _FakeAudibleMultiMediumTrack([
-        audibleMedium,
-        _FakeUnregisteredAudibleSingleMedium(),
-      ]);
-      final state = MultiMediumTrackState.main(
-        track: track,
-        registry: registry,
-        singleMediumStateFactory: _fakeSingleMediumStateFactory,
-      );
-      await state.initialize(_FakeContext(), startPlaying: true);
+    test('initialize(startPlaying) initializes media and starts playing',
+        () async {
+      final state = MultiMediumTrackState.main(track: audibleMainTrack2);
+      stubAll(state.mediaState);
+
+      await state.initialize(fakeContext, startPlaying: true);
       expect(state.isFinished, isFalse);
-      expect(state.current.isInitialized, isTrue);
-      expect(state.current.isErroneous, isFalse);
-      expect(state.current.asFake.calls, ['initialize', 'play']);
-      expect(state.last.isInitialized, isFalse);
-      expect(state.last.isErroneous, isTrue);
+      verifyInOrder([
+        state.mediaState.first.initialize(fakeContext, startPlaying: false),
+        state.mediaState.first.play(fakeContext),
+      ]);
+      verifyInOrder([
+        state.mediaState.last.initialize(fakeContext, startPlaying: false),
+      ]);
+      state.mediaState.forEach(verifyNoMoreInteractions);
     });
 
-    test("play() doesn't end with state without controller", () async {
-      final track = _FakeAudibleMultiMediumTrack([
-        audibleMedium,
-        _FakeUnregisteredAudibleSingleMedium(),
-      ]);
-      final state = MultiMediumTrackState.main(
-        track: track,
-        registry: registry,
-        singleMediumStateFactory: _fakeSingleMediumStateFactory,
-      );
-
-      await state.initialize(_FakeContext());
-      var first = state.current;
-
-      await state.play(_FakeContext());
-      expect(state.isFinished, isFalse);
-      expect(state.current, same(first));
-      expect(state.current.asFake.calls, ['initialize', 'play']);
-      expect(state.last.isInitialized, isFalse);
-      expect(state.last.isErroneous, isTrue);
-
-      // after the current track finished, the next should be played, but since
-      // it is erroneous without controller, nothing happens (we'll have to
-      // implement a default or error SingleMediumController eventually)
-      state.current.controller.onMediumFinished(_FakeContext());
-      expect(first.asFake.calls, ['initialize', 'play']);
-      expect(state.isFinished, isFalse);
-      expect(state.current, same(state.last));
-      expect(state.last.isInitialized, isFalse);
-      expect(state.last.isErroneous, isTrue);
-    });
-
-    test('play-pause-next cycle works without onMediumFinished', () async {
+    test('play-pause-next cycle with onMediumFinished works', () async {
       final track = _FakeAudibleMultiMediumTrack([
         audibleMedium,
         audibleMedium2,
       ]);
-      final state = MultiMediumTrackState.main(
-        track: track,
-        registry: registry,
-        singleMediumStateFactory: _fakeSingleMediumStateFactory,
-      );
-
-      await state.initialize(_FakeContext());
-      expect(state.current.asFake.calls, ['initialize']);
-      expect(state.last.asFake.calls, ['initialize']);
-      final first = state.current;
-
-      await state.play(_FakeContext());
-      expect(state.isFinished, isFalse);
-      expect(state.current, same(first));
-      expect(state.current.asFake.calls, ['initialize', 'play']);
-      expect(state.last.asFake.calls, ['initialize']);
-
-      await state.pause(_FakeContext());
-      expect(state.isFinished, isFalse);
-      expect(state.current, same(first));
-      expect(state.current.asFake.calls, ['initialize', 'play', 'pause']);
-      expect(state.last.asFake.calls, ['initialize']);
-
-      await state.play(_FakeContext());
-      expect(state.isFinished, isFalse);
-      expect(state.current, same(first));
-      expect(
-          state.current.asFake.calls, ['initialize', 'play', 'pause', 'play']);
-      expect(state.last.asFake.calls, ['initialize']);
-
-      // after the current track finished, the next one is played
-      state.current.controller.onMediumFinished(_FakeContext());
-      expect(state.isFinished, isFalse);
-      expect(state.current, same(state.last));
-      expect(first.asFake.calls, ['initialize', 'play', 'pause', 'play']);
-      expect(state.last.asFake.calls, ['initialize', 'play']);
-
-      // after the last track finished, the controller should be finished
-      state.current.controller.onMediumFinished(_FakeContext());
-      expect(state.isFinished, isTrue);
-      expect(state.current, isNull);
-      expect(first.asFake.calls, ['initialize', 'play', 'pause', 'play']);
-      expect(state.last.asFake.calls, ['initialize', 'play']);
-
-      // If we dispose the controller,
-      await state.dispose();
-      expect(first.asFake.calls,
-          ['initialize', 'play', 'pause', 'play', 'dispose']);
-      expect(state.last.asFake.calls, ['initialize', 'play', 'dispose']);
-    });
-
-    test('onMediumFinished is called', () async {
-      final track =
-          _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]);
-
-      var finished = false;
-
+      var onMediumFinishedCalled = false;
       final state = MultiMediumTrackState.main(
           track: track,
-          registry: registry,
-          singleMediumStateFactory: _fakeSingleMediumStateFactory,
-          onMediumFinished: (BuildContext context) => finished = true);
+          onMediumFinished: (context) => onMediumFinishedCalled = true);
+      expect(onMediumFinishedCalled, false);
+      stubAll(state.mediaState);
 
-      await state.initialize(_FakeContext());
-      expect(finished, isFalse);
-      // plays first
-      await state.play(_FakeContext());
-      expect(finished, isFalse);
-      // ends first, second starts playing
-      state.current.controller.onMediumFinished(_FakeContext());
-      expect(finished, isFalse);
-      // ends second, onMediumFinished should be called
-      state.current.controller.onMediumFinished(_FakeContext());
-      expect(finished, isTrue);
+      await state.initialize(fakeContext);
+
+      final first = state.current;
+      state.mediaState.forEach(clearInteractions);
+      await state.play(fakeContext);
+      expect(onMediumFinishedCalled, false);
+      expect(state.isFinished, isFalse);
+      expect(state.current, same(first));
+      verify(state.current.play(fakeContext)).called(1);
+      state.mediaState.forEach(verifyNoMoreInteractions);
+
+      state.mediaState.forEach(clearInteractions);
+      await state.pause(fakeContext);
+      expect(onMediumFinishedCalled, false);
+      expect(state.isFinished, isFalse);
+      expect(state.current, same(first));
+      verify(state.current.pause(fakeContext)).called(1);
+      state.mediaState.forEach(verifyNoMoreInteractions);
+
+      state.mediaState.forEach(clearInteractions);
+      await state.play(fakeContext);
+      expect(onMediumFinishedCalled, false);
+      expect(state.isFinished, isFalse);
+      expect(state.current, same(first));
+      verify(state.current.play(fakeContext)).called(1);
+      state.mediaState.forEach(verifyNoMoreInteractions);
+
+      // after the current track finished, the next one is played
+      state.mediaState.forEach(clearInteractions);
+      state.current.asMock.onMediumFinished(fakeContext);
+      expect(onMediumFinishedCalled, false);
+      expect(state.isFinished, isFalse);
+      expect(state.current, same(state.last));
+      verify(state.current.play(fakeContext)).called(1);
+      state.mediaState.forEach(verifyNoMoreInteractions);
+
+      // after the last track finished, the controller should be finished
+      state.mediaState.forEach(clearInteractions);
+      state.current.asMock.onMediumFinished(fakeContext);
+      expect(onMediumFinishedCalled, true);
       expect(state.isFinished, isTrue);
+      expect(state.current, isNull);
+      state.mediaState.forEach(verifyNoMoreInteractions);
+
+      // If we dispose the controller,
+      state.mediaState.forEach(clearInteractions);
+      await state.dispose();
+      state.mediaState.forEach((s) {
+        verify(s.dispose()).called(1);
+        verifyNoMoreInteractions(s);
+      });
     });
 
     test('listening for updates work', () async {
-      final track =
-          _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]);
-      final state = MultiMediumTrackState.main(
-          track: track,
-          registry: registry,
-          singleMediumStateFactory: _fakeSingleMediumStateFactory);
+      final state = MultiMediumTrackState.main(track: audibleMainTrack2);
+      stubAll(state.mediaState);
 
       var notifyCalls = 0;
       state.addListener(() => notifyCalls += 1);
 
-      await state.initialize(_FakeContext());
+      await state.initialize(fakeContext);
       expect(notifyCalls, 1);
       // plays first
-      await state.play(_FakeContext());
+      await state.play(fakeContext);
       expect(notifyCalls, 1);
       // ends first, second starts playing
-      state.current.controller.onMediumFinished(_FakeContext());
+      state.current.asMock.onMediumFinished(fakeContext);
       expect(notifyCalls, 2);
       // ends second, onMediumFinished should be called
-      state.current.controller.onMediumFinished(_FakeContext());
+      state.current.asMock.onMediumFinished(fakeContext);
       expect(notifyCalls, 3);
-      await state.pause(_FakeContext());
+      await state.pause(fakeContext);
       expect(notifyCalls, 3);
       await state.dispose();
       expect(notifyCalls, 3);
     });
 
     test('toString()', () async {
-      var state = MultiMediumTrackState.main(
-        track: _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]),
-        registry: registry,
-        singleMediumStateFactory: _fakeSingleMediumStateFactory,
-      );
+      var state = MultiMediumTrackState.main(track: audibleMainTrack2);
+      stubAll(state.mediaState);
 
       expect(state.toString(),
           'MultiMediumTrackState(audible, current: 0, media: 2)');
-      await state.initialize(_FakeContext());
+      await state.initialize(fakeContext);
       expect(state.toString(),
           'MultiMediumTrackState(initialized, audible, current: 0, media: 2)');
 
-      state = MultiMediumTrackState.background(
-        track: const NoTrack(),
-        registry: registry,
-      );
+      state = MultiMediumTrackState.background(track: const NoTrack());
+      stubAll(state.mediaState);
       expect(
-        MultiMediumTrackState.background(
-          track: const NoTrack(),
-          registry: registry,
-          singleMediumStateFactory: _fakeSingleMediumStateFactory,
-        ).toString(),
+        MultiMediumTrackState.background(track: const NoTrack()).toString(),
         'MultiMediumTrackState(empty)',
       );
     });
@@ -431,28 +281,21 @@ void main() {
       // fake all the diagnostics class hierarchy too, which is overkill.
       expect(
         MultiMediumTrackState.main(
-          track: _FakeAudibleMultiMediumTrack([audibleMedium, audibleMedium2]),
-          registry: registry,
+          track: audibleMainTrack2,
         ).toStringDeep().replaceAll(identityHash, ''),
         'MultiMediumTrackState\n'
         ' │ audible\n'
         ' │ currentIndex: 0\n'
         ' │ mediaState.length: 2\n'
         ' │\n'
-        ' ├─0: SingleMediumState\n'
-        ' │   medium: Instance of \'_FakeAudibleSingleMedium\'\n'
-        ' │   size: <uninitialized>\n'
-        ' │\n'
-        ' └─1: SingleMediumState\n'
-        '     medium: Instance of \'_FakeAudibleSingleMedium\'\n'
-        '     size: <uninitialized>\n'
+        ' ├─0: _MockSingleMediumState(_FakeAudibleSingleMedium(audibleMedium1))\n'
+        ' └─1: _MockSingleMediumState(_FakeAudibleSingleMedium(audibleMedium2))\n'
         '',
       );
       expect(
-        MultiMediumTrackState.background(
-          track: const NoTrack(),
-          registry: registry,
-        ).toStringDeep().replaceAll(identityHash, ''),
+        MultiMediumTrackState.background(track: const NoTrack())
+            .toStringDeep()
+            .replaceAll(identityHash, ''),
         'MultiMediumTrackState\n'
         '   empty\n'
         '',
@@ -465,24 +308,23 @@ class _TestMultiMediumTrackState extends MultiMediumTrackState {
   _TestMultiMediumTrackState({
     @required List<SingleMedium> media,
     @required bool visualizable,
-    @required ControllerRegistry registry,
     void Function(BuildContext context) onMediumFinished,
-    SingleMediumStateFactory singleMediumStateFactory,
   }) : super.internal(
-            media: media,
-            visualizable: visualizable,
-            registry: registry,
-            onMediumFinished: onMediumFinished,
-            singleMediumStateFactory: singleMediumStateFactory);
+          media: media,
+          visualizable: visualizable,
+          onMediumFinished: onMediumFinished,
+        );
 }
 
 class _FakeContext extends Fake implements BuildContext {}
 
 abstract class _FakeSingleMedium extends Fake implements SingleMedium {
+  final String name;
   final Size size;
   final dynamic error;
   final Key widgetKey;
   _FakeSingleMedium({
+    this.name,
     this.size,
     this.error,
     Key widgetKey,
@@ -491,14 +333,18 @@ abstract class _FakeSingleMedium extends Fake implements SingleMedium {
 
   @override
   Uri get resource => Uri.parse('medium.resource');
+
+  @override
+  String toString() => '$runtimeType($name)';
 }
 
 class _FakeAudibleSingleMedium extends _FakeSingleMedium implements Audible {
   _FakeAudibleSingleMedium({
+    String name,
     Size size,
     dynamic error,
     Key widgetKey,
-  }) : super(size: size, error: error, widgetKey: widgetKey);
+  }) : super(name: name, size: size, error: error, widgetKey: widgetKey);
 }
 
 class _FakeAudibleMultiMediumTrack extends Fake
@@ -515,111 +361,24 @@ class _FakeAudibleBackgroundMultiMediumTrack extends Fake
   _FakeAudibleBackgroundMultiMediumTrack(this.media);
 }
 
-class _FakeUnregisteredAudibleSingleMedium extends Fake
-    implements SingleMedium, Audible {
-  @override
-  Uri get resource => Uri.parse('medium.resource');
-}
-
-void _registerControllers(ControllerRegistry registry) {
-  SingleMediumController createController(SingleMedium medium,
-      {void Function(BuildContext) onMediumFinished}) {
-    final fakeMedium = medium as _FakeSingleMedium;
-    final c = _FakeSingleMediumController(fakeMedium,
-        onMediumFinished: onMediumFinished);
-    return c;
-  }
-
-  registry.register(_FakeAudibleSingleMedium, createController);
-}
-
-class _FakeSingleMediumStateFactory extends Fake
-    implements SingleMediumStateFactory {
-  @override
-  SingleMediumState good(SingleMediumController controller,
-          {bool isVisualizable = true}) =>
-      _FakeSingleMediumState(
-          medium: controller.medium,
-          controller: controller as _FakeSingleMediumController,
-          isVisualizable: isVisualizable);
-
-  @override
-  SingleMediumState bad(SingleMedium medium, dynamic error) =>
-      _FakeSingleMediumState(medium: medium, error: error);
-}
-
-class _FakeSingleMediumState extends Fake
-    with FakeDiagnosticableMixin
+class _MockSingleMediumState extends Mock
+    with DiagnosticableTreeMixin
     implements SingleMediumState {
   @override
-  SingleMedium medium;
-
-  @override
-  final _FakeSingleMediumController controller;
-
+  final SingleMedium medium;
   @override
   final bool isVisualizable;
-
-  @override
-  Size size;
-
-  @override
-  dynamic error;
-
-  _FakeSingleMediumState(
-      {this.medium, this.controller, this.error, this.isVisualizable});
-
-  final calls = <String>[];
-
-  Future<void> _errorOrOk(String name, [Size size]) async {
-    calls.add(name);
-    if (controller?.medium?.error != null) {
-      throw controller.medium.error;
-    }
-    if (size != null) {
-      this.size = size;
-    }
-  }
-
-  @override
-  bool get isInitialized => size != null;
-
-  @override
-  bool get isErroneous => error != null;
-
-  @override
-  Future<void> initialize(BuildContext context, {bool startPlaying = false}) =>
-      _errorOrOk('initialize', controller?.medium?.size)
-          .then<void>((_) => startPlaying ? play(context) : null);
-
-  @override
-  Future<void> play(BuildContext context) => _errorOrOk('play');
-
-  @override
-  Future<void> pause(BuildContext context) => _errorOrOk('pause');
-
-  @override
-  Future<void> dispose() => _errorOrOk('dispose');
-
-  @override
-  Widget build(BuildContext context) {
-    calls.add('build');
-    return Container(key: controller.widgetKey);
-  }
-}
-
-class _FakeSingleMediumController extends Fake
-    implements SingleMediumController {
-  @override
-  _FakeSingleMedium medium;
-  @override
   final void Function(BuildContext) onMediumFinished;
-  _FakeSingleMediumController(
+  _MockSingleMediumState(
     this.medium, {
+    this.isVisualizable,
     this.onMediumFinished,
-  }) : assert(medium != null);
+  });
+
+  @override
+  String toStringShort() => '$runtimeType($medium)';
 }
 
-extension _AsFakeSingleMediumState on SingleMediumState {
-  _FakeSingleMediumState get asFake => this as _FakeSingleMediumState;
+extension _AsMockSingleMediumState on SingleMediumState {
+  _MockSingleMediumState get asMock => this as _MockSingleMediumState;
 }

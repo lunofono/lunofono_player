@@ -38,9 +38,11 @@ class SingleMediumWidget extends StatelessWidget {
             // have 2 build methods in SingleMediumController: buildAudible()
             // and buildVisualizable() and use then depeding on what kind of
             // track we are showing.
-            if (!state.isVisualizable) return Container(key: state.widgetKey);
+            if (!state.isVisualizable) {
+              return Container(key: state.controller.widgetKey);
+            }
 
-            var widget = state.build(context);
+            var widget = state.controller.build(context);
             if (state.size.width > state.size.height) {
               widget = RotatedBox(
                 quarterTurns: 1,

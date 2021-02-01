@@ -12,12 +12,23 @@ import 'package:lunofono_bundle/lunofono_bundle.dart'
         VisualizableMultiMediumTrack,
         VisualizableBackgroundMultiMediumTrack;
 
-import 'controller_registry.dart' show ControllerRegistry;
-import 'single_medium_state.dart'
-    show SingleMediumState, SingleMediumStateFactory;
+import 'single_medium_state.dart' show SingleMediumState;
 
 /// A player state for playing a [MultiMediumTrack] and notifying changes.
 class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
+  /// Function used to create [SingleMediumState] instances.
+  @visibleForTesting
+  static var createSingleMediumState = (
+    SingleMedium medium, {
+    bool isVisualizable,
+    void Function(BuildContext) onMediumFinished,
+  }) =>
+      SingleMediumState(
+        medium,
+        isVisualizable: isVisualizable,
+        onMediumFinished: onMediumFinished,
+      );
+
   /// If true, then a proper widget needs to be shown for this track.
   final bool isVisualizable;
 
@@ -55,53 +66,37 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   ///
   /// The [media] list must be non-null and not empty. Also [visualizable] must
   /// not be null and it indicates if the media should be displayed or not.
-  /// [registry] should also be non-null and it will be used to create the
-  /// [SingleMedium] controller instances. If [onMediumFinished] is provided and
-  /// non-null, it will be called when all the tracks finished playing.
+  /// If [onMediumFinished] is provided and non-null, it will be called when all
+  /// the tracks finished playing.
   ///
-  /// When the underlaying [SingleMedium] controller is created, its
-  /// `onMediumFinished` callback will be used to play the next media in the
+  /// When the underlaying [SingleMediumState] are created, its
+  /// [onMediumFinished] callback will be used to play the next media in the
   /// [media] list. If last medium finished playing, then this
   /// [onMediumFinished] will be called.
-  ///
-  /// If a [singleMediumStateFactory] is specified, it will be used to create
-  /// the [mediaState] elements, otherwise a default const
-  /// [SingleMediumStateFactory()] will be used.
   @protected
   MultiMediumTrackState.internal({
     @required List<SingleMedium> media,
     @required bool visualizable,
-    @required ControllerRegistry registry,
     void Function(BuildContext context) onMediumFinished,
-    SingleMediumStateFactory singleMediumStateFactory =
-        const SingleMediumStateFactory(),
   })  : assert(media != null),
         assert(media.isNotEmpty),
         assert(visualizable != null),
-        assert(registry != null),
-        assert(singleMediumStateFactory != null),
         isVisualizable = visualizable {
-    for (var i = 0; i < media.length; i++) {
-      final medium = media[i];
-      final create = registry.getFunction(medium);
-      if (create == null) {
-        mediaState.add(singleMediumStateFactory.bad(medium,
-            'Unsupported type ${medium.runtimeType} for ${medium.resource}'));
-        continue;
+    void _playNext(BuildContext context) {
+      currentIndex++;
+      if (isFinished) {
+        onMediumFinished?.call(context);
+      } else {
+        play(context);
       }
-
-      final controller = create(medium, onMediumFinished: (context) {
-        currentIndex++;
-        if (isFinished) {
-          onMediumFinished?.call(context);
-        } else {
-          play(context);
-        }
-        notifyListeners();
-      });
-      mediaState.add(singleMediumStateFactory.good(controller,
-          isVisualizable: isVisualizable));
+      notifyListeners();
     }
+
+    mediaState.addAll(media.map((medium) => createSingleMediumState(
+          medium,
+          isVisualizable: isVisualizable,
+          onMediumFinished: _playNext,
+        )));
   }
 
   /// Constructs an empty track state that [isFinished].
@@ -112,21 +107,15 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
 
   /// Constructs a [MultiMediumTrackState] for a [MultiMediumTrack].
   ///
-  /// [track] and [registry] must be non-null. If [onMediumFinished] is
-  /// provided and non-null, it will be called when all the tracks finished
-  /// playing.
+  /// [track] must be non-null. If [onMediumFinished] is provided and non-null,
+  /// it will be called when all the tracks finished playing.
   MultiMediumTrackState.main({
     @required MultiMediumTrack track,
-    @required ControllerRegistry registry,
     void Function(BuildContext context) onMediumFinished,
-    SingleMediumStateFactory singleMediumStateFactory =
-        const SingleMediumStateFactory(),
   }) : this.internal(
           media: track?.media,
           visualizable: track is VisualizableMultiMediumTrack,
-          registry: registry,
           onMediumFinished: onMediumFinished,
-          singleMediumStateFactory: singleMediumStateFactory,
         );
 
   /// Constructs a [MultiMediumTrackState] for
@@ -137,20 +126,15 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// empty [mediaState]). Otherwise a regular [MultiMediumTrackState] will
   /// be constructed.
   ///
-  /// [track] and [registry] must be non-null.
+  /// [track] must be non-null.
   static MultiMediumTrackState background({
     @required BackgroundMultiMediumTrack track,
-    @required ControllerRegistry registry,
-    SingleMediumStateFactory singleMediumStateFactory =
-        const SingleMediumStateFactory(),
   }) =>
       track is NoTrack
           ? MultiMediumTrackState.empty()
           : MultiMediumTrackState.internal(
               media: track?.media,
               visualizable: track is VisualizableBackgroundMultiMediumTrack,
-              registry: registry,
-              singleMediumStateFactory: singleMediumStateFactory,
             );
 
   /// Plays the current [SingleMediumState].
@@ -176,9 +160,7 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// initialization is done.
   Future<void> initialize(BuildContext context,
       {bool startPlaying = false}) async {
-    await Future.wait(mediaState
-        .where((s) => !s.isErroneous)
-        .map((s) => s.initialize(context)));
+    await Future.wait(mediaState.map((s) => s.initialize(context)));
     _allInitialized = true;
     notifyListeners();
     if (startPlaying) await play(context);
