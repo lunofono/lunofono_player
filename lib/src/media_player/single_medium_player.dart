@@ -46,7 +46,7 @@ class SingleMediumPlayer extends StatelessWidget {
   Widget build(BuildContext context) =>
       ChangeNotifierProvider<SingleMediumState>(
         create: (context) =>
-            SingleMediumState(medium, onMediumFinished: onMediaStopped)
+            SingleMediumState(medium, onFinished: onMediaStopped)
               ..initialize(context, startPlaying: true),
         child: Builder(
           builder: (context) => GestureDetector(

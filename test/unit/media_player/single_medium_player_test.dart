@@ -421,7 +421,7 @@ class _FakeSingleMediumController extends Fake
   @override
   Future<void> play(BuildContext context) {
     // TODO: test play errors
-    // Trigger onMediumFinished after the duration of the media to simulate
+    // Trigger onFinished after the duration of the media to simulate
     // a natural stop if a duration is set
     if (medium.info.duration is! UnlimitedDuration) {
       _playingTimer = Timer(medium.info.duration, () {

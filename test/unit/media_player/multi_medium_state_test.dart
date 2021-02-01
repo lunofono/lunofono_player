@@ -56,7 +56,7 @@ void main() {
     test('play/pause cycle works with main track only', () async {
       var finished = false;
       final state = MultiMediumState(audibleMultiMedium,
-          onMediumFinished: (context) => finished = true);
+          onFinished: (context) => finished = true);
       expect(finished, isFalse);
       expect(state.isInitialized, isFalse);
       expect(state.backgroundTrackState, isEmpty);
@@ -142,7 +142,7 @@ void main() {
 
       Future<MultiMediumState> testInitialize() async {
         final state = MultiMediumState(multiMedium,
-            onMediumFinished: (context) => finished = true);
+            onFinished: (context) => finished = true);
         expect(finished, isFalse);
         expect(state.isInitialized, isFalse);
         expect(state.backgroundTrackState, isNotEmpty);
@@ -302,8 +302,7 @@ void main() {
 
     test('toString()', () {
       expect(
-        MultiMediumState(multiMedium, onMediumFinished: (context) => null)
-            .toString(),
+        MultiMediumState(multiMedium, onFinished: (context) => null).toString(),
         'MultiMediumState(main: MultiMediumTrackState(audible, '
         'current: 0, media: 2), '
         'background: MultiMediumTrackState(visualizable, '
@@ -320,7 +319,7 @@ void main() {
       final identityHash = RegExp(r'#[0-9a-f]{5}');
 
       expect(
-          MultiMediumState(multiMedium, onMediumFinished: (context) => null)
+          MultiMediumState(multiMedium, onFinished: (context) => null)
               .toStringDeep()
               .replaceAll(identityHash, ''),
           'MultiMediumState\n'
@@ -336,12 +335,12 @@ void main() {
           ' │ │ mediaState.length: 2\n'
           ' │ │\n'
           ' │ ├─0: SingleMediumState\n'
-          ' │ │   medium: _FakeAudibleSingleMedium(resource: audible, maxDuration:\n'
-          ' │ │     8760:00:00.000000)\n'
+          ' │ │   playable: _FakeAudibleSingleMedium(resource: audible,\n'
+          ' │ │     maxDuration: 8760:00:00.000000)\n'
           ' │ │   size: <uninitialized>\n'
           ' │ │\n'
           ' │ └─1: SingleMediumState\n'
-          ' │     medium: _FakeAudibleSingleMedium(resource: visualizable,\n'
+          ' │     playable: _FakeAudibleSingleMedium(resource: visualizable,\n'
           ' │       maxDuration: 8760:00:00.000000)\n'
           ' │     size: <uninitialized>\n'
           ' │\n'
@@ -351,12 +350,12 @@ void main() {
           '   │ mediaState.length: 2\n'
           '   │\n'
           '   ├─0: SingleMediumState\n'
-          '   │   medium: _FakeVisualizableSingleMedium(resource: visualizable1,\n'
+          '   │   playable: _FakeVisualizableSingleMedium(resource: visualizable1,\n'
           '   │     maxDuration: 8760:00:00.000000)\n'
           '   │   size: <uninitialized>\n'
           '   │\n'
           '   └─1: SingleMediumState\n'
-          '       medium: _FakeVisualizableSingleMedium(resource: visualizable2,\n'
+          '       playable: _FakeVisualizableSingleMedium(resource: visualizable2,\n'
           '         maxDuration: 8760:00:00.000000)\n'
           '       size: <uninitialized>\n'
           '');
@@ -375,12 +374,12 @@ void main() {
           ' │ │ mediaState.length: 2\n'
           ' │ │\n'
           ' │ ├─0: SingleMediumState\n'
-          ' │ │   medium: _FakeAudibleSingleMedium(resource: audible, maxDuration:\n'
-          ' │ │     8760:00:00.000000)\n'
+          ' │ │   playable: _FakeAudibleSingleMedium(resource: audible,\n'
+          ' │ │     maxDuration: 8760:00:00.000000)\n'
           ' │ │   size: <uninitialized>\n'
           ' │ │\n'
           ' │ └─1: SingleMediumState\n'
-          ' │     medium: _FakeAudibleSingleMedium(resource: visualizable,\n'
+          ' │     playable: _FakeAudibleSingleMedium(resource: visualizable,\n'
           ' │       maxDuration: 8760:00:00.000000)\n'
           ' │     size: <uninitialized>\n'
           ' │\n'

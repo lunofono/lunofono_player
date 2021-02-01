@@ -20,12 +20,12 @@ void main() {
     MultiMediumTrackState.createSingleMediumState = (
       SingleMedium medium, {
       bool isVisualizable,
-      void Function(BuildContext) onMediumFinished,
+      void Function(BuildContext) onFinished,
     }) {
       final state = _MockSingleMediumState(
         medium,
         isVisualizable: isVisualizable,
-        onMediumFinished: onMediumFinished,
+        onFinished: onFinished,
       );
       throwOnMissingStub(state);
       return state;
@@ -108,12 +108,12 @@ void main() {
         expect(state.isNotEmpty, isTrue);
         expect(state.current, state.mediaState.first);
         expect(state.last, state.mediaState.last);
-        expect(state.current.medium, media.first);
+        expect(state.current.playable, media.first);
         expect(state.current.isVisualizable, state.isVisualizable);
-        expect(state.current.asMock.onMediumFinished, isNotNull);
-        expect(state.last.medium, media.last);
+        expect(state.current.onFinished, isNotNull);
+        expect(state.last.playable, media.last);
         expect(state.last.isVisualizable, state.isVisualizable);
-        expect(state.last.asMock.onMediumFinished, isNotNull);
+        expect(state.last.onFinished, isNotNull);
       }
 
       test('.main() create mediaState correctly', () {
@@ -167,16 +167,15 @@ void main() {
       state.mediaState.forEach(verifyNoMoreInteractions);
     });
 
-    test('play-pause-next cycle with onMediumFinished works', () async {
+    test('play-pause-next cycle with onFinished works', () async {
       final track = _FakeAudibleMultiMediumTrack([
         audibleMedium,
         audibleMedium2,
       ]);
-      var onMediumFinishedCalled = false;
+      var onFinishedCalled = false;
       final state = MultiMediumTrackState.main(
-          track: track,
-          onMediumFinished: (context) => onMediumFinishedCalled = true);
-      expect(onMediumFinishedCalled, false);
+          track: track, onFinished: (context) => onFinishedCalled = true);
+      expect(onFinishedCalled, false);
       stubAll(state.mediaState);
 
       await state.initialize(fakeContext);
@@ -184,7 +183,7 @@ void main() {
       final first = state.current;
       state.mediaState.forEach(clearInteractions);
       await state.play(fakeContext);
-      expect(onMediumFinishedCalled, false);
+      expect(onFinishedCalled, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       verify(state.current.play(fakeContext)).called(1);
@@ -192,7 +191,7 @@ void main() {
 
       state.mediaState.forEach(clearInteractions);
       await state.pause(fakeContext);
-      expect(onMediumFinishedCalled, false);
+      expect(onFinishedCalled, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       verify(state.current.pause(fakeContext)).called(1);
@@ -200,7 +199,7 @@ void main() {
 
       state.mediaState.forEach(clearInteractions);
       await state.play(fakeContext);
-      expect(onMediumFinishedCalled, false);
+      expect(onFinishedCalled, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
       verify(state.current.play(fakeContext)).called(1);
@@ -208,8 +207,8 @@ void main() {
 
       // after the current track finished, the next one is played
       state.mediaState.forEach(clearInteractions);
-      state.current.asMock.onMediumFinished(fakeContext);
-      expect(onMediumFinishedCalled, false);
+      state.current.onFinished(fakeContext);
+      expect(onFinishedCalled, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(state.last));
       verify(state.current.play(fakeContext)).called(1);
@@ -217,8 +216,8 @@ void main() {
 
       // after the last track finished, the controller should be finished
       state.mediaState.forEach(clearInteractions);
-      state.current.asMock.onMediumFinished(fakeContext);
-      expect(onMediumFinishedCalled, true);
+      state.current.onFinished(fakeContext);
+      expect(onFinishedCalled, true);
       expect(state.isFinished, isTrue);
       expect(state.current, isNull);
       state.mediaState.forEach(verifyNoMoreInteractions);
@@ -245,10 +244,10 @@ void main() {
       await state.play(fakeContext);
       expect(notifyCalls, 1);
       // ends first, second starts playing
-      state.current.asMock.onMediumFinished(fakeContext);
+      state.current.onFinished(fakeContext);
       expect(notifyCalls, 2);
-      // ends second, onMediumFinished should be called
-      state.current.asMock.onMediumFinished(fakeContext);
+      // ends second, onFinished should be called
+      state.current.onFinished(fakeContext);
       expect(notifyCalls, 3);
       await state.pause(fakeContext);
       expect(notifyCalls, 3);
@@ -308,11 +307,11 @@ class _TestMultiMediumTrackState extends MultiMediumTrackState {
   _TestMultiMediumTrackState({
     @required List<SingleMedium> media,
     @required bool visualizable,
-    void Function(BuildContext context) onMediumFinished,
+    void Function(BuildContext context) onFinished,
   }) : super.internal(
           media: media,
           visualizable: visualizable,
-          onMediumFinished: onMediumFinished,
+          onFinished: onFinished,
         );
 }
 
@@ -365,20 +364,17 @@ class _MockSingleMediumState extends Mock
     with DiagnosticableTreeMixin
     implements SingleMediumState {
   @override
-  final SingleMedium medium;
+  final SingleMedium playable;
   @override
   final bool isVisualizable;
-  final void Function(BuildContext) onMediumFinished;
+  @override
+  final void Function(BuildContext) onFinished;
   _MockSingleMediumState(
-    this.medium, {
+    this.playable, {
     this.isVisualizable,
-    this.onMediumFinished,
+    this.onFinished,
   });
 
   @override
-  String toStringShort() => '$runtimeType($medium)';
-}
-
-extension _AsMockSingleMediumState on SingleMediumState {
-  _MockSingleMediumState get asMock => this as _MockSingleMediumState;
+  String toStringShort() => '$runtimeType($playable)';
 }

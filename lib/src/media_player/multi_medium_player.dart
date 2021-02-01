@@ -50,7 +50,7 @@ class MultiMediumPlayer extends StatelessWidget {
       ChangeNotifierProvider<MultiMediumState>(
         create: (context) => MultiMediumState(
           medium,
-          onMediumFinished: onMediaStopped,
+          onFinished: onMediaStopped,
         )..initialize(context, startPlaying: true),
         child: Consumer<MultiMediumState>(
             child: Material(

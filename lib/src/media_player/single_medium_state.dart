@@ -4,10 +4,10 @@ import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:lunofono_bundle/lunofono_bundle.dart' show SingleMedium;
 
 import 'controller_registry.dart' show ControllerRegistry;
+import 'playable_state.dart' show PlayableState;
 import 'single_medium_controller.dart' show SingleMediumController, Size;
-import 'single_medium_widget.dart' show SingleMediumWidget;
 
-/// A state of a [SingleMediumWidget].
+/// A state of a playing [SingleMedium].
 ///
 /// The medium can have 3 states:
 /// 1. Uninitialized, represented by [error] and [size] being null.
@@ -16,9 +16,16 @@ import 'single_medium_widget.dart' show SingleMediumWidget;
 ///    while constructing the controller, [initialize()]ing, [play()]ing,
 ///    [pause()]ing, etc. Having both [error] and [size] non-null can happen if
 ///    the error happens after initialization is successful.
-class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
-  /// The medium this state tracks.
-  final SingleMedium medium;
+class SingleMediumState
+    with ChangeNotifier, DiagnosticableTreeMixin
+    implements PlayableState {
+  /// The medium this state represents.
+  @override
+  final SingleMedium playable;
+
+  /// The function to call when this medium finishes playing.
+  @override
+  final void Function(BuildContext context) onFinished;
 
   /// The player controller used to control this medium.
   ///
@@ -61,20 +68,21 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   /// controller registered for this kind of [medium], then an [error] will
   /// be set.
   ///
-  /// If [onMediumFinished] is provided, it will be called when the medium
-  /// finishes playing (if ever).
+  /// If [onFinished] is provided, it will be called when the medium finishes
+  /// playing (if ever).
   SingleMediumState(
-    this.medium, {
+    SingleMedium medium, {
     this.isVisualizable = true,
-    void Function(BuildContext context) onMediumFinished,
+    this.onFinished,
   })  : assert(medium != null),
-        assert(isVisualizable != null) {
+        assert(isVisualizable != null),
+        playable = medium {
     final create = ControllerRegistry.instance.getFunction(medium);
     if (create == null) {
       error = 'Unsupported type ${medium.runtimeType} for ${medium.resource}';
       return;
     }
-    _controller = create(medium, onMediumFinished: onMediumFinished);
+    _controller = create(medium, onMediumFinished: onFinished);
   }
 
   /// Initializes this medium's [controller].
@@ -87,6 +95,7 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   ///
   /// If the underlaying controller couldn't be created, then this
   /// method does nothing.
+  @override
   Future<void> initialize(BuildContext context,
       {bool startPlaying = false}) async {
     assert(size == null);
@@ -107,6 +116,7 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   // FIXME: For now we show the error forever, eventually we probably have to
   // show the error only for some time and then move to the next medium in the
   // track.
+  @override
   Future<void> play(BuildContext context) =>
       controller?.play(context)?.catchError((dynamic error) {
         this.error = error;
@@ -119,6 +129,7 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   // FIXME: For now we ignore pause() when isErroneous, eventually we probably
   // have to show the error only for some time and then move to the next medium
   // in the track.
+  @override
   Future<void> pause(BuildContext context) =>
       controller?.pause(context)?.catchError((dynamic error) {
         this.error = error;
@@ -149,7 +160,7 @@ class SingleMediumState with ChangeNotifier, DiagnosticableTreeMixin {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
-      ..add(DiagnosticsProperty('medium', medium))
+      ..add(DiagnosticsProperty('playable', playable))
       ..add(DiagnosticsProperty<dynamic>('error', error, defaultValue: null))
       ..add(DiagnosticsProperty('size',
           size == null ? '<uninitialized>' : '${size.width}x${size.height}'));

@@ -110,7 +110,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   size: <uninitialized>\n'
             '');
@@ -118,7 +118,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   error: Exception: Initialization Error\n'
             '   size: <uninitialized>\n'
@@ -217,7 +217,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   size: <uninitialized>\n'
             '');
@@ -225,7 +225,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   size: 0.0x0.0\n'
             '');
