@@ -3,20 +3,21 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lunofono_player/src/media_player/controller_registry.dart';
 import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart';
 import 'package:lunofono_player/src/media_player/single_medium_controller.dart'
     show SingleMediumController, Size;
 
-import 'package:lunofono_player/src/media_player/multi_medium_controller.dart'
-    show SingleMediumState, SingleMediumStateFactory;
+import 'package:lunofono_player/src/media_player/single_medium_state.dart'
+    show SingleMediumState;
 
 void main() {
   void verifyStateInvariants(
       SingleMediumState state, _FakeSingleMediumController controller) {
     expect(state.controller, same(controller));
-    expect(state.widgetKey, controller.widgetKey);
+    expect(state.controller.widgetKey, controller.widgetKey);
   }
 
   void verifyStateInitialization(
@@ -38,23 +39,19 @@ void main() {
     expect(state.isErroneous, isTrue);
   }
 
+  final registry = ControllerRegistry();
+  final originalRegistry = ControllerRegistry.instance;
+  setUp(() => ControllerRegistry.instance = registry);
+  tearDown(() => ControllerRegistry.instance = originalRegistry);
+
   group('SingleMediumState', () {
-    test('.erroneous() initializes with error', () async {
-      final medium = _FakeSingleMedium('medium', size: Size(0.0, 0.0));
-
-      expect(() => SingleMediumState.erroneous(null, 'Error'),
-          throwsAssertionError);
-
-      expect(() => SingleMediumState.erroneous(medium, null),
-          throwsAssertionError);
-
-      final state = SingleMediumState.erroneous(medium, 'Error 123');
-      expect(state.controller, isNull);
-      expect(state.widgetKey, isNull);
-      expect(state.error, 'Error 123');
-      expect(state.isErroneous, isTrue);
-      expect(state.size, isNull);
-      expect(state.isInitialized, isFalse);
+    group('without a registered medium', () {
+      test('constructs a state with an error', () {
+        final medium = _FakeSingleMedium('bad-medium', size: Size(1, 1));
+        final state = SingleMediumState(medium);
+        expect(state.isErroneous, true);
+        expect(state.error, contains('Unsupported type'));
+      });
     });
 
     group('on bad medium', () {
@@ -67,7 +64,11 @@ void main() {
         error = Exception('Initialization Error');
         medium = _FakeSingleMedium('bad-medium', exception: error);
         controller = _FakeSingleMediumController(medium);
-        state = SingleMediumState(controller);
+        registry.register(
+          _FakeSingleMedium,
+          (medium, {onMediumFinished}) => controller,
+        );
+        state = SingleMediumState(medium);
       });
 
       test('the state is properly initialized', () {
@@ -95,11 +96,12 @@ void main() {
       });
 
       test('toString()', () async {
-        expect(state.toString(), 'SingleMediumState(uninitialized)');
+        expect(
+            state.toString(), 'SingleMediumState("bad-medium", uninitialized)');
         await state.initialize(_FakeContext());
         expect(
             state.toString(),
-            'SingleMediumState(uninitializederror: '
+            'SingleMediumState("bad-medium", uninitializederror: '
             'Exception: Initialization Error)');
       });
 
@@ -109,7 +111,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   size: <uninitialized>\n'
             '');
@@ -117,7 +119,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: bad-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   error: Exception: Initialization Error\n'
             '   size: <uninitialized>\n'
@@ -135,7 +137,11 @@ void main() {
         size = Size(0.0, 0.0);
         medium = _FakeSingleMedium('good-medium', size: size);
         controller = _FakeSingleMediumController(medium);
-        state = SingleMediumState(controller);
+        registry.register(
+          _FakeSingleMedium,
+          (medium, {onMediumFinished}) => controller,
+        );
+        state = SingleMediumState(medium);
       });
 
       void verifyStateInitialized() {
@@ -150,6 +156,11 @@ void main() {
         expect(() => SingleMediumState(null), throwsAssertionError);
       });
 
+      test('constructor asserts on null isVisualizable', () {
+        expect(() => SingleMediumState(medium, isVisualizable: null),
+            throwsAssertionError);
+      });
+
       test('the state is properly initialized', () {
         verifyStateInitialization(state, controller);
       });
@@ -157,6 +168,13 @@ void main() {
       test('.initialize() gets the size', () async {
         await state.initialize(_FakeContext());
         verifyStateInitialized();
+      });
+
+      test('.initialize(startPlaying) gets the size and starts playing',
+          () async {
+        await state.initialize(_FakeContext(), startPlaying: true);
+        verifyStateInitialized();
+        expect(controller.calls, ['initialize', 'play']);
       });
 
       test('.initialize() sets error with assertion', () async {
@@ -184,14 +202,15 @@ void main() {
       });
 
       test('.build() builds a widget with the expected key', () {
-        final widget = state.build(_FakeContext());
-        expect(widget.key, state.widgetKey);
+        final widget = state.controller.build(_FakeContext());
+        expect(widget.key, state.controller.widgetKey);
       });
 
       test('toString()', () async {
-        expect(state.toString(), 'SingleMediumState(uninitialized)');
+        expect(state.toString(),
+            'SingleMediumState("good-medium", uninitialized)');
         await state.initialize(_FakeContext());
-        expect(state.toString(), 'SingleMediumState(0.0x0.0)');
+        expect(state.toString(), 'SingleMediumState("good-medium", 0.0x0.0)');
       });
 
       test('debugFillProperties() and debugDescribeChildren()', () async {
@@ -200,7 +219,7 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   size: <uninitialized>\n'
             '');
@@ -208,31 +227,11 @@ void main() {
         expect(
             state.toStringDeep().replaceAll(identityHash, ''),
             'SingleMediumState\n'
-            '   medium: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
+            '   playable: _FakeSingleMedium(resource: good-medium, maxDuration:\n'
             '     8760:00:00.000000)\n'
             '   size: 0.0x0.0\n'
             '');
       });
-    });
-  });
-
-  group('SingleMediumStateFactory', () {
-    test('.good()', () {
-      final medium = _FakeSingleMedium('bad-medium', size: Size(1.0, 1.0));
-      final controller = _FakeSingleMediumController(medium);
-      final state = SingleMediumStateFactory().good(controller);
-      verifyStateInitialization(state, controller);
-    });
-
-    test('.bad()', () {
-      final state = SingleMediumStateFactory()
-          .bad(_FakeSingleMedium('error', size: Size(1.0, 1.0)), 'Error 123');
-      expect(state.controller, isNull);
-      expect(state.widgetKey, isNull);
-      expect(state.error, 'Error 123');
-      expect(state.isErroneous, isTrue);
-      expect(state.size, isNull);
-      expect(state.isInitialized, isFalse);
     });
   });
 }
@@ -309,5 +308,3 @@ class _FakeSingleMediumController extends Fake
     return Container(key: widgetKey);
   }
 }
-
-// vim: set foldmethod=syntax foldminlines=3 :

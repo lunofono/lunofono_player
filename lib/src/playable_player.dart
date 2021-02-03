@@ -2,10 +2,19 @@ import 'package:flutter/material.dart'
     show BuildContext, Navigator, MaterialPageRoute, Colors;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Playable, MultiMedium, SingleMedium, Audio, Image, Video, Color;
+    show
+        Audio,
+        Color,
+        Image,
+        MultiMedium,
+        Playable,
+        Playlist,
+        SingleMedium,
+        Video;
 
 import 'dynamic_dispatch_registry.dart' show DynamicDispatchRegistry;
-import 'media_player.dart' show MediaPlayer;
+import 'media_player.dart'
+    show MultiMediumPlayer, SingleMediumPlayer, PlaylistPlayer;
 
 /// Register all builtin types
 ///
@@ -13,13 +22,16 @@ import 'media_player.dart' show MediaPlayer;
 /// function, which is used by [PlayablePlayerRegistry.builtin()].
 void _registerBuiltin(PlayablePlayerRegistry registry) {
   // New actions should be registered here
-  MultiMediumPlayer singleMediumPlayer(Playable playable) =>
-      MultiMediumPlayer(MultiMedium.fromSingleMedium(playable as SingleMedium));
-  registry.register(Audio, (playable) => singleMediumPlayer(playable));
-  registry.register(Image, (playable) => singleMediumPlayer(playable));
-  registry.register(Video, (playable) => singleMediumPlayer(playable));
+  registry.register(Audio,
+      (playable) => SingleMediumPlayablePlayer(playable as SingleMedium));
+  registry.register(Image,
+      (playable) => SingleMediumPlayablePlayer(playable as SingleMedium));
+  registry.register(Video,
+      (playable) => SingleMediumPlayablePlayer(playable as SingleMedium));
+  registry.register(MultiMedium,
+      (playable) => MultiMediumPlayablePlayer(playable as MultiMedium));
   registry.register(
-      MultiMedium, (playable) => MultiMediumPlayer(playable as MultiMedium));
+      Playlist, (playable) => PlaylistPlayablePlayer(playable as Playlist));
 }
 
 /// A wrapper to manage how a [Playable] is played by the player.
@@ -49,26 +61,85 @@ abstract class PlayablePlayer {
   void play(BuildContext context, [Color backgroundColor]);
 }
 
-class MultiMediumPlayer extends PlayablePlayer {
+class SingleMediumPlayablePlayer extends PlayablePlayer {
+  /// The underlaying model's [SingleMedium].
+  @override
+  final SingleMedium playable;
+
+  /// Creates a [SingleMediumPlayablePlayer] using [playable] as the underlaying
+  /// [Playable].
+  SingleMediumPlayablePlayer(this.playable) : assert(playable != null);
+
+  /// Plays a [SingleMedium] by pushing a new page with a [SingleMediumPlayer].
+  ///
+  /// If [backgroundColor] is provided and non-null, it will be used as the
+  /// [SingleMediumPlayer.backgroundColor]. Otherwise, [Colors.black] will be
+  /// used.
+  @override
+  void play(BuildContext context, [Color backgroundColor]) {
+    Navigator.push<SingleMediumPlayer>(
+      context,
+      MaterialPageRoute<SingleMediumPlayer>(
+        builder: (BuildContext context) => SingleMediumPlayer(
+          medium: playable,
+          backgroundColor: backgroundColor ?? Colors.black,
+          onMediaStopped: (context) => Navigator.pop(context),
+        ),
+      ),
+    );
+  }
+}
+
+class PlaylistPlayablePlayer extends PlayablePlayer {
+  /// The underlaying model's [SingleMedium].
+  @override
+  final Playlist playable;
+
+  /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
+  /// [Playable].
+  PlaylistPlayablePlayer(this.playable) : assert(playable != null);
+
+  /// Plays a [SingleMedium] by pushing a new page with a [PlaylistPlayer].
+  ///
+  /// If [backgroundColor] is provided and non-null, it will be used as the
+  /// [PlaylistPlayer.backgroundColor]. Otherwise, [Colors.black] will be
+  /// used.
+  @override
+  void play(BuildContext context, [Color backgroundColor]) {
+    Navigator.push<PlaylistPlayer>(
+      context,
+      MaterialPageRoute<PlaylistPlayer>(
+        builder: (BuildContext context) => PlaylistPlayer(
+          playlist: playable,
+          backgroundColor: backgroundColor ?? Colors.black,
+          onMediaStopped: (context) => Navigator.pop(context),
+        ),
+      ),
+    );
+  }
+}
+
+class MultiMediumPlayablePlayer extends PlayablePlayer {
   /// The underlaying model's [SingleMedium].
   @override
   final MultiMedium playable;
 
-  /// Constructs a [SingleMediumPlayer] using [playable] as the underlaying
+  /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
   /// [Playable].
-  MultiMediumPlayer(this.playable) : assert(playable != null);
+  MultiMediumPlayablePlayer(this.playable) : assert(playable != null);
 
-  /// Plays a [SingleMedium] by pushing a new page with a [MediaPlayer].
+  /// Plays a [SingleMedium] by pushing a new page with a [MultiMediumPlayer].
   ///
   /// If [backgroundColor] is provided and non-null, it will be used as the
-  /// [MediaPlayer.backgroundColor]. Otherwise, [Colors.black] will be used.
+  /// [MultiMediumPlayer.backgroundColor]. Otherwise, [Colors.black] will be
+  /// used.
   @override
   void play(BuildContext context, [Color backgroundColor]) {
-    Navigator.push<MediaPlayer>(
+    Navigator.push<MultiMediumPlayer>(
       context,
-      MaterialPageRoute<MediaPlayer>(
-        builder: (BuildContext context) => MediaPlayer(
-          multimedium: playable,
+      MaterialPageRoute<MultiMediumPlayer>(
+        builder: (BuildContext context) => MultiMediumPlayer(
+          medium: playable,
           backgroundColor: backgroundColor ?? Colors.black,
           onMediaStopped: (context) => Navigator.pop(context),
         ),

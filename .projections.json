@@ -1,0 +1,5 @@
+{
+  "lib/src/*.dart": { "alternate": "test/unit/{}_test.dart", "type": "source" },
+  "test/unit/*_test.dart": { "alternate": "lib/src/{}.dart", "type": "test" },
+  "*": { "make" : "tool/ci" }
+}

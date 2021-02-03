@@ -26,7 +26,7 @@ class ControllerRegistry
   /// The global instance for the registry.
   ///
   /// This instance is initialized with all known media controllers.
-  static final instance = ControllerRegistry.defaults();
+  static var instance = ControllerRegistry.defaults();
 
   /// Constructs an empty controller registry.
   ControllerRegistry();
