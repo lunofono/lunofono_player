@@ -1,5 +1,6 @@
 @Tags(['unit', 'player'])
 
+import 'package:flutter/foundation.dart' show DiagnosticableTreeMixin;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -21,8 +22,6 @@ import 'package:lunofono_player/src/media_player/multi_medium_widget.dart'
     show MultiMediumWidget;
 import 'package:lunofono_player/src/media_player/multi_medium_track_widget.dart'
     show MultiMediumTrackWidget;
-
-import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
   group('MultiMediumWidget', () {
@@ -155,11 +154,9 @@ void main() {
 }
 
 class _FakeSingleMediumState extends Fake
-    with FakeDiagnosticableMixin, ChangeNotifier
+    with DiagnosticableTreeMixin, ChangeNotifier
     implements SingleMediumState {
   final String name;
-  @override
-  String toStringFakeImpl() => toStringShort();
   @override
   String toStringShort() => '$name';
   @override
@@ -168,7 +165,7 @@ class _FakeSingleMediumState extends Fake
 }
 
 class _FakeMultiMediumTrackState extends Fake
-    with FakeDiagnosticableMixin, ChangeNotifier
+    with DiagnosticableTreeMixin, ChangeNotifier
     implements MultiMediumTrackState {
   @override
   _FakeSingleMediumState current;
@@ -183,8 +180,6 @@ class _FakeMultiMediumTrackState extends Fake
   @override
   Future<void> dispose() async => super.dispose();
   @override
-  String toStringFakeImpl() => toStringShort();
-  @override
   String toStringShort() => 'current: $current, '
       'last: $last, '
       'isVisualizable: $isVisualizable';
@@ -196,7 +191,7 @@ class _FakeMultiMediumTrackState extends Fake
 }
 
 class _FakeMultiMediumState extends Fake
-    with FakeDiagnosticableMixin, ChangeNotifier
+    with DiagnosticableTreeMixin, ChangeNotifier
     implements MultiMediumState {
   _FakeMultiMediumTrackState mainTrack;
   _FakeMultiMediumTrackState backgroundTrack;
@@ -206,8 +201,6 @@ class _FakeMultiMediumState extends Fake
   MultiMediumTrackState get mainTrackState => mainTrack;
   @override
   MultiMediumTrackState get backgroundTrackState => backgroundTrack;
-  @override
-  String toStringFakeImpl() => toStringShort();
   @override
   String toStringShort() => 'isInitialized: $isInitialized, '
       'mainTrack: $mainTrack, '

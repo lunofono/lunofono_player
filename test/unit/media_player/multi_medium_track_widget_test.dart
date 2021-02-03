@@ -1,5 +1,6 @@
 @Tags(['unit', 'player'])
 
+import 'package:flutter/foundation.dart' show DiagnosticableTreeMixin;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,8 +16,6 @@ import 'package:lunofono_player/src/media_player/single_medium_widget.dart'
     show SingleMediumWidget;
 import 'package:lunofono_player/src/media_player/single_medium_state.dart'
     show SingleMediumState;
-
-import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
   group('MultiMediumTrackWidget', () {
@@ -74,7 +73,7 @@ void main() {
 }
 
 class _FakeSingleMediumState extends Fake
-    with FakeDiagnosticableMixin, ChangeNotifier
+    with DiagnosticableTreeMixin, ChangeNotifier
     implements SingleMediumState {
   @override
   Future<void> dispose() async => super.dispose();
@@ -93,7 +92,7 @@ class _FakeSingleMediumWidget extends StatelessWidget {
 }
 
 class _FakeMultiMediumTrackState extends Fake
-    with FakeDiagnosticableMixin, ChangeNotifier
+    with DiagnosticableTreeMixin, ChangeNotifier
     implements MultiMediumTrackState {
   @override
   _FakeSingleMediumState current;

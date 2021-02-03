@@ -1,5 +1,6 @@
 @Tags(['unit', 'player'])
 
+import 'package:flutter/foundation.dart' show DiagnosticableTreeMixin;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -18,8 +19,6 @@ import 'package:lunofono_player/src/media_player/single_medium_state.dart'
     show SingleMediumState;
 import 'package:lunofono_player/src/media_player/single_medium_widget.dart'
     show SingleMediumWidget;
-
-import '../../util/foundation.dart' show FakeDiagnosticableMixin;
 
 void main() {
   group('SingleMediumWidget', () {
@@ -138,7 +137,7 @@ class _MockSingleMediumController extends Mock
     implements SingleMediumController {}
 
 class _FakeSingleMediumState extends Fake
-    with FakeDiagnosticableMixin, ChangeNotifier
+    with DiagnosticableTreeMixin, ChangeNotifier
     implements SingleMediumState {
   @override
   bool isVisualizable;
