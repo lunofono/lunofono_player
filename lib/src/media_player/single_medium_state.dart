@@ -153,7 +153,7 @@ class SingleMediumState
     final sizeStr =
         size == null ? 'uninitialized' : '${size.width}x${size.height}';
     final errorStr = error == null ? '' : 'error: $error';
-    return '$runtimeType($sizeStr$errorStr)';
+    return '$runtimeType("${playable.resource}", $sizeStr$errorStr)';
   }
 
   @override

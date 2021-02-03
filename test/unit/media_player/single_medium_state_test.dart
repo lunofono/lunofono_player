@@ -96,11 +96,12 @@ void main() {
       });
 
       test('toString()', () async {
-        expect(state.toString(), 'SingleMediumState(uninitialized)');
+        expect(
+            state.toString(), 'SingleMediumState("bad-medium", uninitialized)');
         await state.initialize(_FakeContext());
         expect(
             state.toString(),
-            'SingleMediumState(uninitializederror: '
+            'SingleMediumState("bad-medium", uninitializederror: '
             'Exception: Initialization Error)');
       });
 
@@ -206,9 +207,10 @@ void main() {
       });
 
       test('toString()', () async {
-        expect(state.toString(), 'SingleMediumState(uninitialized)');
+        expect(state.toString(),
+            'SingleMediumState("good-medium", uninitialized)');
         await state.initialize(_FakeContext());
-        expect(state.toString(), 'SingleMediumState(0.0x0.0)');
+        expect(state.toString(), 'SingleMediumState("good-medium", 0.0x0.0)');
       });
 
       test('debugFillProperties() and debugDescribeChildren()', () async {
