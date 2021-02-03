@@ -7,7 +7,7 @@ import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart';
 import 'package:lunofono_player/src/media_player.dart'
-    show MultiMediumPlayer, SingleMediumPlayer;
+    show MultiMediumPlayer, PlaylistPlayer, SingleMediumPlayer;
 import 'package:lunofono_player/src/playable_player.dart';
 
 void main() {
@@ -134,6 +134,57 @@ void main() {
         );
         await testPlayable(
             tester, HomeWidgetPlayable(multimedium, key: homeKey));
+      });
+    });
+
+    group('Playlist', () {
+      final homeKey = GlobalKey(debugLabel: 'homeKey');
+
+      void testPlayable(WidgetTester tester, Widget homeWidget) async {
+        // We need a MaterialApp to use the Navigator
+        await tester.pumpWidget(MaterialApp(home: homeWidget));
+        final homeFinder = find.byKey(homeKey);
+        expect(homeFinder, findsOneWidget);
+        expect(find.byType(PlaylistPlayer), findsNothing);
+
+        // We tap on the HomeWidget to call playable.play()
+        await tester.tap(homeFinder);
+        // One pump seems to be needed to process the Navigator.push(), this
+        // idiom is also being used in Flutter Navigator tests:
+        // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
+        await tester.pump();
+        // The second pump we wait a bit because Navigator is animated
+        await tester.pump(Duration(seconds: 1));
+        expect(find.byKey(homeKey), findsNothing);
+        final playerFinder = find.byType(PlaylistPlayer);
+        expect(playerFinder, findsOneWidget);
+        final mediaPlayer = tester.widget(playerFinder) as PlaylistPlayer;
+        final context = tester.element(playerFinder);
+
+        // The HomeWidget should be back
+        mediaPlayer.onMediaStopped(context); // Should call Navigator.pop()
+        await tester.pump(); // Same with .push() about the double pump()
+        await tester.pump(Duration(seconds: 1));
+        expect(find.byKey(homeKey), findsOneWidget);
+        expect(find.byType(PlaylistPlayer), findsNothing);
+      }
+
+      testWidgets('MultiMedium', (WidgetTester tester) async {
+        final playlist = PlayablePlayer.wrap(
+          Playlist(
+            <Medium>[
+              MultiMedium(
+                AudibleMultiMediumTrack(
+                  <Audible>[Video(Uri.parse('video'))],
+                ),
+                backgroundTrack: VisualizableBackgroundMultiMediumTrack(
+                  <Visualizable>[Image(Uri.parse('image'))],
+                ),
+              ),
+            ],
+          ),
+        );
+        await testPlayable(tester, HomeWidgetPlayable(playlist, key: homeKey));
       });
     });
   });

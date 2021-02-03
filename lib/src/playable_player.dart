@@ -2,10 +2,19 @@ import 'package:flutter/material.dart'
     show BuildContext, Navigator, MaterialPageRoute, Colors;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Audio, Color, Image, MultiMedium, Playable, SingleMedium, Video;
+    show
+        Audio,
+        Color,
+        Image,
+        MultiMedium,
+        Playable,
+        Playlist,
+        SingleMedium,
+        Video;
 
 import 'dynamic_dispatch_registry.dart' show DynamicDispatchRegistry;
-import 'media_player.dart' show MultiMediumPlayer, SingleMediumPlayer;
+import 'media_player.dart'
+    show MultiMediumPlayer, SingleMediumPlayer, PlaylistPlayer;
 
 /// Register all builtin types
 ///
@@ -21,6 +30,8 @@ void _registerBuiltin(PlayablePlayerRegistry registry) {
       (playable) => SingleMediumPlayablePlayer(playable as SingleMedium));
   registry.register(MultiMedium,
       (playable) => MultiMediumPlayablePlayer(playable as MultiMedium));
+  registry.register(
+      Playlist, (playable) => PlaylistPlayablePlayer(playable as Playlist));
 }
 
 /// A wrapper to manage how a [Playable] is played by the player.
@@ -71,6 +82,35 @@ class SingleMediumPlayablePlayer extends PlayablePlayer {
       MaterialPageRoute<SingleMediumPlayer>(
         builder: (BuildContext context) => SingleMediumPlayer(
           medium: playable,
+          backgroundColor: backgroundColor ?? Colors.black,
+          onMediaStopped: (context) => Navigator.pop(context),
+        ),
+      ),
+    );
+  }
+}
+
+class PlaylistPlayablePlayer extends PlayablePlayer {
+  /// The underlaying model's [SingleMedium].
+  @override
+  final Playlist playable;
+
+  /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
+  /// [Playable].
+  PlaylistPlayablePlayer(this.playable) : assert(playable != null);
+
+  /// Plays a [SingleMedium] by pushing a new page with a [PlaylistPlayer].
+  ///
+  /// If [backgroundColor] is provided and non-null, it will be used as the
+  /// [PlaylistPlayer.backgroundColor]. Otherwise, [Colors.black] will be
+  /// used.
+  @override
+  void play(BuildContext context, [Color backgroundColor]) {
+    Navigator.push<PlaylistPlayer>(
+      context,
+      MaterialPageRoute<PlaylistPlayer>(
+        builder: (BuildContext context) => PlaylistPlayer(
+          playlist: playable,
           backgroundColor: backgroundColor ?? Colors.black,
           onMediaStopped: (context) => Navigator.pop(context),
         ),

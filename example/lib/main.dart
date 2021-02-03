@@ -36,8 +36,8 @@ class MyApp extends StatelessWidget {
 
 final bundle = Bundle(
   GridMenu(
-    rows: 4,
-    columns: 1,
+    rows: 3,
+    columns: 2,
     buttons: [
       ColoredButton(
         PlayContentAction(
@@ -90,6 +90,64 @@ final bundle = Bundle(
           ),
         ),
         Colors.green,
+      ),
+      ColoredButton(
+        PlayContentAction(
+          Playlist(
+            <Medium>[
+              Image(
+                Uri.parse('assets/heilshorn-cows.jpg'),
+                maxDuration: Duration(seconds: 2),
+              ),
+              Image(
+                Uri.parse('assets/heilshorn-cows2.jpg'),
+                maxDuration: Duration(seconds: 2),
+              ),
+            ],
+          ),
+        ),
+        Colors.purple,
+      ),
+      ColoredButton(
+        PlayContentAction(
+          Playlist(
+            <Medium>[
+              MultiMedium(
+                VisualizableMultiMediumTrack(
+                  <Visualizable>[
+                    Image(Uri.parse('assets/heilshorn-cows2.jpg'),
+                        maxDuration: Duration(seconds: 2)),
+                  ],
+                ),
+                backgroundTrack: AudibleBackgroundMultiMediumTrack(
+                  <Audible>[
+                    Audio(Uri.parse(
+                        'assets/Farm-SoundBible.com-1720780826.opus')),
+                  ],
+                ),
+              ),
+              MultiMedium(
+                AudibleMultiMediumTrack(
+                  <Audible>[
+                    Audio(
+                        Uri.parse('assets/Farm-SoundBible.com-1720780826.opus'),
+                        maxDuration: Duration(seconds: 4)),
+                  ],
+                ),
+                backgroundTrack: VisualizableBackgroundMultiMediumTrack(
+                  <Visualizable>[
+                    Image(Uri.parse('assets/heilshorn-cows.jpg')),
+                  ],
+                ),
+              ),
+              Image(
+                Uri.parse('assets/heilshorn-cows2.jpg'),
+                maxDuration: Duration(seconds: 2),
+              ),
+            ],
+          ),
+        ),
+        Colors.orange,
       ),
     ],
   ),
