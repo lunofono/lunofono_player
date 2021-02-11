@@ -50,18 +50,20 @@ class TestWidget extends StatelessWidget {
   final Key loadingKey;
   final SingleMediumController controller;
   final AssetBundle bundle;
-  TestWidget(this.controller, {AssetBundle bundle})
+  final bool startPlaying;
+  TestWidget(this.controller, {AssetBundle bundle, this.startPlaying = true})
       : assert(controller != null),
+        assert(startPlaying != null),
         errorKey = GlobalKey(debugLabel: 'errorKey'),
         loadingKey = GlobalKey(debugLabel: 'loadingKey'),
         bundle = bundle ?? TestAssetBundle() {
     globalSize = null;
   }
 
-  Future<Size> _initializeAndPlay(BuildContext context) async {
+  Future<Size> _initialize(BuildContext context) async {
     final size = await controller.initialize(context);
     globalSize = size;
-    await controller.play(context);
+    if (startPlaying) await controller.play(context);
     return size;
   }
 
@@ -74,7 +76,7 @@ class TestWidget extends StatelessWidget {
         // Needed so we pass the context with the overridden DefaultAssetBundle
         child: Builder(
           builder: (context) => FutureBuilder<Size>(
-            future: _initializeAndPlay(context),
+            future: _initialize(context),
             builder: (BuildContext context, AsyncSnapshot<Size> snapshot) {
               if (snapshot.hasData) {
                 return controller.build(context);

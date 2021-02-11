@@ -176,6 +176,57 @@ void main() {
         expect(hasStopped, true);
       },
     );
+
+    testWidgets(
+      'maxDurationTimer is started when the image is first played',
+      (WidgetTester tester) async {
+        var hasStopped = false;
+        final image = bundle.Image(
+          Uri.parse('assets/10x10-red.png'),
+          maxDuration: Duration(seconds: 1),
+        );
+        controller = ImagePlayerController(
+          image,
+          onMediumFinished: (context) => hasStopped = true,
+          widgetKey: globalSuccessKey,
+        );
+        final widget = TestWidget(controller, startPlaying: false);
+
+        await tester.pumpWidget(widget);
+        expectLoading(tester, widget);
+        expect(hasStopped, false);
+
+        await tester.runAsync(() async => await undeadlockAsync()); // XXX!!!
+        await tester.pumpAndSettle();
+        final size = Size(10.0, 10.0);
+        expectSuccess(tester, widget, size: size, findWidget: Image);
+        expect(find.byWidget(controller.image), findsOneWidget);
+        expect(hasStopped, false);
+
+        // Wait for a few seconds, the media should haven't stopped (it
+        // shouldn't have started playing to be precise)
+        await tester.pump(image.maxDuration * 5);
+
+        // Now start playing
+        await controller.play(null);
+        expectSuccess(tester, widget, size: size, findWidget: Image);
+        expect(find.byWidget(controller.image), findsOneWidget);
+        expect(hasStopped, false);
+
+        // Half the time passes, it should be still playing
+        await tester.pump(image.maxDuration ~/ 2);
+        expectSuccess(tester, widget, size: size, findWidget: Image);
+        expect(find.byWidget(controller.image), findsOneWidget);
+        expect(hasStopped, false);
+
+        // Now we let the final half of the maxDuration pass and it should have
+        // finished
+        await tester.pump(image.maxDuration ~/ 2);
+        expectSuccess(tester, widget, size: size, findWidget: Image);
+        expect(find.byWidget(controller.image), findsOneWidget);
+        expect(hasStopped, true);
+      },
+    );
   });
 }
 
