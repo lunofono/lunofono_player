@@ -1,5 +1,6 @@
 import 'dart:async' show Completer;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:video_player/video_player.dart' as video_player;
@@ -112,12 +113,13 @@ class VideoPlayerController extends SingleMediumController {
   ///
   /// This method is provided mostly only for testing, so a fake type of video
   /// player controller can be *injected* by tests.
-  @protected
+  @visibleForTesting
   video_player.VideoPlayerController createVideoPlayerController() {
-    return video_player.VideoPlayerController.asset(
-      medium.resource.toString(),
-      videoPlayerOptions: video_player.VideoPlayerOptions(mixWithOthers: true),
-    );
+    // mixWithOthers is not supported in web yet
+    final options =
+        kIsWeb ? null : video_player.VideoPlayerOptions(mixWithOthers: true);
+    return video_player.VideoPlayerController.asset(medium.resource.toString(),
+        videoPlayerOptions: options);
   }
 
   /// {@macro ui_player_media_player_medium_player_controller_initialize}
