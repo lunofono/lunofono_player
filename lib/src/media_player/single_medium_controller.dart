@@ -89,11 +89,11 @@ abstract class SingleMediumController {
 /// A video player controller.
 class VideoPlayerController extends SingleMediumController {
   /// The video player controller.
-  video_player.VideoPlayerController _videoPlayerController;
+  video_player.VideoPlayerController _controller;
 
   /// The video player controller.
-  video_player.VideoPlayerController get videoPlayerController =>
-      _videoPlayerController;
+  @visibleForTesting
+  video_player.VideoPlayerController get controller => _controller;
 
   /// {@macro ui_player_media_player_medium_player_controller_constructor}
   VideoPlayerController(
@@ -104,17 +104,15 @@ class VideoPlayerController extends SingleMediumController {
 
   /// Disposes this controller.
   @override
-  Future<void> dispose() => Future.wait([
-        _videoPlayerController?.dispose(),
-        super.dispose()
-      ].where((f) => f != null));
+  Future<void> dispose() => Future.wait(
+      [_controller?.dispose(), super.dispose()].where((f) => f != null));
 
   /// Creates a new [video_player.VideoPlayerController].
   ///
   /// This method is provided mostly only for testing, so a fake type of video
   /// player controller can be *injected* by tests.
   @visibleForTesting
-  video_player.VideoPlayerController createVideoPlayerController() {
+  video_player.VideoPlayerController createController() {
     // mixWithOthers is not supported in web yet
     final options =
         kIsWeb ? null : video_player.VideoPlayerOptions(mixWithOthers: true);
@@ -127,7 +125,7 @@ class VideoPlayerController extends SingleMediumController {
   Future<Size> initialize(BuildContext context) async {
     VoidCallback listener;
     listener = () {
-      final value = _videoPlayerController.value;
+      final value = _controller.value;
       // value.duration can be null during initialization
       // If the position reaches the duration (we use >= just to be extra
       // careful) and it is not playing anymore, we assumed it finished playing.
@@ -137,35 +135,34 @@ class VideoPlayerController extends SingleMediumController {
           value.position >= value.duration &&
           !value.isPlaying) {
         onMediumFinished?.call(context);
-        _videoPlayerController.removeListener(listener);
+        _controller.removeListener(listener);
       }
     };
 
-    _videoPlayerController = createVideoPlayerController();
-    _videoPlayerController.addListener(listener);
+    _controller = createController();
+    _controller.addListener(listener);
 
-    await Future.wait(
-        [super.initialize(context), _videoPlayerController.initialize()]);
+    await Future.wait([super.initialize(context), _controller.initialize()]);
 
-    return _videoPlayerController.value.size;
+    return _controller.value.size;
   }
 
   /// Play the [medium] controlled by this controller.
   @override
   Future<void> play(BuildContext context) =>
-      Future.wait([super.play(context), _videoPlayerController.play()]);
+      Future.wait([super.play(context), _controller.play()]);
 
   /// Pause the [medium] controlled by this controller.
   @override
   Future<void> pause(BuildContext context) =>
-      Future.wait([super.pause(context), _videoPlayerController.pause()]);
+      Future.wait([super.pause(context), _controller.pause()]);
 
   /// Builds the [Widget] that plays the medium this controller controls.
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: _videoPlayerController.value.aspectRatio,
-      child: video_player.VideoPlayer(_videoPlayerController),
+      aspectRatio: _controller.value.aspectRatio,
+      child: video_player.VideoPlayer(_controller),
       key: widgetKey,
     );
   }

@@ -108,7 +108,7 @@ void main() {
         // Since loading is emulated, in the next frame it should be ready.
         // Video should start playing.
         final fakeController =
-            controller.videoPlayerController as FakeVideoPlayerController;
+            controller.controller as FakeVideoPlayerController;
         await tester.pump(fakeController.initDelay);
         expectSuccess(tester, widget,
             size: videoInfo.size, findWidget: video_player.VideoPlayer);
@@ -164,7 +164,7 @@ void main() {
         expect(controller.value.isPlaying, false);
 
         final fakeController =
-            controller.videoPlayerController as FakeVideoPlayerController;
+            controller.controller as FakeVideoPlayerController;
         await tester.pump(fakeController.initDelay);
         expectSuccess(tester, widget,
             size: videoInfo.size, findWidget: video_player.VideoPlayer);
@@ -218,7 +218,7 @@ void main() {
         // Since loading is emulated, in the next frame it should be ready.
         // Video should start playing.
         final fakeController =
-            controller.videoPlayerController as FakeVideoPlayerController;
+            controller.controller as FakeVideoPlayerController;
         await tester.pump(fakeController.initDelay);
         expectSuccess(tester, widget,
             size: videoInfo.size, findWidget: video_player.VideoPlayer);
@@ -283,8 +283,7 @@ void main() {
 
       // Since loading is emulated, in the next frame it should be ready.
       // Video should start playing.
-      final fakeController =
-          controller.videoPlayerController as FakeVideoPlayerController;
+      final fakeController = controller.controller as FakeVideoPlayerController;
       await tester.pump(fakeController.initDelay);
       final foundWidget = expectSuccess(tester, widget,
           size: videoInfo.size, findWidget: Container);
@@ -404,15 +403,15 @@ class TestVideoPlayerController extends VideoPlayerController {
     globalFakeInfo = info;
   }
 
-  video_player.VideoPlayerValue get value => videoPlayerController.value;
+  video_player.VideoPlayerValue get value => controller.value;
 
   @override
-  video_player.VideoPlayerController createVideoPlayerController() {
+  video_player.VideoPlayerController createController() {
     return FakeVideoPlayerController(medium.toString());
   }
 
   video_player.VideoPlayerController testCreateVideoPlayerController() {
-    return super.createVideoPlayerController();
+    return super.createController();
   }
 }
 
@@ -426,10 +425,10 @@ class TestAudioPlayerController extends AudioPlayerController {
     globalFakeInfo = info;
   }
 
-  video_player.VideoPlayerValue get value => videoPlayerController.value;
+  video_player.VideoPlayerValue get value => controller.value;
 
   @override
-  video_player.VideoPlayerController createVideoPlayerController() {
+  video_player.VideoPlayerController createController() {
     return FakeVideoPlayerController(medium.resource.toString());
   }
 }
