@@ -146,7 +146,7 @@ void main() {
 
             Finder findButtonByColor(Color c) {
               return find.byWidgetPredicate(
-                (w) => w is FlatButton && w.color == c,
+                (w) => w is Material && w.color == c,
               );
             }
 

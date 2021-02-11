@@ -14,10 +14,10 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(findButtonByColor(Colors.amber), findsOneWidget);
-    expect(findButtonByColor(Colors.red), findsOneWidget);
+    expect(findByMaterialColor(Colors.amber), findsOneWidget);
+    expect(findByMaterialColor(Colors.red), findsOneWidget);
 
-    await tester.tap(findButtonByColor(Colors.amber));
+    await tester.tap(findByMaterialColor(Colors.amber));
     await tester.pump();
     await tester.pump();
 
@@ -30,8 +30,8 @@ void main() {
   });
 }
 
-Finder findButtonByColor(Color c) => find.byWidgetPredicate(
-      (w) => w is FlatButton && w.color == c,
+Finder findByMaterialColor(Color c) => find.byWidgetPredicate(
+      (w) => w is Material && w.color == c,
     );
 
 /// Finds a [Text] widget whose content contains the [substring].
