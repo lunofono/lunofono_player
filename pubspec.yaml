@@ -12,6 +12,7 @@ environment:
   flutter: ">=1.17.0 <2.0.0"
 
 dependencies:
+  audioplayers: ^0.17.3
   flutter:
     sdk: flutter
 

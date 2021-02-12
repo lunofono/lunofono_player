@@ -1,5 +1,6 @@
 @Tags(['unit', 'player'])
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' show BuildContext;
 
 import 'package:test/test.dart';
@@ -34,7 +35,13 @@ void main() {
 
       final audio = Audio(Uri.parse('fake-audio'));
       var controller = registry.getFunction(audio)(audio);
-      expect(controller, isA<AudioPlayerController>());
+      // XXX: This is a hack that should be removed after #15 and #16 are
+      // resolved.
+      if (kIsWeb) {
+        expect(controller, isA<WebAudioPlayerController>());
+      } else {
+        expect(controller, isA<AudioPlayerController>());
+      }
       expect(controller.medium, audio);
 
       final image = Image(Uri.parse('fake-image'));
