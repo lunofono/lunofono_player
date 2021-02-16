@@ -15,6 +15,7 @@ import 'package:lunofono_player/src/action_player.dart'
 import 'package:lunofono_player/src/button_player.dart'
     show ButtonPlayer, ButtonPlayerRegistry;
 import 'package:lunofono_player/src/menu_player.dart';
+import 'package:lunofono_player/src/menu_player/grid_menu_player.dart';
 
 void main() {
   group('MenuPlayer', () {
