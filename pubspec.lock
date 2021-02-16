@@ -258,8 +258,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "v0.1.0"
-      resolved-ref: "446d0dc2132f73b6d59900a7a0e318c0fcf4c93a"
+      ref: "v0.2.0"
+      resolved-ref: "521720f448ea2b41a42a9a63c18c30fa72ee5f82"
       url: "https://github.com/lunofono/lunofono_bundle.git"
     source: git
     version: "1.0.0"

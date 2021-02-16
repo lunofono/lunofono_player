@@ -55,7 +55,7 @@ class FakeActionPlayer extends ActionPlayer {
 
 class FakeButtonPlayer extends Fake implements ButtonPlayer {
   @override
-  Color get color => Color(0x12345678);
+  Color get backgroundColor => Color(0x12345678);
 }
 
 class FakeContext extends Fake implements BuildContext {}
@@ -114,13 +114,13 @@ void main() {
         final Action action = PlayContentAction(fakePlayable);
         final actionPlayer = ActionPlayer.wrap(action);
         actionPlayer.act(fakeContext, fakeButton);
-        fakePlayable.expectCalled(fakeContext, fakeButton.color);
+        fakePlayable.expectCalled(fakeContext, fakeButton.backgroundColor);
       });
 
       test('direct call', () {
         final action = ActionPlayer.wrap(PlayContentAction(fakePlayable));
         action.act(fakeContext, fakeButton);
-        fakePlayable.expectCalled(fakeContext, fakeButton.color);
+        fakePlayable.expectCalled(fakeContext, fakeButton.backgroundColor);
       });
     });
   });

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Action, Button, Color, ColoredButton;
+    show Action, Button, Color, StyledButton;
 import 'package:lunofono_player/src/action_player.dart';
 import 'package:lunofono_player/src/button_player.dart';
 
@@ -30,7 +30,7 @@ class FakeButtonPlayer extends ButtonPlayer {
 
   @override
   GridButtonItem create(BuildContext context) {
-    return GridButtonItem(color: color, value: action, title: '');
+    return GridButtonItem(color: backgroundColor, value: action, title: '');
   }
 
   FakeButtonPlayer(this.button) : super(button);
@@ -69,18 +69,18 @@ void main() {
       ButtonPlayer.registry
           .register(FakeButton, (b) => FakeButtonPlayer(b as FakeButton));
       final buttonPlayer = ButtonPlayer.wrap(fakeButton);
-      expect(buttonPlayer.color, isNull);
+      expect(buttonPlayer.backgroundColor, isNull);
       expect(buttonPlayer.action.action, fakeButton.action);
       final gridItem = buttonPlayer.create(fakeContext);
-      expect(gridItem.color, buttonPlayer.color);
+      expect(gridItem.color, buttonPlayer.backgroundColor);
       expect(gridItem.value, buttonPlayer.action);
       expect(gridItem.title, '');
     });
 
     test('builtin types are registered and work as expected', () {
-      expect(() => ColoredButtonPlayer(null), throwsAssertionError);
-      final coloredButton = ColoredButton(FakeAction(), color);
-      final buttonPlayer = ButtonPlayer.wrap(coloredButton);
+      expect(() => StyledButtonPlayer(null), throwsAssertionError);
+      final styledButton = StyledButton(FakeAction(), backgroundColor: color);
+      final buttonPlayer = ButtonPlayer.wrap(styledButton);
       final gridButtonItem = buttonPlayer.create(fakeContext);
       expect(gridButtonItem.color, color);
       expect(gridButtonItem.key, isA<ValueKey>());
