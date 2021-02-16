@@ -3,6 +3,8 @@ import 'dart:async' show Completer;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
+import 'package:audioplayers/audioplayers.dart' show AudioPlayer, ReleaseMode;
+import 'package:audioplayers/audio_cache.dart' show AudioCache;
 import 'package:video_player/video_player.dart' as video_player;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
@@ -168,18 +170,111 @@ class VideoPlayerController extends SingleMediumController {
   }
 }
 
+/// An audio player controller for the web.
+///
+/// XXX: This is just a temporary hack because audioplayers doesn't support web
+/// for playing assets (#16) and just_audio is affected by the ExoPlayer bug
+/// (#15).
+///
+/// Since audio is not really visible, this player will return an empty
+/// [Container] in the [build()] method. Users are free to omit using the
+/// [build()] method at all.
+class WebAudioPlayerController extends VideoPlayerController {
+  /// {@macro ui_player_media_player_medium_player_controller_constructor}
+  WebAudioPlayerController(
+    SingleMedium medium, {
+    void Function(BuildContext) onMediumFinished,
+    Key widgetKey,
+  }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey);
+
+  /// Builds the [Widget] that plays the medium this controller controls.
+  ///
+  /// Since audio is not really visible, this player will return an empty
+  /// [Container]. Users are free to omit using this method.
+  @override
+  Widget build(BuildContext context) {
+    // Audios are invisible, so there is nothing to show
+    return Container(key: widgetKey);
+  }
+}
+
 /// An audio player controller.
 ///
 /// Since audio is not really visible, this player will return an empty
 /// [Container] in the [build()] method. Users are free to omit using the
 /// [build()] method at all.
-class AudioPlayerController extends VideoPlayerController {
+class AudioPlayerController extends SingleMediumController {
   /// {@macro ui_player_media_player_medium_player_controller_constructor}
   AudioPlayerController(
     SingleMedium medium, {
     void Function(BuildContext) onMediumFinished,
     Key widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey);
+
+  /// The video player controller.
+  AudioCache _controller;
+
+  /// True if playing was started, false otherwise.
+  ///
+  /// This is needed because once it is started, if it was paused, resume()
+  /// should be used instead of play().
+  bool _playStarted = false;
+
+  /// The video player controller.
+  @visibleForTesting
+  AudioCache get controller => _controller;
+
+  /// Disposes this controller.
+  @override
+  Future<void> dispose() {
+    return Future.wait([_controller?.fixedPlayer?.dispose(), super.dispose()]
+        .where((f) => f != null));
+  }
+
+  /// Creates a new [video_player.VideoPlayerController].
+  ///
+  /// This method is provided mostly only for testing, so a fake type of video
+  /// player controller can be *injected* by tests.
+  @visibleForTesting
+  AudioCache createController() => AudioCache(prefix: '');
+
+  /// {@macro ui_player_media_player_medium_player_controller_initialize}
+  @override
+  Future<Size> initialize(BuildContext context) async {
+    _controller = createController();
+
+    final player = AudioPlayer();
+    player.onPlayerCompletion.listen((_) {
+      onMediumFinished?.call(context);
+    });
+
+    _controller.fixedPlayer = player;
+
+    await Future.wait([
+      super.initialize(context),
+      player
+          .setReleaseMode(ReleaseMode.STOP)
+          .then((_) => _controller.load(medium.resource.toString())),
+    ]);
+
+    return Size.zero;
+  }
+
+  /// Play the [medium] controlled by this controller.
+  @override
+  Future<void> play(BuildContext context) {
+    final controllerPlayFuture = _playStarted
+        ? _controller.fixedPlayer.resume()
+        : _controller.play(medium.resource.toString());
+    _playStarted = true;
+    return Future.wait([super.play(context), controllerPlayFuture]);
+  }
+
+  /// Pause the [medium] controlled by this controller.
+  @override
+  Future<void> pause(BuildContext context) {
+    return Future.wait([super.pause(context), _controller.fixedPlayer.pause()]);
+  }
 
   /// Builds the [Widget] that plays the medium this controller controls.
   ///

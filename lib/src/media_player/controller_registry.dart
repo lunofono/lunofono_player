@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' show BuildContext;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
@@ -36,7 +37,13 @@ class ControllerRegistry
     register(
       Audio,
       (SingleMedium medium, {void Function(BuildContext) onMediumFinished}) =>
-          AudioPlayerController(medium, onMediumFinished: onMediumFinished),
+          // XXX: This is a hack that should be removed after #15 and #16 are
+          // resolved.
+          kIsWeb
+              ? WebAudioPlayerController(medium,
+                  onMediumFinished: onMediumFinished)
+              : AudioPlayerController(medium,
+                  onMediumFinished: onMediumFinished),
     );
 
     register(

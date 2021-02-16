@@ -254,18 +254,18 @@ void main() {
     );
   });
 
-  group('AudioPlayerController', () {
+  group('WebAudioPlayerController', () {
     final audio = Audio(Uri.parse('fake-audio.avi'));
 
     TestAudioPlayerController controller;
     tearDown(() async => await controller?.dispose());
 
     test('constructor asserts on null medium', () {
-      expect(() => AudioPlayerController(null), throwsAssertionError);
+      expect(() => WebAudioPlayerController(null), throwsAssertionError);
     });
 
     test('is a subclass of VideoPlayerController', () async {
-      final controller = AudioPlayerController(audio);
+      final controller = WebAudioPlayerController(audio);
       expect(controller, isA<VideoPlayerController>());
       await controller.dispose();
     });
@@ -415,7 +415,7 @@ class TestVideoPlayerController extends VideoPlayerController {
   }
 }
 
-class TestAudioPlayerController extends AudioPlayerController {
+class TestAudioPlayerController extends WebAudioPlayerController {
   TestAudioPlayerController(
     SingleMedium medium,
     FakeVideoInfo info, {
