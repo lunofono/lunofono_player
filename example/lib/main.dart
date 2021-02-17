@@ -39,7 +39,7 @@ final bundle = Bundle(
     rows: 3,
     columns: 2,
     buttons: [
-      ColoredButton(
+      StyledButton(
         PlayContentAction(
           MultiMedium(
             AudibleMultiMediumTrack(
@@ -54,9 +54,9 @@ final bundle = Bundle(
             ),
           ),
         ),
-        Colors.amber,
+        backgroundColor: Colors.amber,
       ),
-      ColoredButton(
+      StyledButton(
         PlayContentAction(
           MultiMedium(
             VisualizableMultiMediumTrack(
@@ -71,27 +71,27 @@ final bundle = Bundle(
             ),
           ),
         ),
-        Colors.red,
+        backgroundColor: Colors.red,
       ),
-      ColoredButton(
+      StyledButton(
         PlayContentAction(
           Image(
             Uri.parse('assets/heilshorn-cows.jpg'),
             maxDuration: Duration(seconds: 2),
           ),
         ),
-        Colors.blue,
+        backgroundColor: Colors.blue,
       ),
-      ColoredButton(
+      StyledButton(
         PlayContentAction(
           Audio(
             Uri.parse('assets/Farm-SoundBible.com-1720780826.opus'),
             maxDuration: Duration(seconds: 2),
           ),
         ),
-        Colors.green,
+        backgroundColor: Colors.green,
       ),
-      ColoredButton(
+      StyledButton(
         PlayContentAction(
           Playlist(
             <Medium>[
@@ -106,9 +106,9 @@ final bundle = Bundle(
             ],
           ),
         ),
-        Colors.purple,
+        backgroundColor: Colors.purple,
       ),
-      ColoredButton(
+      StyledButton(
         PlayContentAction(
           Playlist(
             <Medium>[
@@ -147,7 +147,7 @@ final bundle = Bundle(
             ],
           ),
         ),
-        Colors.orange,
+        backgroundColor: Colors.orange,
       ),
     ],
   ),

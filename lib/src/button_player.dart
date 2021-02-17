@@ -1,16 +1,11 @@
-import 'package:flutter/material.dart' show BuildContext, ValueKey;
-
-import 'package:flutter_grid_button/flutter_grid_button.dart'
-    show GridButtonItem;
+import 'package:flutter/material.dart' hide Action;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Action, Button, Color, ColoredButton;
+    show Action, Button, Color, StyledButton;
 
 import 'action_player.dart' show ActionPlayer;
+import 'button_player/styled_button_player.dart' show StyledButtonPlayer;
 import 'dynamic_dispatch_registry.dart' show DynamicDispatchRegistry;
-
-export 'package:flutter_grid_button/flutter_grid_button.dart'
-    show GridButtonItem;
 
 /// Register all built-in types
 ///
@@ -19,7 +14,7 @@ export 'package:flutter_grid_button/flutter_grid_button.dart'
 void _registerBuiltin(ButtonPlayerRegistry registry) {
   // New wrappers should be registered here
   registry.register(
-      ColoredButton, (button) => ColoredButtonPlayer(button as ColoredButton));
+      StyledButton, (button) => StyledButtonPlayer(button as StyledButton));
 }
 
 /// A wrapper to manage how a [Button] is played by the player.
@@ -55,44 +50,14 @@ abstract class ButtonPlayer {
 
   /// The [Color] of the underlaying [button].
   ///
-  /// Returns null by default, as not all [Button] types have a color.
-  Color get color => null;
+  /// Returns null by default, as not all [Button] types have a background
+  /// color.
+  Color get backgroundColor => null;
 
   /// Creates a [GridButtonItem] from the underlaying [button].
   ///
   /// The [GridButtonItem.value] must always be assigned to this [ButtonPlayer].
-  GridButtonItem create(BuildContext context);
-}
-
-/// A wrapper to play a [ColoredButton].
-class ColoredButtonPlayer extends ButtonPlayer {
-  /// The underlaying model's [Button].
-  @override
-  final ColoredButton button;
-
-  /// Constructs a [ButtonPlayer] using [button] as the underlaying [Button].
-  ColoredButtonPlayer(this.button)
-      : assert(button != null),
-        super(button);
-
-  /// The [Color] of the underlaying [button].
-  @override
-  Color get color => button.color;
-
-  /// Creates a [GridButtonItem].
-  ///
-  /// It uses [color] as the [GridButtonItem.color] and [this] as the
-  /// [GridButtonItem.value] and as a [ValueKey] for [GridButtonItem.key].
-  @override
-  GridButtonItem create(BuildContext context) {
-    return GridButtonItem(
-      key: ValueKey<ColoredButtonPlayer>(this),
-      title: '',
-      color: color,
-      value: this,
-      borderRadius: 50,
-    );
-  }
+  Widget build(BuildContext context);
 }
 
 /// A function type to create a [ButtonPlayer] from a [Button].

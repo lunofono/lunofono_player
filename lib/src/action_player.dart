@@ -65,7 +65,7 @@ class PlayContentActionPlayer extends ActionPlayer {
   /// Plays the [content].
   @override
   void act(BuildContext context, ButtonPlayer button) =>
-      content.play(context, button.color);
+      content.play(context, button.backgroundColor);
 }
 
 /// A function type to act on an [Action].

@@ -1,12 +1,12 @@
 @Tags(['unit', 'player'])
 
-import 'package:flutter/material.dart' show ValueKey, BuildContext;
+import 'package:flutter/material.dart' hide Action;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart' show Fake;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Action, Button, Color, ColoredButton;
+    show Action, Button, Color, StyledButton;
 import 'package:lunofono_player/src/action_player.dart';
 import 'package:lunofono_player/src/button_player.dart';
 
@@ -29,9 +29,7 @@ class FakeButtonPlayer extends ButtonPlayer {
   final FakeButton button;
 
   @override
-  GridButtonItem create(BuildContext context) {
-    return GridButtonItem(color: color, value: action, title: '');
-  }
+  Widget build(BuildContext context) => Container(key: ObjectKey(button));
 
   FakeButtonPlayer(this.button) : super(button);
 }
@@ -69,24 +67,15 @@ void main() {
       ButtonPlayer.registry
           .register(FakeButton, (b) => FakeButtonPlayer(b as FakeButton));
       final buttonPlayer = ButtonPlayer.wrap(fakeButton);
-      expect(buttonPlayer.color, isNull);
+      expect(buttonPlayer.backgroundColor, isNull);
       expect(buttonPlayer.action.action, fakeButton.action);
-      final gridItem = buttonPlayer.create(fakeContext);
-      expect(gridItem.color, buttonPlayer.color);
-      expect(gridItem.value, buttonPlayer.action);
-      expect(gridItem.title, '');
+      final widget = buttonPlayer.build(fakeContext);
+      expect(widget.key, ObjectKey(fakeButton));
     });
 
-    test('builtin types are registered and work as expected', () {
-      expect(() => ColoredButtonPlayer(null), throwsAssertionError);
-      final coloredButton = ColoredButton(FakeAction(), color);
-      final buttonPlayer = ButtonPlayer.wrap(coloredButton);
-      final gridButtonItem = buttonPlayer.create(fakeContext);
-      expect(gridButtonItem.color, color);
-      expect(gridButtonItem.key, isA<ValueKey>());
-      expect(gridButtonItem.title, '');
-      expect(gridButtonItem.value, buttonPlayer);
-      expect(gridButtonItem.borderRadius, 50);
+    test('builtin types are registered', () {
+      final styledButton = StyledButton(FakeAction(), backgroundColor: color);
+      expect(ButtonPlayer.wrap(styledButton), isA<ButtonPlayer>());
     });
   });
 }
