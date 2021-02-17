@@ -1,6 +1,6 @@
 @Tags(['unit', 'player'])
 
-import 'package:flutter/material.dart' show ValueKey, BuildContext;
+import 'package:flutter/material.dart' hide Action;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart' show Fake;
@@ -29,9 +29,7 @@ class FakeButtonPlayer extends ButtonPlayer {
   final FakeButton button;
 
   @override
-  GridButtonItem create(BuildContext context) {
-    return GridButtonItem(color: backgroundColor, value: action, title: '');
-  }
+  Widget build(BuildContext context) => Container(key: ObjectKey(button));
 
   FakeButtonPlayer(this.button) : super(button);
 }
@@ -71,22 +69,16 @@ void main() {
       final buttonPlayer = ButtonPlayer.wrap(fakeButton);
       expect(buttonPlayer.backgroundColor, isNull);
       expect(buttonPlayer.action.action, fakeButton.action);
-      final gridItem = buttonPlayer.create(fakeContext);
-      expect(gridItem.color, buttonPlayer.backgroundColor);
-      expect(gridItem.value, buttonPlayer.action);
-      expect(gridItem.title, '');
+      final widget = buttonPlayer.build(fakeContext);
+      expect(widget.key, ObjectKey(fakeButton));
     });
 
     test('builtin types are registered and work as expected', () {
       expect(() => StyledButtonPlayer(null), throwsAssertionError);
       final styledButton = StyledButton(FakeAction(), backgroundColor: color);
       final buttonPlayer = ButtonPlayer.wrap(styledButton);
-      final gridButtonItem = buttonPlayer.create(fakeContext);
-      expect(gridButtonItem.color, color);
-      expect(gridButtonItem.key, isA<ValueKey>());
-      expect(gridButtonItem.title, '');
-      expect(gridButtonItem.value, buttonPlayer);
-      expect(gridButtonItem.borderRadius, 50);
+      final widget = buttonPlayer.build(fakeContext);
+      expect(widget.key, ObjectKey(styledButton));
     });
   });
 }

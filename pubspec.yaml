@@ -21,7 +21,6 @@ dependencies:
       url: https://github.com/lunofono/lunofono_bundle.git
       ref: v0.2.0
 
-  flutter_grid_button: ^1.1.6
   pausable_timer: ^0.1.0
   provider: ^4.3.2+2
   video_player: ^1.0.0

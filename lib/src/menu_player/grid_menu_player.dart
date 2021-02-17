@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_grid_button/flutter_grid_button.dart'
-    show GridButton, GridButtonItem;
-
 import 'package:lunofono_bundle/lunofono_bundle.dart' show GridMenu;
 
 import '../button_player.dart' show ButtonPlayer;
@@ -38,7 +35,7 @@ class GridMenuPlayer extends MenuPlayer {
   /// Builds the UI for this [menu].
   @override
   Widget build(BuildContext context) {
-    return GridMenuWidget(this);
+    return GridMenuWidget(menu: this);
   }
 }
 
@@ -47,42 +44,69 @@ class GridMenuWidget extends StatelessWidget {
   /// The [GridMenu] that this widget represents.
   final GridMenuPlayer menu;
 
-  /// Constructs a widget for a [menu].
-  const GridMenuWidget(
-    this.menu, {
-    Key key,
-  }) : super(key: key);
+  /// The padding to leave between buttons and this widget's container.
+  final double padding;
 
-  /// Builds the UI for this widget.
+  /// Creates a new [GridMenuWidget] for [menu].
+  const GridMenuWidget({
+    @required this.menu,
+    this.padding = 10.0,
+    Key key,
+  })  : assert(menu != null),
+        assert(padding != null),
+        super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(fontSize: 26);
-    return Padding(
-      padding: const EdgeInsets.all(18.0),
-      child: GridButton(
-        textStyle: textStyle,
-        hideSurroundingBorder: true,
-        onPressed: (dynamic value) {
-          final button = value as ButtonPlayer;
-          button.action.act(context, button);
-        },
-        items: _buildButtonsGrid(context),
+    return Container(
+      padding: EdgeInsets.all(padding),
+      child: Column(
+        children: List<Widget>.generate(
+          menu.rows,
+          (row) => GridMenuRowWidget(row: row, menu: menu, padding: padding),
+          growable: false,
+        ),
       ),
     );
   }
+}
 
-  /// Builds a grid of buttons for the menu.
-  ///
-  /// The grid is represented by a list of rows and a row is a list of buttons
-  /// (the columns of that row).
-  List<List<GridButtonItem>> _buildButtonsGrid(BuildContext context) {
-    final rows = <List<GridButtonItem>>[];
-    for (var i = 0; i < menu.rows; i++) {
-      rows.add([]);
-      for (var j = 0; j < menu.columns; j++) {
-        rows.last.add(menu.buttonAt(i, j).create(context));
-      }
-    }
-    return rows;
-  }
+/// A Widget to display a [GridMenuWidget] row of buttons.
+class GridMenuRowWidget extends StatelessWidget {
+  /// The row this widget is displaying.
+  final int row;
+
+  /// The menu this widget is displaying.
+  final GridMenuPlayer menu;
+
+  /// The padding to leave around the buttons.
+  final double padding;
+
+  /// Creates a new [GridMenuRowWidget] to display the [row] row from [menu].
+  const GridMenuRowWidget({
+    @required this.row,
+    @required this.menu,
+    this.padding = 10.0,
+    Key key,
+  })  : assert(row != null),
+        assert(menu != null),
+        assert(padding != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: List<Widget>.generate(
+            menu.columns,
+            (column) => Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(padding),
+                child: menu.buttonAt(row, column).build(context),
+              ),
+            ),
+            growable: false,
+          ),
+        ),
+      );
 }
