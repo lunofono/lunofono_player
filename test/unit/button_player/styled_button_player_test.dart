@@ -1,0 +1,98 @@
+@Tags(['unit', 'player'])
+
+import 'package:flutter/material.dart' hide Action;
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+
+import 'package:lunofono_bundle/lunofono_bundle.dart'
+    show Action, Color, StyledButton;
+
+import 'package:lunofono_player/src/action_player.dart';
+import 'package:lunofono_player/src/button_player.dart';
+
+import 'package:lunofono_player/src/button_player/styled_button_player.dart';
+
+class FakeAction extends Action {
+  final actCalls = <ButtonPlayer>[];
+}
+
+class FakeActionPlayer extends ActionPlayer {
+  @override
+  final FakeAction action;
+  @override
+  void act(BuildContext context, ButtonPlayer button) =>
+      action.actCalls.add(button);
+  FakeActionPlayer(this.action) : assert(action != null);
+}
+
+class FakeContext extends Fake implements BuildContext {}
+
+void main() {
+  final oldActionRegistry = ActionPlayer.registry;
+  setUp(() {
+    ActionPlayer.registry = ActionPlayerRegistry();
+    ActionPlayer.registry
+        .register(FakeAction, (a) => FakeActionPlayer(a as FakeAction));
+  });
+
+  tearDown(() => ActionPlayer.registry = oldActionRegistry);
+
+  group('StyledButtonPlayer', () {
+    FakeContext fakeContext;
+    Color color;
+
+    setUp(() {
+      fakeContext = FakeContext();
+      color = Color(0x12ab4523);
+    });
+
+    test('constructor asserts on null', () {
+      expect(() => StyledButtonPlayer(null), throwsAssertionError);
+    });
+
+    test('build creates a StyledButtonWidget', () {
+      final styledButton = StyledButton(FakeAction(), backgroundColor: color);
+      final buttonPlayer = ButtonPlayer.wrap(styledButton);
+      expect(buttonPlayer.button, same(styledButton));
+      expect(buttonPlayer.backgroundColor, styledButton.backgroundColor);
+      final widget = buttonPlayer.build(fakeContext);
+      expect(widget.key, ObjectKey(styledButton));
+    });
+  });
+
+  group('StyledButtonWidget', () {
+    test('constructor asserts on null button', () {
+      expect(() => StyledButtonWidget(button: null), throwsAssertionError);
+    });
+
+    testWidgets('tapping calls action.act()', (tester) async {
+      final action = FakeAction();
+      final button = StyledButton(action);
+      final buttonPlayer = ButtonPlayer.wrap(button);
+      Widget widget;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Container(
+            child: Builder(builder: (context) {
+              widget = buttonPlayer.build(context);
+              return widget;
+            }),
+          ),
+        ),
+      );
+      expect(widget.key, ObjectKey(button));
+      expect(widget, isA<StyledButtonWidget>());
+      expect((widget as StyledButtonWidget).button, same(buttonPlayer));
+      expect(action.actCalls.length, 0);
+
+      // tap the button should call button.act()
+      final buttonFinder = find.byKey(ObjectKey(button));
+      expect(buttonFinder, findsOneWidget);
+      await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(action.actCalls.length, 1);
+      expect(action.actCalls.last, buttonPlayer);
+    });
+  });
+}

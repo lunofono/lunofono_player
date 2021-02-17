@@ -73,12 +73,9 @@ void main() {
       expect(widget.key, ObjectKey(fakeButton));
     });
 
-    test('builtin types are registered and work as expected', () {
-      expect(() => StyledButtonPlayer(null), throwsAssertionError);
+    test('builtin types are registered', () {
       final styledButton = StyledButton(FakeAction(), backgroundColor: color);
-      final buttonPlayer = ButtonPlayer.wrap(styledButton);
-      final widget = buttonPlayer.build(fakeContext);
-      expect(widget.key, ObjectKey(styledButton));
+      expect(ButtonPlayer.wrap(styledButton), isA<ButtonPlayer>());
     });
   });
 }

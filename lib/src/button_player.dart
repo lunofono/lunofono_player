@@ -4,6 +4,7 @@ import 'package:lunofono_bundle/lunofono_bundle.dart'
     show Action, Button, Color, StyledButton;
 
 import 'action_player.dart' show ActionPlayer;
+import 'button_player/styled_button_player.dart' show StyledButtonPlayer;
 import 'dynamic_dispatch_registry.dart' show DynamicDispatchRegistry;
 
 /// Register all built-in types
@@ -57,53 +58,6 @@ abstract class ButtonPlayer {
   ///
   /// The [GridButtonItem.value] must always be assigned to this [ButtonPlayer].
   Widget build(BuildContext context);
-}
-
-/// A wrapper to play a [StyledButton].
-class StyledButtonPlayer extends ButtonPlayer {
-  /// The underlaying model's [Button].
-  @override
-  final StyledButton button;
-
-  /// Constructs a [ButtonPlayer] using [button] as the underlaying [Button].
-  StyledButtonPlayer(this.button)
-      : assert(button != null),
-        super(button);
-
-  /// The [Color] of the underlaying [button].
-  @override
-  Color get backgroundColor => button.backgroundColor;
-
-  /// Creates a [GridButtonItem].
-  ///
-  /// It uses [color] as the [GridButtonItem.color] and [this] as the
-  /// [GridButtonItem.value] and as a [ValueKey] for [GridButtonItem.key].
-  @override
-  Widget build(BuildContext context) =>
-      StyledButtonWidget(button: this, key: ObjectKey(button));
-}
-
-/// A widget to display a [StyledButton].
-class StyledButtonWidget extends StatelessWidget {
-  /// The button to display.
-  final StyledButtonPlayer button;
-
-  /// Creates a new [StyledButtonWidget] to display [button].
-  const StyledButtonWidget({@required this.button, Key key})
-      : assert(button != null),
-        super(key: key);
-
-  @override
-  Widget build(BuildContext context) => TextButton(
-        onPressed: () => button.action.act(context, button),
-        child: const Text(''),
-        style: TextButton.styleFrom(
-          backgroundColor: button.backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
-          ),
-        ),
-      );
 }
 
 /// A function type to create a [ButtonPlayer] from a [Button].
