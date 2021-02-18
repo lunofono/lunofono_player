@@ -55,6 +55,7 @@ final bundle = Bundle(
           ),
         ),
         backgroundColor: Colors.amber,
+        foregroundImage: Uri.parse('assets/heilshorn-cows.jpg'),
       ),
       StyledButton(
         PlayContentAction(

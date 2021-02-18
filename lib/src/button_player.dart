@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart' hide Action;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Action, Button, Color, StyledButton;
+    show Action, Button, Color, StyledButton, ImageButton;
+import 'package:lunofono_player/src/button_player/image_button_player.dart';
 
 import 'action_player.dart' show ActionPlayer;
+import 'button_player/image_button_player.dart' show ImageButtonPlayer;
 import 'button_player/styled_button_player.dart' show StyledButtonPlayer;
 import 'dynamic_dispatch_registry.dart' show DynamicDispatchRegistry;
 
@@ -15,6 +17,8 @@ void _registerBuiltin(ButtonPlayerRegistry registry) {
   // New wrappers should be registered here
   registry.register(
       StyledButton, (button) => StyledButtonPlayer(button as StyledButton));
+  registry.register(
+      ImageButton, (button) => ImageButtonPlayer(button as ImageButton));
 }
 
 /// A wrapper to manage how a [Button] is played by the player.

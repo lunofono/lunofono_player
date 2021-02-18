@@ -5,13 +5,12 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:lunofono_bundle/lunofono_bundle.dart'
-    show Action, Color, StyledButton;
+import 'package:lunofono_bundle/lunofono_bundle.dart' show Action, ImageButton;
 
 import 'package:lunofono_player/src/action_player.dart';
 import 'package:lunofono_player/src/button_player.dart';
 
-import 'package:lunofono_player/src/button_player/styled_button_player.dart';
+import 'package:lunofono_player/src/button_player/image_button_player.dart';
 
 import '../../util/test_asset_bundle.dart' show TestAssetBundle;
 
@@ -31,7 +30,9 @@ class FakeActionPlayer extends ActionPlayer {
 class FakeContext extends Fake implements BuildContext {}
 
 void main() {
+  final imageUri = Uri.parse('assets/10x10-red.png');
   final oldActionRegistry = ActionPlayer.registry;
+
   setUp(() {
     ActionPlayer.registry = ActionPlayerRegistry();
     ActionPlayer.registry
@@ -40,70 +41,35 @@ void main() {
 
   tearDown(() => ActionPlayer.registry = oldActionRegistry);
 
-  group('StyledButtonPlayer', () {
+  group('ImageButtonPlayer', () {
     FakeContext fakeContext;
-    Color color;
 
     setUp(() {
       fakeContext = FakeContext();
-      color = Color(0x12ab4523);
     });
 
     test('constructor asserts on null', () {
-      expect(() => StyledButtonPlayer(null), throwsAssertionError);
+      expect(() => ImageButtonPlayer(null), throwsAssertionError);
     });
 
-    test('build creates a StyledButtonWidget', () {
-      final styledButton = StyledButton(FakeAction(), backgroundColor: color);
-      final buttonPlayer = ButtonPlayer.wrap(styledButton);
-      expect(buttonPlayer.button, same(styledButton));
-      expect(buttonPlayer.backgroundColor, styledButton.backgroundColor);
+    test('build creates a ImageButtonWidget', () {
+      final button = ImageButton(FakeAction(), imageUri);
+      final buttonPlayer = ButtonPlayer.wrap(button);
+      expect(buttonPlayer.button, same(button));
+      expect((buttonPlayer as ImageButtonPlayer).imageUri, button.imageUri);
       final widget = buttonPlayer.build(fakeContext);
-      expect(widget.key, ObjectKey(styledButton));
+      expect(widget.key, ObjectKey(button));
     });
   });
 
-  group('StyledButtonWidget', () {
+  group('ImageButtonWidget', () {
     test('constructor asserts on null button', () {
-      expect(() => StyledButtonWidget(button: null), throwsAssertionError);
+      expect(() => ImageButtonWidget(button: null), throwsAssertionError);
     });
 
     testWidgets('tapping calls action.act()', (tester) async {
       final action = FakeAction();
-      final button = StyledButton(action);
-      final buttonPlayer = ButtonPlayer.wrap(button);
-      Widget widget;
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Container(
-            child: Builder(builder: (context) {
-              widget = buttonPlayer.build(context);
-              return widget;
-            }),
-          ),
-        ),
-      );
-      expect(widget.key, ObjectKey(button));
-      expect(widget, isA<StyledButtonWidget>());
-      expect((widget as StyledButtonWidget).button, same(buttonPlayer));
-      expect(find.byType(Image), findsNothing);
-      expect(action.actCalls.length, 0);
-
-      // tap the button should call button.act()
-      final buttonFinder = find.byKey(ObjectKey(button));
-      expect(buttonFinder, findsOneWidget);
-      await tester.tap(buttonFinder);
-      await tester.pump();
-      expect(action.actCalls.length, 1);
-      expect(action.actCalls.last, buttonPlayer);
-    });
-
-    testWidgets(
-        'shows foregroundImage and tapping the image also calls action.act()',
-        (tester) async {
-      final action = FakeAction();
-      final button = StyledButton(action,
-          foregroundImage: Uri.parse('assets/10x10-red.png'));
+      final button = ImageButton(action, imageUri);
       final buttonPlayer = ButtonPlayer.wrap(button);
       Widget widget;
       await tester.pumpWidget(
@@ -118,16 +84,24 @@ void main() {
         ),
       );
       expect(widget.key, ObjectKey(button));
-      expect(widget, isA<StyledButtonWidget>());
-      expect((widget as StyledButtonWidget).button, same(buttonPlayer));
+      expect(widget, isA<ImageButtonWidget>());
+      expect((widget as ImageButtonWidget).button, same(buttonPlayer));
       expect(action.actCalls.length, 0);
+      final buttonFinder = find.byKey(ObjectKey(button));
+      expect(buttonFinder, findsOneWidget);
       final imageFinder = find.byType(Image);
       expect(imageFinder, findsOneWidget);
 
       // tap the button should call button.act()
-      await tester.tap(imageFinder);
+      await tester.tap(buttonFinder);
       await tester.pump();
       expect(action.actCalls.length, 1);
+      expect(action.actCalls.last, buttonPlayer);
+
+      // tap the image should call button.act()
+      await tester.tap(imageFinder);
+      await tester.pump();
+      expect(action.actCalls.length, 2);
       expect(action.actCalls.last, buttonPlayer);
     });
   });

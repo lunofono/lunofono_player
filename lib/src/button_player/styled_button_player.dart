@@ -16,14 +16,13 @@ class StyledButtonPlayer extends ButtonPlayer {
       : assert(button != null),
         super(button);
 
-  /// The [Color] of the underlaying [button].
+  /// The background [Color] of the underlaying [button].
   @override
   Color get backgroundColor => button.backgroundColor;
 
-  /// Creates a [GridButtonItem].
-  ///
-  /// It uses [color] as the [GridButtonItem.color] and [this] as the
-  /// [GridButtonItem.value] and as a [ValueKey] for [GridButtonItem.key].
+  /// The foreground image [Uri] of the underlaying [button].
+  Uri get foregroundImage => button.foregroundImage;
+
   @override
   Widget build(BuildContext context) =>
       StyledButtonWidget(button: this, key: ObjectKey(button));
@@ -40,14 +39,19 @@ class StyledButtonWidget extends StatelessWidget {
         super(key: key);
 
   @override
-  Widget build(BuildContext context) => TextButton(
-        onPressed: () => button.action.act(context, button),
-        child: const Text(''),
-        style: TextButton.styleFrom(
-          backgroundColor: button.backgroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50),
-          ),
+  Widget build(BuildContext context) {
+    final child = button.foregroundImage == null
+        ? const Text('')
+        : Image.asset(button.foregroundImage.toString());
+    return TextButton(
+      onPressed: () => button.action.act(context, button),
+      child: child,
+      style: TextButton.styleFrom(
+        backgroundColor: button.backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
         ),
-      );
+      ),
+    );
+  }
 }
