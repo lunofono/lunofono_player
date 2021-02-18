@@ -13,6 +13,8 @@ import 'package:lunofono_player/src/button_player.dart';
 
 import 'package:lunofono_player/src/button_player/styled_button_player.dart';
 
+import '../../util/test_asset_bundle.dart' show TestAssetBundle;
+
 class FakeAction extends Action {
   final actCalls = <ButtonPlayer>[];
 }
@@ -84,12 +86,46 @@ void main() {
       expect(widget.key, ObjectKey(button));
       expect(widget, isA<StyledButtonWidget>());
       expect((widget as StyledButtonWidget).button, same(buttonPlayer));
+      expect(find.byType(Image), findsNothing);
       expect(action.actCalls.length, 0);
 
       // tap the button should call button.act()
       final buttonFinder = find.byKey(ObjectKey(button));
       expect(buttonFinder, findsOneWidget);
       await tester.tap(buttonFinder);
+      await tester.pump();
+      expect(action.actCalls.length, 1);
+      expect(action.actCalls.last, buttonPlayer);
+    });
+
+    testWidgets(
+        'shows foregroundImage and tapping the image also calls action.act()',
+        (tester) async {
+      final action = FakeAction();
+      final button = StyledButton(action,
+          foregroundImage: Uri.parse('assets/10x10-red.png'));
+      final buttonPlayer = ButtonPlayer.wrap(button);
+      Widget widget;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: DefaultAssetBundle(
+            bundle: TestAssetBundle(),
+            child: Builder(builder: (context) {
+              widget = buttonPlayer.build(context);
+              return widget;
+            }),
+          ),
+        ),
+      );
+      expect(widget.key, ObjectKey(button));
+      expect(widget, isA<StyledButtonWidget>());
+      expect((widget as StyledButtonWidget).button, same(buttonPlayer));
+      expect(action.actCalls.length, 0);
+      final imageFinder = find.byType(Image);
+      expect(imageFinder, findsOneWidget);
+
+      // tap the button should call button.act()
+      await tester.tap(imageFinder);
       await tester.pump();
       expect(action.actCalls.length, 1);
       expect(action.actCalls.last, buttonPlayer);
