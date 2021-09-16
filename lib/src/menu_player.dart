@@ -31,7 +31,7 @@ abstract class MenuPlayer {
   static MenuPlayer wrap(Menu menu) {
     final wrap = registry.getFunction(menu);
     assert(wrap != null, 'Unimplemented MenuPlayer for ${menu.runtimeType}');
-    return wrap(menu);
+    return wrap!(menu);
   }
 
   /// The underlaying model's [Menu].

@@ -38,13 +38,11 @@ abstract class ButtonPlayer {
     final wrap = registry.getFunction(button);
     assert(
         wrap != null, 'Unimplemented ButtonPlayer for ${button.runtimeType}');
-    return wrap(button);
+    return wrap!(button);
   }
 
   /// Constructs a [ButtonPlayer].
-  ButtonPlayer(Button button)
-      : assert(button != null),
-        action = ActionPlayer.wrap(button.action);
+  ButtonPlayer(Button button) : action = ActionPlayer.wrap(button.action);
 
   /// The [ActionPlayer] wrapping the [Action] for this [button].
   final ActionPlayer action;
@@ -56,7 +54,7 @@ abstract class ButtonPlayer {
   ///
   /// Returns null by default, as not all [Button] types have a background
   /// color.
-  Color get backgroundColor => null;
+  Color? get backgroundColor => null;
 
   /// Creates a [GridButtonItem] from the underlaying [button].
   ///

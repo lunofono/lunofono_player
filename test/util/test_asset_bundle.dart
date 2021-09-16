@@ -22,7 +22,7 @@ class TestAssetBundle extends CachingAssetBundle {
   /// `flutter test file.dart` will not. This class accounts for this difference
   /// and makes the assets always load from the top-level directory of the
   /// project so you don't have to worry about it.
-  TestAssetBundle([String assetsDirectory])
+  TestAssetBundle([String? assetsDirectory])
       : assetsDirectory = assetsDirectory ?? 'test/asset_bundle';
 
   @override

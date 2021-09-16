@@ -9,7 +9,7 @@ import 'package:lunofono_player/src/dynamic_dispatch_registry.dart';
 class Base {}
 
 class Item extends Base {
-  int x;
+  int? x;
 }
 
 class NoSubClass {}
@@ -17,7 +17,7 @@ class NoSubClass {}
 void main() {
   group('DynamicLibrary', () {
     group('from empty', () {
-      DynamicDispatchRegistry<Base, VoidCallback> registry;
+      late DynamicDispatchRegistry<Base, VoidCallback> registry;
       void baseFunction() {}
       void itemFunction1() {}
       void itemFunction2() {}

@@ -33,7 +33,7 @@ class PlaylistWidget extends StatelessWidget {
   static Widget Function() createMultiMediumWidget = () => MultiMediumWidget();
 
   /// Constructs a [MultiMediumTrackWidget].
-  const PlaylistWidget({Key key}) : super(key: key);
+  const PlaylistWidget({Key? key}) : super(key: key);
 
   /// Builds the UI for this widget.
   @override

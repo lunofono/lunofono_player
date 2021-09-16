@@ -1,6 +1,5 @@
 @Tags(['unit', 'player'])
 
-import 'package:flutter/foundation.dart' show DiagnosticableTreeMixin;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -12,22 +11,23 @@ import 'package:lunofono_player/src/media_player/media_player_error.dart'
     show MediaPlayerError;
 import 'package:lunofono_player/src/media_player/media_progress_indicator.dart'
     show MediaProgressIndicator;
-import 'package:lunofono_player/src/media_player/multi_medium_state.dart'
-    show MultiMediumState;
 import 'package:lunofono_player/src/media_player/multi_medium_widget.dart'
     show MultiMediumWidget;
-import 'package:lunofono_player/src/media_player/playable_state.dart'
-    show PlayableState;
 import 'package:lunofono_player/src/media_player/playlist_state.dart'
     show PlaylistState;
 import 'package:lunofono_player/src/media_player/playlist_widget.dart'
     show PlaylistWidget;
 import 'package:lunofono_player/src/media_player/single_medium_widget.dart'
     show SingleMediumWidget;
-import 'package:lunofono_player/src/media_player/single_medium_state.dart'
-    show SingleMediumState;
 
 import '../../util/finders.dart' show findSubString;
+
+import 'mocks.mocks.dart'
+    show
+        MockMultiMediumState,
+        MockPlayableState,
+        MockPlaylistState,
+        MockSingleMediumState;
 
 void main() {
   test('PlaylistWidget.createSingleMediumWidget()', () {
@@ -50,7 +50,7 @@ void main() {
       PlaylistWidget.createMultiMediumWidget = createMultiMediumWidget;
     });
 
-    Widget createWidget(_MockPlaylistState state) => Directionality(
+    Widget createWidget(MockPlaylistState state) => Directionality(
           textDirection: TextDirection.ltr,
           child: ChangeNotifierProvider<PlaylistState>.value(
             value: state,
@@ -60,7 +60,7 @@ void main() {
 
     testWidgets('shows a MediaProgressIndicator if initializing',
         (WidgetTester tester) async {
-      final state = _MockPlaylistState();
+      final state = MockPlaylistState();
       when(state.isInitialized).thenReturn(false);
       await tester.pumpWidget(createWidget(state));
       verify(state.isInitialized).called(1);
@@ -69,9 +69,10 @@ void main() {
 
     testWidgets('shows a MediaPlayerError if current is of unknown type',
         (WidgetTester tester) async {
-      final state = _MockPlaylistState();
+      final state = MockPlaylistState();
       when(state.isInitialized).thenReturn(true);
-      when(state.current).thenReturn(_MockUnknownMediumState());
+      final unknownPlayableState = MockPlayableState();
+      when(state.current).thenReturn(unknownPlayableState);
       await tester.pumpWidget(createWidget(state));
       verify(state.isInitialized).called(1);
       expect(find.byType(MediaPlayerError), findsOneWidget);
@@ -80,9 +81,9 @@ void main() {
 
     testWidgets('shows a SingleMediumWidget if current is a SingleMediumState',
         (WidgetTester tester) async {
-      final state = _MockPlaylistState();
+      final state = MockPlaylistState();
       when(state.isInitialized).thenReturn(true);
-      final current = _MockSingleMediumState();
+      final current = MockSingleMediumState();
       when(state.current).thenReturn(current);
       when(current.isErroneous).thenReturn(true);
       when(current.isVisualizable).thenReturn(true);
@@ -92,47 +93,31 @@ void main() {
 
     testWidgets('shows a MultiMediumWidget if current is a MultiMediumState',
         (WidgetTester tester) async {
-      final state = _MockPlaylistState();
+      final state = MockPlaylistState();
       when(state.isInitialized).thenReturn(true);
-      when(state.current).thenReturn(_MockMultiMediumState());
+      when(state.current).thenReturn(MockMultiMediumState());
       await tester.pumpWidget(createWidget(state));
       expect(find.byType(_FakeMultiMediumWidget), findsOneWidget);
     });
 
     testWidgets('shows the last state if current is null',
         (WidgetTester tester) async {
-      final state = _MockPlaylistState();
+      final state = MockPlaylistState();
       when(state.isInitialized).thenReturn(true);
       when(state.current).thenReturn(null);
-      when(state.last).thenReturn(_MockMultiMediumState());
+      when(state.last).thenReturn(MockMultiMediumState());
       await tester.pumpWidget(createWidget(state));
       expect(find.byType(_FakeMultiMediumWidget), findsOneWidget);
     });
   });
 }
 
-class _MockUnknownMediumState extends Mock
-    with DiagnosticableTreeMixin
-    implements PlayableState {}
-
-class _MockSingleMediumState extends Mock
-    with DiagnosticableTreeMixin
-    implements SingleMediumState {}
-
 class _FakeSingleMediumWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container();
 }
 
-class _MockMultiMediumState extends Mock
-    with DiagnosticableTreeMixin
-    implements MultiMediumState {}
-
 class _FakeMultiMediumWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container();
 }
-
-class _MockPlaylistState extends Mock
-    with DiagnosticableTreeMixin
-    implements PlaylistState {}

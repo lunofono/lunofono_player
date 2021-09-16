@@ -1,3 +1,7 @@
+# Generated Mocks
+
+test/**/*.mocks.dart
+
 # Miscellaneous
 *.class
 *.log

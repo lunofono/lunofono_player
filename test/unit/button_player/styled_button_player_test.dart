@@ -25,7 +25,7 @@ class FakeActionPlayer extends ActionPlayer {
   @override
   void act(BuildContext context, ButtonPlayer button) =>
       action.actCalls.add(button);
-  FakeActionPlayer(this.action) : assert(action != null);
+  FakeActionPlayer(this.action);
 }
 
 class FakeContext extends Fake implements BuildContext {}
@@ -41,16 +41,12 @@ void main() {
   tearDown(() => ActionPlayer.registry = oldActionRegistry);
 
   group('StyledButtonPlayer', () {
-    FakeContext fakeContext;
-    Color color;
+    late FakeContext fakeContext;
+    Color? color;
 
     setUp(() {
       fakeContext = FakeContext();
       color = Color(0x12ab4523);
-    });
-
-    test('constructor asserts on null', () {
-      expect(() => StyledButtonPlayer(null), throwsAssertionError);
     });
 
     test('build creates a StyledButtonWidget', () {
@@ -64,26 +60,22 @@ void main() {
   });
 
   group('StyledButtonWidget', () {
-    test('constructor asserts on null button', () {
-      expect(() => StyledButtonWidget(button: null), throwsAssertionError);
-    });
-
     testWidgets('tapping calls action.act()', (tester) async {
       final action = FakeAction();
       final button = StyledButton(action);
       final buttonPlayer = ButtonPlayer.wrap(button);
-      Widget widget;
+      Widget? widget;
       await tester.pumpWidget(
         MaterialApp(
           home: Container(
             child: Builder(builder: (context) {
               widget = buttonPlayer.build(context);
-              return widget;
+              return widget!;
             }),
           ),
         ),
       );
-      expect(widget.key, ObjectKey(button));
+      expect(widget!.key, ObjectKey(button));
       expect(widget, isA<StyledButtonWidget>());
       expect((widget as StyledButtonWidget).button, same(buttonPlayer));
       expect(find.byType(Image), findsNothing);
@@ -105,7 +97,7 @@ void main() {
       final button = StyledButton(action,
           foregroundImage: Uri.parse('assets/10x10-red.png'));
       final buttonPlayer = ButtonPlayer.wrap(button);
-      Widget widget;
+      late final Widget widget;
       await tester.pumpWidget(
         MaterialApp(
           home: DefaultAssetBundle(
@@ -125,7 +117,10 @@ void main() {
       expect(imageFinder, findsOneWidget);
 
       // tap the button should call button.act()
-      await tester.tap(imageFinder);
+      // FIXME: The warnIfMissed had to be added in one update of Flutter, and
+      // it is not clear why it happens that it says the images is not being
+      // hit, but the action is called.
+      await tester.tap(imageFinder, warnIfMissed: false);
       await tester.pump();
       expect(action.actCalls.length, 1);
       expect(action.actCalls.last, buttonPlayer);

@@ -17,7 +17,7 @@ void main() {
   void verifyStateInvariants(
       SingleMediumState state, _FakeSingleMediumController controller) {
     expect(state.controller, same(controller));
-    expect(state.controller.widgetKey, controller.widgetKey);
+    expect(state.controller!.widgetKey, controller.widgetKey);
   }
 
   void verifyStateInitialization(
@@ -48,7 +48,7 @@ void main() {
     group('without a registered medium', () {
       test('constructs a state with an error', () {
         final medium = _FakeSingleMedium('bad-medium', size: Size(1, 1));
-        final state = SingleMediumState(medium);
+        final state = SingleMediumState(medium, isVisualizable: true);
         expect(state.isErroneous, true);
         expect(state.error, contains('Unsupported type'));
       });
@@ -57,8 +57,8 @@ void main() {
     group('on bad medium', () {
       Exception error;
       _FakeSingleMedium medium;
-      _FakeSingleMediumController controller;
-      SingleMediumState state;
+      late _FakeSingleMediumController controller;
+      late SingleMediumState state;
 
       setUp(() {
         error = Exception('Initialization Error');
@@ -68,7 +68,7 @@ void main() {
           _FakeSingleMedium,
           (medium, {onMediumFinished}) => controller,
         );
-        state = SingleMediumState(medium);
+        state = SingleMediumState(medium, isVisualizable: true);
       });
 
       test('the state is properly initialized', () {
@@ -128,10 +128,10 @@ void main() {
     });
 
     group('on good medium', () {
-      Size size;
-      _FakeSingleMedium medium;
-      _FakeSingleMediumController controller;
-      SingleMediumState state;
+      Size? size;
+      late _FakeSingleMedium medium;
+      late _FakeSingleMediumController controller;
+      late SingleMediumState state;
 
       setUp(() {
         size = Size(0.0, 0.0);
@@ -141,7 +141,7 @@ void main() {
           _FakeSingleMedium,
           (medium, {onMediumFinished}) => controller,
         );
-        state = SingleMediumState(medium);
+        state = SingleMediumState(medium, isVisualizable: true);
       });
 
       void verifyStateInitialized() {
@@ -151,15 +151,6 @@ void main() {
         expect(state.error, isNull);
         expect(state.isErroneous, isFalse);
       }
-
-      test('constructor asserts on null controller', () {
-        expect(() => SingleMediumState(null), throwsAssertionError);
-      });
-
-      test('constructor asserts on null isVisualizable', () {
-        expect(() => SingleMediumState(medium, isVisualizable: null),
-            throwsAssertionError);
-      });
 
       test('the state is properly initialized', () {
         verifyStateInitialization(state, controller);
@@ -202,8 +193,8 @@ void main() {
       });
 
       test('.build() builds a widget with the expected key', () {
-        final widget = state.controller.build(_FakeContext());
-        expect(widget.key, state.controller.widgetKey);
+        final widget = state.controller!.build(_FakeContext());
+        expect(widget.key, state.controller!.widgetKey);
       });
 
       test('toString()', () async {
@@ -239,15 +230,14 @@ void main() {
 class _FakeContext extends Fake implements BuildContext {}
 
 class _SingleMediumInfo {
-  final Size size;
-  final Exception exception;
+  final Size? size;
+  final Exception? exception;
   final Key widgetKey;
   _SingleMediumInfo(
     String location, {
     this.size,
     this.exception,
-  })  : assert(location != null),
-        assert(exception != null && size == null ||
+  })  : assert(exception != null && size == null ||
             exception == null && size != null),
         widgetKey = GlobalKey(debugLabel: 'widgetKey(${location}');
 }
@@ -256,8 +246,8 @@ class _FakeSingleMedium extends SingleMedium {
   final _SingleMediumInfo info;
   _FakeSingleMedium(
     String location, {
-    Size size,
-    Exception exception,
+    Size? size,
+    Exception? exception,
   })  : info = _SingleMediumInfo(location, size: size, exception: exception),
         super(Uri.parse(location));
 }
@@ -271,21 +261,20 @@ class _FakeSingleMediumController extends Fake
   Key widgetKey;
 
   @override
-  void Function(BuildContext context) onMediumFinished;
+  void Function(BuildContext context)? onMediumFinished;
 
   final calls = <String>[];
 
   _FakeSingleMediumController(
     this.medium, {
-    Key widgetKey,
+    Key? widgetKey,
     this.onMediumFinished,
-  })  : assert(medium != null),
-        widgetKey = widgetKey ?? GlobalKey(debugLabel: 'mediumKey');
+  }) : widgetKey = widgetKey ?? GlobalKey(debugLabel: 'mediumKey');
 
-  Future<T> _errorOr<T>(String name, [T value]) {
+  Future<T> _errorOr<T>(String name, [T? value]) {
     calls.add(name);
     return medium.info.exception != null
-        ? Future.error(medium.info.exception)
+        ? Future.error(medium.info.exception!)
         : Future<T>.value(value);
   }
 
@@ -294,10 +283,10 @@ class _FakeSingleMediumController extends Fake
       _errorOr('initialize', medium.info.size);
 
   @override
-  Future<void> play(BuildContext context) => _errorOr<void>('play');
+  Future<void> play(BuildContext? context) => _errorOr<void>('play');
 
   @override
-  Future<void> pause(BuildContext context) => _errorOr<void>('pause');
+  Future<void> pause(BuildContext? context) => _errorOr<void>('pause');
 
   @override
   Future<void> dispose() => _errorOr<void>('dispose');

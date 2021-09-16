@@ -1,7 +1,5 @@
 import 'package:flutter/services.dart'
-    show SystemChrome, DeviceOrientation, SystemUiOverlay;
-
-import 'package:meta/meta.dart' show required;
+    show SystemChrome, DeviceOrientation, SystemUiMode;
 
 import 'package:wakelock/wakelock.dart' show Wakelock;
 
@@ -16,9 +14,9 @@ class PlatformServices {
   const PlatformServices();
 
   /// Set fullscreen mode on or off.
-  Future<void> setFullScreen({@required bool on}) async {
-    return SystemChrome.setEnabledSystemUIOverlays(
-        on ? [] : SystemUiOverlay.values);
+  Future<void> setFullScreen({required bool on}) async {
+    return SystemChrome.setEnabledSystemUIMode(
+        on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge);
   }
 
   /// Set the preferred screen orientation(s).
@@ -70,7 +68,7 @@ class PlatformServices {
   ///
   /// This is also known as "wakelock", when taking the "wakelock" means the
   /// device doesn't go to sleep.
-  Future<void> inhibitScreenOff({@required bool on}) async {
+  Future<void> inhibitScreenOff({required bool on}) async {
     // Take wakelock so the device isn't locked after some time inactive
     return on ? Wakelock.enable() : Wakelock.disable();
   }

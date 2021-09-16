@@ -10,9 +10,8 @@ class MediaProgressIndicator extends StatelessWidget {
   final bool isVisualizable;
 
   /// Constructs a [MediaProgressIndicator] setting if it's [visualizable].
-  const MediaProgressIndicator({@required bool visualizable})
-      : assert(visualizable != null),
-        isVisualizable = visualizable;
+  const MediaProgressIndicator({required bool visualizable})
+      : isVisualizable = visualizable;
 
   /// Builds the widget.
   @override

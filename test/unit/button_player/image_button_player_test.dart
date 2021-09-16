@@ -24,7 +24,7 @@ class FakeActionPlayer extends ActionPlayer {
   @override
   void act(BuildContext context, ButtonPlayer button) =>
       action.actCalls.add(button);
-  FakeActionPlayer(this.action) : assert(action != null);
+  FakeActionPlayer(this.action);
 }
 
 class FakeContext extends Fake implements BuildContext {}
@@ -42,14 +42,10 @@ void main() {
   tearDown(() => ActionPlayer.registry = oldActionRegistry);
 
   group('ImageButtonPlayer', () {
-    FakeContext fakeContext;
+    late FakeContext fakeContext;
 
     setUp(() {
       fakeContext = FakeContext();
-    });
-
-    test('constructor asserts on null', () {
-      expect(() => ImageButtonPlayer(null), throwsAssertionError);
     });
 
     test('build creates a ImageButtonWidget', () {
@@ -63,27 +59,23 @@ void main() {
   });
 
   group('ImageButtonWidget', () {
-    test('constructor asserts on null button', () {
-      expect(() => ImageButtonWidget(button: null), throwsAssertionError);
-    });
-
     testWidgets('tapping calls action.act()', (tester) async {
       final action = FakeAction();
       final button = ImageButton(action, imageUri);
       final buttonPlayer = ButtonPlayer.wrap(button);
-      Widget widget;
+      Widget? widget;
       await tester.pumpWidget(
         MaterialApp(
           home: DefaultAssetBundle(
             bundle: TestAssetBundle(),
             child: Builder(builder: (context) {
               widget = buttonPlayer.build(context);
-              return widget;
+              return widget!;
             }),
           ),
         ),
       );
-      expect(widget.key, ObjectKey(button));
+      expect(widget!.key, ObjectKey(button));
       expect(widget, isA<ImageButtonWidget>());
       expect((widget as ImageButtonWidget).button, same(buttonPlayer));
       expect(action.actCalls.length, 0);

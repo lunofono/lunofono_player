@@ -13,7 +13,7 @@ class NoCheckSize extends Size {
 
 final globalSuccessKey = GlobalKey(debugLabel: 'successKey');
 
-Size globalSize;
+Size? globalSize;
 
 void expectLoading(WidgetTester tester, TestWidget widget) {
   expect(find.byKey(widget.loadingKey), findsOneWidget);
@@ -22,15 +22,21 @@ void expectLoading(WidgetTester tester, TestWidget widget) {
   expect(globalSize, null);
 }
 
-void expectError(WidgetTester tester, TestWidget widget) {
+void expectInitError(WidgetTester tester, TestWidget widget) {
   expect(find.byKey(widget.errorKey), findsOneWidget);
   expect(find.byKey(widget.loadingKey), findsNothing);
   expect(find.byKey(globalSuccessKey), findsNothing);
   expect(globalSize, null);
 }
 
-Widget expectSuccess(WidgetTester tester, TestWidget widget,
-    {Size size = const NoCheckSize(), Type findWidget}) {
+void expectPlayError(WidgetTester tester, TestWidget widget) {
+  expect(find.byKey(widget.errorKey), findsOneWidget);
+  expect(find.byKey(widget.loadingKey), findsNothing);
+  expect(find.byKey(globalSuccessKey), findsNothing);
+}
+
+Widget? expectSuccess(WidgetTester tester, TestWidget widget,
+    {Size? size = const NoCheckSize(), Type? findWidget}) {
   expect(find.byKey(globalSuccessKey), findsOneWidget);
   expect(find.byKey(widget.loadingKey), findsNothing);
   expect(find.byKey(widget.errorKey), findsNothing);
@@ -51,10 +57,8 @@ class TestWidget extends StatelessWidget {
   final SingleMediumController controller;
   final AssetBundle bundle;
   final bool startPlaying;
-  TestWidget(this.controller, {AssetBundle bundle, this.startPlaying = true})
-      : assert(controller != null),
-        assert(startPlaying != null),
-        errorKey = GlobalKey(debugLabel: 'errorKey'),
+  TestWidget(this.controller, {AssetBundle? bundle, this.startPlaying = true})
+      : errorKey = GlobalKey(debugLabel: 'errorKey'),
         loadingKey = GlobalKey(debugLabel: 'loadingKey'),
         bundle = bundle ?? TestAssetBundle() {
     globalSize = null;

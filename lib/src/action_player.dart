@@ -34,7 +34,7 @@ abstract class ActionPlayer {
     final wrap = registry.getFunction(action);
     assert(
         wrap != null, 'Unimplemented ActionPlayer for ${action.runtimeType}');
-    return wrap(action);
+    return wrap!(action);
   }
 
   /// Constructs an [ActionPlayer].
@@ -59,8 +59,7 @@ class PlayContentActionPlayer extends ActionPlayer {
   /// Constructs a [PlayContentActionPlayer] using [action] as the underlaying
   /// [Action].
   PlayContentActionPlayer(this.action)
-      : assert(action != null),
-        content = PlayablePlayer.wrap(action.content);
+      : content = PlayablePlayer.wrap(action.content);
 
   /// Plays the [content].
   @override

@@ -95,13 +95,13 @@ class _FakeMultiMediumTrackState extends Fake
     with DiagnosticableTreeMixin, ChangeNotifier
     implements MultiMediumTrackState {
   @override
-  _FakeSingleMediumState current;
+  _FakeSingleMediumState? current;
   @override
-  _FakeSingleMediumState last;
+  _FakeSingleMediumState? last;
   @override
   Future<void> dispose() async => super.dispose();
   _FakeMultiMediumTrackState({
     this.current,
-    _FakeSingleMediumState last,
+    _FakeSingleMediumState? last,
   }) : last = last ?? current;
 }

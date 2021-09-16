@@ -1,6 +1,5 @@
 @Tags(['unit', 'player'])
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -11,19 +10,18 @@ import 'package:lunofono_player/src/media_player/controller_registry.dart';
 import 'package:lunofono_player/src/media_player/playlist_player.dart';
 import 'package:lunofono_player/src/media_player/playlist_widget.dart';
 
+import 'mocks.mocks.dart'
+    show MockSingleMedium, MockSingleMediumController, MockPlaylist;
+
 void main() {
   test('PlaylistWidget.createSingleMediumWidget()', () {
     expect(PlaylistPlayer.createPlaylistWidget(), isA<PlaylistWidget>());
   });
 
   group('PlaylistPlayer', () {
-    final mockPlaylist = _MockPlaylist();
+    final mockPlaylist = MockPlaylist();
 
     setUp(() => reset(mockPlaylist));
-
-    test('constructor asserts on null media', () {
-      expect(() => PlaylistPlayer(playlist: null), throwsAssertionError);
-    });
 
     test('default constructor uses the expected defaults', () {
       final player = PlaylistPlayer(playlist: mockPlaylist);
@@ -55,8 +53,8 @@ void main() {
       // then we mock the controller, so we can mock a normal play (otherwise
       // just an error will be shown if the mock medium doesn't have
       // a registered controller
-      final mockController = _MockSingleMediumController();
-      ControllerRegistry.instance.register(_MockSingleMedium, (medium,
+      final mockController = MockSingleMediumController();
+      ControllerRegistry.instance.register(MockSingleMedium, (medium,
           {onMediumFinished}) {
         when(mockController.medium).thenReturn(medium);
         when(mockController.onMediumFinished).thenReturn(onMediumFinished);
@@ -64,7 +62,7 @@ void main() {
       });
 
       // finally we add a stub to the mock playlist to return a mock medium
-      final mockMedium = _MockSingleMedium();
+      final mockMedium = MockSingleMedium();
       when(mockPlaylist.media).thenReturn(<Medium>[mockMedium]);
       when(mockMedium.resource).thenReturn(Uri.parse('medium/path'));
 
@@ -98,16 +96,7 @@ void main() {
   });
 }
 
-class _MockSingleMediumController extends Mock
-    implements SingleMediumController {}
-
-class _MockSingleMedium extends Mock implements SingleMedium {}
-
 class _FakePlaylistWidget extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(BuildContext context) => Text('test');
 }
-
-class _MockPlaylist extends Mock
-    with DiagnosticableTreeMixin
-    implements Playlist {}

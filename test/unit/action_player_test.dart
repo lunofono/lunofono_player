@@ -13,10 +13,10 @@ import 'package:lunofono_player/src/playable_player.dart'
     show PlayablePlayer, PlayablePlayerRegistry;
 
 class FakePlayable extends Playable {
-  BuildContext playedContext;
-  Color playedColor;
+  BuildContext? playedContext;
+  Color? playedColor;
 
-  void expectCalled(BuildContext context, Color backgroundColor) {
+  void expectCalled(BuildContext? context, Color backgroundColor) {
     expect(playedContext, context);
     expect(playedColor, backgroundColor);
   }
@@ -26,20 +26,20 @@ class FakePlayablePlayer extends PlayablePlayer {
   @override
   final FakePlayable playable;
   @override
-  void play(BuildContext context, [Color backgroundColor]) {
+  void play(BuildContext context, [Color? backgroundColor]) {
     playable.playedContext = context;
     playable.playedColor = backgroundColor;
   }
 
-  FakePlayablePlayer(this.playable) : assert(playable != null);
+  FakePlayablePlayer(this.playable);
 }
 
 class FakeAction extends Action {}
 
 class FakeActionPlayer extends ActionPlayer {
-  Action calledAction;
-  BuildContext calledContext;
-  ButtonPlayer calledButton;
+  late final Action calledAction;
+  late final BuildContext calledContext;
+  late final ButtonPlayer calledButton;
 
   @override
   final FakeAction action;
@@ -50,7 +50,7 @@ class FakeActionPlayer extends ActionPlayer {
     calledButton = button;
   }
 
-  FakeActionPlayer(this.action) : assert(action != null);
+  FakeActionPlayer(this.action);
 }
 
 class FakeButtonPlayer extends Fake implements ButtonPlayer {
@@ -63,9 +63,9 @@ class FakeContext extends Fake implements BuildContext {}
 void main() {
   group('ActionPlayer', () {
     final oldActionRegistry = ActionPlayer.registry;
-    FakeContext fakeContext;
-    FakeAction fakeAction;
-    FakeButtonPlayer fakeButton;
+    FakeContext? fakeContext;
+    FakeAction? fakeAction;
+    FakeButtonPlayer? fakeButton;
 
     setUp(() {
       fakeContext = FakeContext();
@@ -78,7 +78,8 @@ void main() {
     test('empty', () {
       ActionPlayer.registry = ActionPlayerRegistry();
       expect(ActionPlayer.registry.isEmpty, isTrue);
-      expect(() => ActionPlayer.wrap(fakeAction).act(fakeContext, fakeButton),
+      expect(
+          () => ActionPlayer.wrap(fakeAction!).act(fakeContext!, fakeButton!),
           throwsAssertionError);
     });
 
@@ -86,8 +87,8 @@ void main() {
       ActionPlayer.registry = ActionPlayerRegistry();
       ActionPlayer.registry.register(
           FakeAction, (action) => FakeActionPlayer(action as FakeAction));
-      final actionPlayer = ActionPlayer.wrap(fakeAction) as FakeActionPlayer;
-      actionPlayer.act(fakeContext, fakeButton);
+      final actionPlayer = ActionPlayer.wrap(fakeAction!) as FakeActionPlayer;
+      actionPlayer.act(fakeContext!, fakeButton!);
       expect(actionPlayer.calledAction, same(fakeAction));
       expect(actionPlayer.calledContext, same(fakeContext));
       expect(actionPlayer.calledButton, same(fakeButton));
@@ -106,21 +107,17 @@ void main() {
 
       tearDown(() => PlayablePlayer.registry = oldPlayableRegistry);
 
-      test('constructor throws if action is null', () {
-        expect(() => PlayContentActionPlayer(null), throwsAssertionError);
-      });
-
       test('dynamic dispatch', () {
         final Action action = PlayContentAction(fakePlayable);
         final actionPlayer = ActionPlayer.wrap(action);
-        actionPlayer.act(fakeContext, fakeButton);
-        fakePlayable.expectCalled(fakeContext, fakeButton.backgroundColor);
+        actionPlayer.act(fakeContext!, fakeButton!);
+        fakePlayable.expectCalled(fakeContext, fakeButton!.backgroundColor);
       });
 
       test('direct call', () {
         final action = ActionPlayer.wrap(PlayContentAction(fakePlayable));
-        action.act(fakeContext, fakeButton);
-        fakePlayable.expectCalled(fakeContext, fakeButton.backgroundColor);
+        action.act(fakeContext!, fakeButton!);
+        fakePlayable.expectCalled(fakeContext, fakeButton!.backgroundColor);
       });
     });
   });

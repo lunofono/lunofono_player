@@ -26,7 +26,7 @@ class MultiMediumPlayer extends StatelessWidget {
   final Color backgroundColor;
 
   /// The action to perform when this player stops.
-  final void Function(BuildContext) onMediaStopped;
+  final void Function(BuildContext)? onMediaStopped;
 
   /// Constructs a new [MultiMediumPlayer].
   ///
@@ -36,12 +36,11 @@ class MultiMediumPlayer extends StatelessWidget {
   /// by the user, the [onMediaStopped] callback will be called (if non-null).
   ///
   const MultiMediumPlayer({
-    @required this.medium,
-    Color backgroundColor,
+    required this.medium,
+    Color? backgroundColor,
     this.onMediaStopped,
-    Key key,
-  })  : assert(medium != null),
-        backgroundColor = backgroundColor ?? Colors.black,
+    Key? key,
+  })  : backgroundColor = backgroundColor ?? Colors.black,
         super(key: key);
 
   /// Builds the UI for this widget.

@@ -16,15 +16,15 @@ class MultiMediumState
 
   /// The function that will be called when the main track finishes playing.
   @override
-  final void Function(BuildContext context) onFinished;
+  final void Function(BuildContext context)? onFinished;
 
   /// The state of the main track.
   MultiMediumTrackState get mainTrackState => _mainTrackState;
-  MultiMediumTrackState _mainTrackState;
+  late final MultiMediumTrackState _mainTrackState;
 
   /// The state of the background track.
   MultiMediumTrackState get backgroundTrackState => _backgroundTrackState;
-  MultiMediumTrackState _backgroundTrackState;
+  late final MultiMediumTrackState _backgroundTrackState;
 
   /// True when all the media in both tracks is initialized.
   bool get isInitialized => _allInitialized;
@@ -36,8 +36,7 @@ class MultiMediumState
   /// is provided, it will be called when the medium finishes playing the
   /// [multimedium.mainTrack].
   MultiMediumState(MultiMedium multimedium, {this.onFinished})
-      : assert(multimedium != null),
-        playable = multimedium {
+      : playable = multimedium {
     _mainTrackState = MultiMediumTrackState.main(
       track: multimedium.mainTrack,
       onFinished: _onMainTrackFinished,

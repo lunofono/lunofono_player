@@ -18,10 +18,10 @@ import 'single_medium_state.dart' show SingleMediumState;
 class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// Function used to create [SingleMediumState] instances.
   @visibleForTesting
-  static var createSingleMediumState = (
+  static SingleMediumState Function(SingleMedium medium, {required bool isVisualizable, void Function(BuildContext)? onFinished}) createSingleMediumState = (
     SingleMedium medium, {
-    bool isVisualizable,
-    void Function(BuildContext) onFinished,
+    required bool isVisualizable,
+    void Function(BuildContext)? onFinished,
   }) =>
       SingleMediumState(
         medium,
@@ -57,10 +57,11 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   bool get isNotEmpty => mediaState.isNotEmpty;
 
   /// The current [SingleMediumState] being played, or null if [isFinished].
-  SingleMediumState get current => isFinished ? null : mediaState[currentIndex];
+  SingleMediumState? get current =>
+      isFinished ? null : mediaState[currentIndex];
 
   /// The last [SingleMediumState] in this track.
-  SingleMediumState get last => mediaState.last;
+  SingleMediumState? get last => mediaState.last;
 
   /// Constructs a [MultiMediumTrackState] from a [SingleMedium] list.
   ///
@@ -74,12 +75,10 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// medium finished playing, then this [onFinished] will be called.
   @protected
   MultiMediumTrackState.internal({
-    @required List<SingleMedium> media,
-    @required bool visualizable,
-    void Function(BuildContext context) onFinished,
-  })  : assert(media != null),
-        assert(media.isNotEmpty),
-        assert(visualizable != null),
+    required List<SingleMedium> media,
+    required bool visualizable,
+    void Function(BuildContext context)? onFinished,
+  })  : assert(media.isNotEmpty),
         isVisualizable = visualizable {
     void _playNext(BuildContext context) {
       currentIndex++;
@@ -109,10 +108,10 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// [track] must be non-null. If [onFinished] is provided and non-null,
   /// it will be called when all the tracks finished playing.
   MultiMediumTrackState.main({
-    @required MultiMediumTrack track,
-    void Function(BuildContext context) onFinished,
+    required MultiMediumTrack track,
+    void Function(BuildContext context)? onFinished,
   }) : this.internal(
-          media: track?.media,
+          media: track.media,
           visualizable: track is VisualizableMultiMediumTrack,
           onFinished: onFinished,
         );
@@ -127,12 +126,12 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   ///
   /// [track] must be non-null.
   static MultiMediumTrackState background({
-    @required BackgroundMultiMediumTrack track,
+    required BackgroundMultiMediumTrack track,
   }) =>
       track is NoTrack
           ? MultiMediumTrackState.empty()
           : MultiMediumTrackState.internal(
-              media: track?.media,
+              media: track.media,
               visualizable: track is VisualizableBackgroundMultiMediumTrack,
             );
 
@@ -152,10 +151,10 @@ class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   }
 
   /// Plays the current [SingleMediumState].
-  Future<void> play(BuildContext context) => current?.play(context);
+  Future<void>? play(BuildContext context) => current?.play(context);
 
   /// Pauses the current [SingleMediumState].
-  Future<void> pause(BuildContext context) => current?.pause(context);
+  Future<void>? pause(BuildContext context) => current?.pause(context);
 
   /// Disposes all the [SingleMediumState] in [mediaState].
   @override

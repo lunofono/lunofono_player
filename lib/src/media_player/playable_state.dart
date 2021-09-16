@@ -10,7 +10,7 @@ abstract class PlayableState implements ChangeNotifier, DiagnosticableTree {
 
   /// The function to call when this playable finishes playing.
   @visibleForTesting
-  void Function(BuildContext context) get onFinished;
+  void Function(BuildContext context)? get onFinished;
 
   /// Initializes this playable state.
   ///
@@ -21,12 +21,12 @@ abstract class PlayableState implements ChangeNotifier, DiagnosticableTree {
   /// Plays this playable.
   ///
   /// It does nothing if the playable was already playing or finished.
-  Future<void> play(BuildContext context);
+  Future<void>? play(BuildContext context);
 
   /// Pauses this playable.
   ///
   /// It does nothing if the playable was already paused or finished.
-  Future<void> pause(BuildContext context);
+  Future<void>? pause(BuildContext context);
 
   /// Disposes this playable.
   ///

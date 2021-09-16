@@ -15,7 +15,7 @@ export 'single_medium_controller.dart' show SingleMediumController;
 /// This callback should never return null.
 typedef ControllerCreateFunction = SingleMediumController Function(
   SingleMedium medium, {
-  void Function(BuildContext) onMediumFinished,
+  void Function(BuildContext)? onMediumFinished,
 });
 
 /// A registry so [SingleMediumController]s can be created dynamically.
@@ -36,7 +36,7 @@ class ControllerRegistry
   ControllerRegistry.defaults() {
     register(
       Audio,
-      (SingleMedium medium, {void Function(BuildContext) onMediumFinished}) =>
+      (SingleMedium medium, {void Function(BuildContext)? onMediumFinished}) =>
           // XXX: This is a hack that should be removed after #15 and #16 are
           // resolved.
           kIsWeb
@@ -48,13 +48,13 @@ class ControllerRegistry
 
     register(
       Image,
-      (SingleMedium medium, {void Function(BuildContext) onMediumFinished}) =>
+      (SingleMedium medium, {void Function(BuildContext)? onMediumFinished}) =>
           ImagePlayerController(medium, onMediumFinished: onMediumFinished),
     );
 
     register(
       Video,
-      (SingleMedium medium, {void Function(BuildContext) onMediumFinished}) =>
+      (SingleMedium medium, {void Function(BuildContext)? onMediumFinished}) =>
           VideoPlayerController(medium, onMediumFinished: onMediumFinished),
     );
   }

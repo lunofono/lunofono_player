@@ -12,7 +12,7 @@ class MediaPlayerError extends StatelessWidget {
   /// Constructs a new [MediaPlayerError].
   ///
   /// The widget will display the error description provided by [error].
-  const MediaPlayerError(this.error, {Key key}) : super(key: key);
+  const MediaPlayerError(this.error, {Key? key}) : super(key: key);
 
   /// Builds this [error] message.
   ///
@@ -20,7 +20,7 @@ class MediaPlayerError extends StatelessWidget {
   /// be shown.
   String buildMessage() {
     var details = '';
-    var message = error.toString();
+    String? message = error.toString();
     if (error is PlatformException) {
       final platformError = error as PlatformException;
       if (platformError.details != null) {
@@ -46,7 +46,7 @@ class MediaPlayerError extends StatelessWidget {
           child: Text(
             'Media could not be played: ${buildMessage()}',
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headline6.copyWith(
+            style: Theme.of(context).textTheme.headline6!.copyWith(
                   color: Colors.white,
                 ),
           ),

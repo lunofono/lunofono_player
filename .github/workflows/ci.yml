@@ -7,7 +7,7 @@ on:
     branches: [ main, 'v[0-9]+.[0-9x]+.[0-9x]+*' ]
 
 env:
-  FLUTTER_CHANNEL: beta
+  FLUTTER_CHANNEL: stable
   JAVA_VERSION: 12.x
 
 jobs:
@@ -34,6 +34,9 @@ jobs:
 
     - name: Install dependencies
       run: flutter pub get
+
+    - name: Generate unit tests mocks
+      run: tool/ci mocks-gen
 
     # Analyze step needs different config for pull_request and push, so it is
     # duplicated with if conditions to use the correct configuration for each

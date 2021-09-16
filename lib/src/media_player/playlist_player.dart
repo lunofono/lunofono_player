@@ -25,7 +25,7 @@ class PlaylistPlayer extends StatelessWidget {
   final Color backgroundColor;
 
   /// The action to perform when this player stops.
-  final void Function(BuildContext) onMediaStopped;
+  final void Function(BuildContext)? onMediaStopped;
 
   /// Creates a new [PlaylistPlayer].
   ///
@@ -34,12 +34,11 @@ class PlaylistPlayer extends StatelessWidget {
   /// playing, either because it was played completely or because it was stopped
   /// by the user, the [onMediaStopped] callback will be called (if non-null).
   const PlaylistPlayer({
-    @required this.playlist,
-    Color backgroundColor,
+    required this.playlist,
+    Color? backgroundColor,
     this.onMediaStopped,
-    Key key,
-  })  : assert(playlist != null),
-        backgroundColor = backgroundColor ?? Colors.black,
+    Key? key,
+  })  : backgroundColor = backgroundColor ?? Colors.black,
         super(key: key);
 
   /// Builds the UI for this widget.
