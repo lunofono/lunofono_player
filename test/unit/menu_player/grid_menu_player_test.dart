@@ -71,10 +71,8 @@ void main() {
     testWidgets('shows all buttons', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Container(
-            child: Builder(
-              builder: (context) => menuPlayer!.build(context),
-            ),
+          home: Builder(
+            builder: (context) => menuPlayer!.build(context),
           ),
         ),
       );

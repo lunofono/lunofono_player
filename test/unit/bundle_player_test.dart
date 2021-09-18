@@ -53,7 +53,7 @@ class FakeMenuPlayer extends MenuPlayer {
   final FakeMenu menu;
   @override
   Widget build(BuildContext context) {
-    return Container(child: Text('FakeMenu'), key: globalKey);
+    return Container(child: const Text('FakeMenu'), key: globalKey);
   }
 }
 

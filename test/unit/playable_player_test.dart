@@ -20,7 +20,7 @@ void main() {
     setUp(() {
       fakePlayable = FakePlayable();
       fakeContext = FakeContext();
-      color = Color(0x3845bd34);
+      color = const Color(0x3845bd34);
     });
 
     tearDown(() => PlayablePlayer.registry = oldPlayableRegistry);
@@ -58,7 +58,7 @@ void main() {
         // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
         await tester.pump();
         // The second pump we wait a bit because Navigator is animated
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
         final playerFinder = find.byType(SingleMediumPlayer);
         expect(playerFinder, findsOneWidget);
@@ -68,7 +68,7 @@ void main() {
         // The HomeWidget should be back
         mediaPlayer.onMediaStopped!(context); // Should call Navigator.pop()
         await tester.pump(); // Same with .push() about the double pump()
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
         expect(find.byType(SingleMediumPlayer), findsNothing);
       }
@@ -106,7 +106,7 @@ void main() {
         // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
         await tester.pump();
         // The second pump we wait a bit because Navigator is animated
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
         final playerFinder = find.byType(MultiMediumPlayer);
         expect(playerFinder, findsOneWidget);
@@ -116,7 +116,7 @@ void main() {
         // The HomeWidget should be back
         mediaPlayer.onMediaStopped!(context); // Should call Navigator.pop()
         await tester.pump(); // Same with .push() about the double pump()
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
         expect(find.byType(MultiMediumPlayer), findsNothing);
       }
@@ -154,7 +154,7 @@ void main() {
         // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
         await tester.pump();
         // The second pump we wait a bit because Navigator is animated
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
         final playerFinder = find.byType(PlaylistPlayer);
         expect(playerFinder, findsOneWidget);
@@ -164,7 +164,7 @@ void main() {
         // The HomeWidget should be back
         mediaPlayer.onMediaStopped!(context); // Should call Navigator.pop()
         await tester.pump(); // Same with .push() about the double pump()
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
         expect(find.byType(PlaylistPlayer), findsNothing);
       }
@@ -222,9 +222,7 @@ class HomeWidgetPlayable extends StatelessWidget {
       onTap: () {
         playable.play(context, color);
       },
-      child: Container(
-        child: const Text('home'),
-      ),
+      child: const Text('home'),
     );
   }
 }

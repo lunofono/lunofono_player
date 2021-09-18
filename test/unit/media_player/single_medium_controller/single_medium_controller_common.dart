@@ -57,10 +57,12 @@ class TestWidget extends StatelessWidget {
   final SingleMediumController controller;
   final AssetBundle bundle;
   final bool startPlaying;
-  TestWidget(this.controller, {AssetBundle? bundle, this.startPlaying = true})
+  TestWidget(this.controller,
+      {AssetBundle? bundle, this.startPlaying = true, Key? key})
       : errorKey = GlobalKey(debugLabel: 'errorKey'),
         loadingKey = GlobalKey(debugLabel: 'loadingKey'),
-        bundle = bundle ?? TestAssetBundle() {
+        bundle = bundle ?? TestAssetBundle(),
+        super(key: key) {
     globalSize = null;
   }
 

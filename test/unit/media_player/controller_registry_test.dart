@@ -18,7 +18,8 @@ class _FakeSingleMediumController extends SingleMediumController {
   _FakeSingleMediumController()
       : super(_FakeSingleMedium(Uri.parse('fake-single-medium')));
   @override
-  Future<Size> initialize(BuildContext context) => Future.value(Size(0, 0));
+  Future<Size> initialize(BuildContext context) =>
+      Future.value(const Size(0, 0));
   @override
   Widget build(BuildContext context) => Container();
 }

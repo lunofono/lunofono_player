@@ -100,7 +100,7 @@ class _FakeMenuPlayer extends MenuPlayer {
   static Key globalKey = GlobalKey(debugLabel: 'FakeMenuPlayerKey');
   @override
   Widget build(BuildContext context) {
-    final widget = Container(child: Text('FakeMenu'), key: globalKey);
+    final widget = Container(child: const Text('FakeMenu'), key: globalKey);
     menu.buildCalls.add(_BuildCall(context, widget));
     return widget;
   }

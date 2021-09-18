@@ -47,7 +47,7 @@ void main() {
   group('SingleMediumState', () {
     group('without a registered medium', () {
       test('constructs a state with an error', () {
-        final medium = _FakeSingleMedium('bad-medium', size: Size(1, 1));
+        final medium = _FakeSingleMedium('bad-medium', size: const Size(1, 1));
         final state = SingleMediumState(medium, isVisualizable: true);
         expect(state.isErroneous, true);
         expect(state.error, contains('Unsupported type'));
@@ -134,7 +134,7 @@ void main() {
       late SingleMediumState state;
 
       setUp(() {
-        size = Size(0.0, 0.0);
+        size = const Size(0.0, 0.0);
         medium = _FakeSingleMedium('good-medium', size: size);
         controller = _FakeSingleMediumController(medium);
         registry.register(
@@ -239,7 +239,7 @@ class _SingleMediumInfo {
     this.exception,
   })  : assert(exception != null && size == null ||
             exception == null && size != null),
-        widgetKey = GlobalKey(debugLabel: 'widgetKey(${location}');
+        widgetKey = GlobalKey(debugLabel: 'widgetKey($location');
 }
 
 class _FakeSingleMedium extends SingleMedium {

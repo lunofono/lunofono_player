@@ -4,10 +4,12 @@ import 'package:lunofono_player/lunofono_player.dart';
 import 'package:lunofono_bundle/lunofono_bundle.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -78,7 +80,7 @@ final bundle = Bundle(
         PlayContentAction(
           Image(
             Uri.parse('assets/heilshorn-cows.jpg'),
-            maxDuration: Duration(seconds: 2),
+            maxDuration: const Duration(seconds: 2),
           ),
         ),
         backgroundColor: Colors.blue,
@@ -87,7 +89,7 @@ final bundle = Bundle(
         PlayContentAction(
           Audio(
             Uri.parse('assets/Farm-SoundBible.com-1720780826.opus'),
-            maxDuration: Duration(seconds: 2),
+            maxDuration: const Duration(seconds: 2),
           ),
         ),
         backgroundColor: Colors.green,
@@ -98,11 +100,11 @@ final bundle = Bundle(
             <Medium>[
               Image(
                 Uri.parse('assets/heilshorn-cows.jpg'),
-                maxDuration: Duration(seconds: 2),
+                maxDuration: const Duration(seconds: 2),
               ),
               Image(
                 Uri.parse('assets/heilshorn-cows2.jpg'),
-                maxDuration: Duration(seconds: 2),
+                maxDuration: const Duration(seconds: 2),
               ),
             ],
           ),
@@ -117,7 +119,7 @@ final bundle = Bundle(
                 VisualizableMultiMediumTrack(
                   <Visualizable>[
                     Image(Uri.parse('assets/heilshorn-cows2.jpg'),
-                        maxDuration: Duration(seconds: 2)),
+                        maxDuration: const Duration(seconds: 2)),
                   ],
                 ),
                 backgroundTrack: AudibleBackgroundMultiMediumTrack(
@@ -132,7 +134,7 @@ final bundle = Bundle(
                   <Audible>[
                     Audio(
                         Uri.parse('assets/Farm-SoundBible.com-1720780826.opus'),
-                        maxDuration: Duration(seconds: 4)),
+                        maxDuration: const Duration(seconds: 4)),
                   ],
                 ),
                 backgroundTrack: VisualizableBackgroundMultiMediumTrack(
@@ -143,7 +145,7 @@ final bundle = Bundle(
               ),
               Image(
                 Uri.parse('assets/heilshorn-cows2.jpg'),
-                maxDuration: Duration(seconds: 2),
+                maxDuration: const Duration(seconds: 2),
               ),
             ],
           ),
@@ -155,7 +157,7 @@ final bundle = Bundle(
 );
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({required this.title, Key? key}) : super(key: key);
+  const MyHomePage({required this.title, Key? key}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -220,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'You have pushed the button this many times:',
             ),
             Text(
@@ -233,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }

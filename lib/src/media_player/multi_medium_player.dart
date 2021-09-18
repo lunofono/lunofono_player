@@ -55,7 +55,7 @@ class MultiMediumPlayer extends StatelessWidget {
             child: Material(
               elevation: 0,
               color: backgroundColor,
-              child: Center(
+              child: const Center(
                 child: MultiMediumWidget(),
               ),
             ),

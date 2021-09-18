@@ -158,7 +158,7 @@ class _FakeSingleMediumState extends Fake
     implements SingleMediumState {
   final String name;
   @override
-  String toStringShort() => '$name';
+  String toStringShort() => name;
   @override
   Future<void> dispose() async => super.dispose();
   _FakeSingleMediumState(this.name);

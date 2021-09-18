@@ -40,7 +40,7 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeAudibleSingleMedium(
         'unregisteredAudibleMedium',
-        size: Size(0.0, 0.0),
+        size: const Size(0.0, 0.0),
       );
       await testUnregisteredMedium(tester, medium);
     });
@@ -50,7 +50,7 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeVisualizableSingleMedium(
         'unregisteredVisualizableMedium',
-        size: Size(10.0, 10.0),
+        size: const Size(10.0, 10.0),
       );
       await testUnregisteredMedium(tester, medium);
     });
@@ -58,9 +58,9 @@ void main() {
     testWidgets('tap stops while initializing', (WidgetTester tester) async {
       final tapInitMedium = _FakeVisualizableSingleMedium(
         'tapInitMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
-        initDelay: Duration(milliseconds: 100),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
+        initDelay: const Duration(milliseconds: 100),
       );
       playerTester = _SingleMediumPlayerTester(tester, tapInitMedium);
 
@@ -83,8 +83,8 @@ void main() {
     testWidgets('tap stops while playing', (WidgetTester tester) async {
       final tapPlayMedium = _FakeVisualizableSingleMedium(
         'tapPlayMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = _SingleMediumPlayerTester(tester, tapPlayMedium);
 
@@ -121,8 +121,8 @@ void main() {
         (WidgetTester tester) async {
       final tapPlayDoneMedium = _FakeVisualizableSingleMedium(
         'tapPlayDoneMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = _SingleMediumPlayerTester(tester, tapPlayDoneMedium);
 
@@ -292,7 +292,7 @@ class _SingleMediumInfo {
             exception == null && size != null),
         initDelay = initDelay ?? const Duration(seconds: 1),
         duration = duration ?? const UnlimitedDuration(),
-        widgetKey = GlobalKey(debugLabel: 'widgetKey(${location}');
+        widgetKey = GlobalKey(debugLabel: 'widgetKey($location');
 }
 
 abstract class _FakeSingleMedium extends SingleMedium {

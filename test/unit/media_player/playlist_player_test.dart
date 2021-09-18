@@ -31,7 +31,7 @@ void main() {
     });
 
     test('default constructor saves extra arguments as expected', () {
-      final callback = (BuildContext context) {};
+      void callback(BuildContext context) {}
       final player = PlaylistPlayer(
         playlist: mockPlaylist,
         backgroundColor: Colors.red,
@@ -98,5 +98,5 @@ void main() {
 
 class _FakePlaylistWidget extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Text('test');
+  Widget build(BuildContext context) => const Text('test');
 }

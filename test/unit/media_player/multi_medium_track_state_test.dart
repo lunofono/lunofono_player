@@ -35,10 +35,10 @@ void main() {
 
     final fakeContext = _FakeContext();
 
-    final audibleMedium =
-        _FakeAudibleSingleMedium(name: 'audibleMedium1', size: Size(0.0, 0.0));
+    final audibleMedium = _FakeAudibleSingleMedium(
+        name: 'audibleMedium1', size: const Size(0.0, 0.0));
     final audibleMedium2 = _FakeAudibleSingleMedium(
-        name: 'audibleMedium2', size: Size(10.0, 12.0));
+        name: 'audibleMedium2', size: const Size(10.0, 12.0));
     final audibleMainTrack2 = _FakeAudibleMultiMediumTrack([
       audibleMedium,
       audibleMedium2,
@@ -49,13 +49,13 @@ void main() {
     ]);
 
     void stubAll(List<SingleMediumState> media) {
-      media.forEach((s) {
+      for (var s in media) {
         when(s.initialize(fakeContext, startPlaying: false))
             .thenAnswer((_) => Future<void>.value());
         when(s.play(fakeContext)).thenAnswer((_) => Future<void>.value());
         when(s.pause(fakeContext)).thenAnswer((_) => Future<void>.value());
         when(s.dispose()).thenAnswer((_) => Future<void>.value());
-      });
+      }
     }
 
     group('constructor', () {
@@ -98,7 +98,7 @@ void main() {
       });
 
       test('.background() create empty track with NoTrack', () {
-        final state = MultiMediumTrackState.background(track: NoTrack());
+        final state = MultiMediumTrackState.background(track: const NoTrack());
         expect(state.isVisualizable, isFalse);
         expect(state.isFinished, isTrue);
         expect(state.isEmpty, isTrue);
@@ -112,12 +112,12 @@ void main() {
       stubAll(state.mediaState);
       await state.initialize(fakeContext);
       expect(state.isFinished, isFalse);
-      state.mediaState.forEach((s) {
+      for (var s in state.mediaState) {
         verifyInOrder([
           s.initialize(fakeContext),
         ]);
         verifyNoMoreInteractions(s);
-      });
+      }
     });
 
     test('initialize(startPlaying) initializes media and starts playing',
@@ -195,10 +195,10 @@ void main() {
       // If we dispose the controller,
       state.mediaState.forEach(clearInteractions);
       await state.dispose();
-      state.mediaState.forEach((s) {
+      for (var s in state.mediaState) {
         verify(s.dispose()).called(1);
         verifyNoMoreInteractions(s);
-      });
+      }
     });
 
     test('listening for updates work', () async {
@@ -276,9 +276,11 @@ void main() {
     test('debugDescribeChildren()', () async {
       final state = MultiMediumTrackState.main(track: audibleMainTrack2);
       final fakeNode = _FakeDiagnosticsNode();
-      state.mediaState.forEach((s) => when(s.toDiagnosticsNode(
-              name: captureAnyNamed('name'), style: captureAnyNamed('style')))
-          .thenReturn(fakeNode));
+      for (var s in state.mediaState) {
+        when(s.toDiagnosticsNode(
+                name: captureAnyNamed('name'), style: captureAnyNamed('style')))
+            .thenReturn(fakeNode);
+      }
 
       expect(state.debugDescribeChildren(), [fakeNode, fakeNode]);
       state.mediaState.asMap().forEach(

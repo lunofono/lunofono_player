@@ -55,7 +55,7 @@ class FakeActionPlayer extends ActionPlayer {
 
 class FakeButtonPlayer extends Fake implements ButtonPlayer {
   @override
-  Color get backgroundColor => Color(0x12345678);
+  Color get backgroundColor => const Color(0x12345678);
 }
 
 class FakeContext extends Fake implements BuildContext {}

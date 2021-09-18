@@ -36,7 +36,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: ChangeNotifierProvider<SingleMediumState>.value(
               value: state,
-              child: SingleMediumWidget(),
+              child: const SingleMediumWidget(),
             ),
           ),
         );
@@ -97,8 +97,8 @@ void main() {
 
       testWidgets('a Container for an initialized non-visualizable state',
           (WidgetTester tester) async {
-        final state =
-            _FakeSingleMediumState(size: Size(2.0, 1.0), isVisualizable: false);
+        final state = _FakeSingleMediumState(
+            size: const Size(2.0, 1.0), isVisualizable: false);
         final playerWidget = await testPlayer(tester, state);
         expect(playerWidget, isA<Container>());
         expect(find.byType(RotatedBox), findsNothing);
@@ -106,27 +106,27 @@ void main() {
 
       testWidgets('the player for a visualizable state',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(1.0, 2.0));
+        final state = _FakeSingleMediumState(size: const Size(1.0, 2.0));
         await testPlayer(tester, state);
       });
 
       testWidgets('no RotatedBox for square media',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(1.0, 1.0));
+        final state = _FakeSingleMediumState(size: const Size(1.0, 1.0));
         await testPlayer(tester, state);
         expect(find.byType(RotatedBox), findsNothing);
       });
 
       testWidgets('no RotatedBox for portrait media',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(1.0, 2.0));
+        final state = _FakeSingleMediumState(size: const Size(1.0, 2.0));
         await testPlayer(tester, state);
         expect(find.byType(RotatedBox), findsNothing);
       });
 
       testWidgets('a RotatedBox for landscape media',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(2.0, 1.0));
+        final state = _FakeSingleMediumState(size: const Size(2.0, 1.0));
         await testPlayer(tester, state);
         expect(find.byType(RotatedBox), findsOneWidget);
       });

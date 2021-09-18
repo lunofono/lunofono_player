@@ -46,7 +46,7 @@ void main() {
 
     setUp(() {
       fakeContext = FakeContext();
-      color = Color(0x12ab4523);
+      color = const Color(0x12ab4523);
     });
 
     test('build creates a StyledButtonWidget', () {
@@ -67,12 +67,10 @@ void main() {
       Widget? widget;
       await tester.pumpWidget(
         MaterialApp(
-          home: Container(
-            child: Builder(builder: (context) {
-              widget = buttonPlayer.build(context);
-              return widget!;
-            }),
-          ),
+          home: Builder(builder: (context) {
+            widget = buttonPlayer.build(context);
+            return widget!;
+          }),
         ),
       );
       expect(widget!.key, ObjectKey(button));

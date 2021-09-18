@@ -35,7 +35,7 @@ class MultiMediumWidget extends StatelessWidget {
   ///
   /// This is mainly useful for testing.
   @protected
-  MultiMediumTrackWidget createTrackWidget() => MultiMediumTrackWidget();
+  MultiMediumTrackWidget createTrackWidget() => const MultiMediumTrackWidget();
 
   /// Builds the UI for this widget.
   @override

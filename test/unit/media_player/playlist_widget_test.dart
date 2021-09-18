@@ -54,7 +54,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ChangeNotifierProvider<PlaylistState>.value(
             value: state,
-            child: PlaylistWidget(),
+            child: const PlaylistWidget(),
           ),
         );
 

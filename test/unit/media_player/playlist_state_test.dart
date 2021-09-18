@@ -23,7 +23,7 @@ void main() {
   group('PlaylistState.createPlayableState()', () {
     test('creates SingleMediumState for SingleMedium', () {
       final medium = _FakeSingleMedium();
-      final onFinished = (BuildContext context) {};
+      void onFinished(BuildContext context) {}
       final state =
           PlaylistState.createPlayableState(medium, onFinished: onFinished);
       expect(state, isA<SingleMediumState>());
@@ -32,7 +32,7 @@ void main() {
 
     test('creates SingleMediumState for SingleMedium', () {
       final medium = _FakeMultiMedium();
-      final onFinished = (BuildContext context) {};
+      void onFinished(BuildContext context) {}
       final state =
           PlaylistState.createPlayableState(medium, onFinished: onFinished);
       expect(state, isA<MultiMediumState>());
@@ -41,7 +41,7 @@ void main() {
 
     test('throws UnsupportedMediumType on unsupported Medium type', () {
       final medium = _FakeMedium();
-      final onFinished = (BuildContext context) {};
+      void onFinished(BuildContext context) {}
       expect(
           () =>
               PlaylistState.createPlayableState(medium, onFinished: onFinished),
@@ -71,14 +71,14 @@ void main() {
         () => PlaylistState.createPlayableState = originalCreatePlayableState);
 
     void stubAll(List<PlayableState> states) {
-      states.forEach((state) {
+      for (var state in states) {
         final s = state as _MockPlayableState;
         when(s.initialize(fakeContext, startPlaying: anyNamed('startPlaying')))
             .thenAnswer((_) => Future<void>.value());
         when(s.play(fakeContext)).thenAnswer((_) => Future<void>.value());
         when(s.pause(fakeContext)).thenAnswer((_) => Future<void>.value());
         when(s.dispose()).thenAnswer((_) => Future<void>.value());
-      });
+      }
     }
 
     PlaylistState createPlaylistState(
@@ -113,12 +113,12 @@ void main() {
       final state = createPlaylistState();
       await state.initialize(fakeContext);
       expect(state.isFinished, isFalse);
-      state.mediaState.forEach((s) {
+      for (var s in state.mediaState) {
         verifyInOrder([
           s.initialize(fakeContext),
         ]);
         verifyNoMoreInteractions(s);
-      });
+      }
     });
 
     test('initialize(startPlaying) initializes media and starts playing',
@@ -190,10 +190,10 @@ void main() {
       // If we dispose the controller,
       state.mediaState.forEach(clearInteractions);
       await state.dispose();
-      state.mediaState.forEach((s) {
+      for (var s in state.mediaState) {
         verify(s.dispose()).called(1);
         verifyNoMoreInteractions(s);
-      });
+      }
     });
 
     test('listening for updates work', () async {
@@ -258,9 +258,11 @@ void main() {
     test('debugDescribeChildren()', () async {
       final state = createPlaylistState();
       final fakeNode = _FakeDiagnosticsNode();
-      state.mediaState.forEach((s) => when(s.toDiagnosticsNode(
-              name: captureAnyNamed('name'), style: captureAnyNamed('style')))
-          .thenReturn(fakeNode));
+      for (var s in state.mediaState) {
+        when(s.toDiagnosticsNode(
+                name: captureAnyNamed('name'), style: captureAnyNamed('style')))
+            .thenReturn(fakeNode);
+      }
 
       expect(state.debugDescribeChildren(), [fakeNode, fakeNode]);
       state.mediaState.asMap().forEach(
@@ -310,7 +312,7 @@ class _FakeMultiMedium extends _FakeMedium implements MultiMedium {
       _FakeMultiMediumTrack(_FakeSingleMedium('mainTrack1'));
 
   @override
-  BackgroundMultiMediumTrack get backgroundTrack => NoTrack();
+  BackgroundMultiMediumTrack get backgroundTrack => const NoTrack();
 
   _FakeMultiMedium([String? name]) : super(name);
 }

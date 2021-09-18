@@ -56,7 +56,7 @@ void main() {
     });
 
     group('new instance', () {
-      testInstance(PlatformServices());
+      testInstance(const PlatformServices());
     });
   });
 }

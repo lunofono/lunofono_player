@@ -88,8 +88,8 @@ void main() {
       'initializes and plays a video until the end',
       (WidgetTester tester) async {
         final videoInfo = FakeVideoInfo(
-          Duration(milliseconds: 1000),
-          Size(10.0, 20.0),
+          const Duration(milliseconds: 1000),
+          const Size(10.0, 20.0),
         );
         var hasFinished = false;
         controller = TestVideoPlayerController(
@@ -142,13 +142,13 @@ void main() {
       'initializes and plays a video with a maxDuration until the end',
       (WidgetTester tester) async {
         final videoInfo = FakeVideoInfo(
-          Duration(milliseconds: 1000),
-          Size(10.0, 20.0),
+          const Duration(milliseconds: 1000),
+          const Size(10.0, 20.0),
         );
         var hasFinished = false;
         final limitedVideo = Video(
           Uri.parse('fake-video.avi'),
-          maxDuration: Duration(milliseconds: 600),
+          maxDuration: const Duration(milliseconds: 600),
         );
         controller = TestVideoPlayerController(
           limitedVideo,
@@ -185,7 +185,7 @@ void main() {
         seekPosition =
             Duration(milliseconds: limitedVideo.maxDuration.inMilliseconds + 1);
         fakeController.fakeSeekTo(seekPosition);
-        await tester.pump(Duration(milliseconds: 2));
+        await tester.pump(const Duration(milliseconds: 2));
 
         // The video should be paused and onMediumFinished called
         expectSuccess(tester, widget, findWidget: video_player.VideoPlayer);
@@ -198,8 +198,8 @@ void main() {
       'initializes and plays a video until the user reacts',
       (WidgetTester tester) async {
         final videoInfo = FakeVideoInfo(
-          Duration(milliseconds: 1000),
-          Size(1024.0, 768.0),
+          const Duration(milliseconds: 1000),
+          const Size(1024.0, 768.0),
         );
         var hasFinished = false;
         controller = TestVideoPlayerController(
@@ -265,7 +265,8 @@ void main() {
 
     testWidgets('initializes and plays showing an empty container',
         (WidgetTester tester) async {
-      final videoInfo = FakeVideoInfo(Duration(seconds: 1), Size(0.0, 0.0));
+      final videoInfo =
+          FakeVideoInfo(const Duration(seconds: 1), const Size(0.0, 0.0));
       final controller = TestAudioPlayerController(audio, videoInfo,
           widgetKey: globalSuccessKey);
       final widget = TestWidget(controller);

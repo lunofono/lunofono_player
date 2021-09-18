@@ -48,7 +48,7 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeAudibleSingleMedium(
         'unregisteredAudibleMedium',
-        size: Size(0.0, 0.0),
+        size: const Size(0.0, 0.0),
       );
       await testUnregisteredMedium(tester, medium);
     });
@@ -58,7 +58,7 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeVisualizableSingleMedium(
         'unregisteredVisualizableMedium',
-        size: Size(10.0, 10.0),
+        size: const Size(10.0, 10.0),
       );
       await testUnregisteredMedium(tester, medium);
     });
@@ -94,8 +94,8 @@ void main() {
         (WidgetTester tester) async {
       final notRotatedSquareMedium = _FakeVisualizableSingleMedium(
         'notRotatedSquareMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = MediaPlayerTester(tester, notRotatedSquareMedium);
 
@@ -108,8 +108,8 @@ void main() {
         (WidgetTester tester) async {
       final notRotatedPortraitMedium = _FakeVisualizableSingleMedium(
         'notRotatedPortraitMedium',
-        size: Size(10.0, 20.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 20.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = MediaPlayerTester(tester, notRotatedPortraitMedium);
 
@@ -122,8 +122,8 @@ void main() {
         (WidgetTester tester) async {
       final rotatedLandscapeMedium = _FakeVisualizableSingleMedium(
         'rotatedLandscapeMedium',
-        size: Size(20.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(20.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = MediaPlayerTester(tester, rotatedLandscapeMedium);
 
@@ -155,8 +155,8 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeAudibleSingleMedium(
         'limitedAudibleMedium',
-        size: Size(0.0, 0.0),
-        duration: Duration(seconds: 1),
+        size: const Size(0.0, 0.0),
+        duration: const Duration(seconds: 1),
       );
       await testPlayMediaUntilEnd(tester, medium);
     });
@@ -165,8 +165,8 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeVisualizableSingleMedium(
         'limitedVisualizableMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       await testPlayMediaUntilEnd(tester, medium);
     });
@@ -174,7 +174,7 @@ void main() {
     testWidgets('plays unlimited media forever(ish, 10 days)',
         (WidgetTester tester) async {
       final unlimitedMedium = _FakeVisualizableSingleMedium('unlimitedMedium',
-          size: Size(10.0, 10.0));
+          size: const Size(10.0, 10.0));
       playerTester = MediaPlayerTester(tester, unlimitedMedium);
 
       await playerTester!.testInitializationDone();
@@ -182,7 +182,7 @@ void main() {
       playerTester!.expectPlayingStatus(finished: false);
 
       // Wait until half of the media was played, it should keep playing
-      await tester.pump(Duration(days: 10));
+      await tester.pump(const Duration(days: 10));
       playerTester!.expectPlayerWidget();
       playerTester!.expectPlayingStatus(finished: false);
     });
@@ -190,9 +190,9 @@ void main() {
     testWidgets('tap stops while initializing', (WidgetTester tester) async {
       final tapInitMedium = _FakeVisualizableSingleMedium(
         'tapInitMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
-        initDelay: Duration(milliseconds: 100),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
+        initDelay: const Duration(milliseconds: 100),
       );
       playerTester = MediaPlayerTester(tester, tapInitMedium);
 
@@ -215,8 +215,8 @@ void main() {
     testWidgets('tap stops while playing', (WidgetTester tester) async {
       final tapPlayMedium = _FakeVisualizableSingleMedium(
         'PlaynitMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = MediaPlayerTester(tester, tapPlayMedium);
 
@@ -253,8 +253,8 @@ void main() {
         (WidgetTester tester) async {
       final tapPlayDoneMedium = _FakeVisualizableSingleMedium(
         'tapPlayDoneMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = MediaPlayerTester(tester, tapPlayDoneMedium);
 
@@ -282,23 +282,23 @@ void main() {
         (WidgetTester tester) async {
       final medium1 = _FakeAudibleVisualizableSingleMedium(
         'medium1(audible, visualizable)',
-        size: Size(20.0, 10.0),
-        duration: Duration(seconds: 7),
-        initDelay: Duration(seconds: 2),
+        size: const Size(20.0, 10.0),
+        duration: const Duration(seconds: 7),
+        initDelay: const Duration(seconds: 2),
       );
 
       final medium2 = _FakeVisualizableSingleMedium(
         'medium2(visualizable)',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
-        initDelay: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
+        initDelay: const Duration(seconds: 1),
       );
 
       final medium3 = _FakeVisualizableSingleMedium(
         'medium3(visualizable)',
-        size: Size(10.0, 20.0),
-        duration: Duration(seconds: 1),
-        initDelay: Duration(seconds: 3),
+        size: const Size(10.0, 20.0),
+        duration: const Duration(seconds: 1),
+        initDelay: const Duration(seconds: 3),
       );
 
       final medium = MultiMedium(
@@ -329,18 +329,18 @@ void main() {
           .reduce((d1, d2) => d1 > d2 ? d1 : d2);
 
       var left = Duration(milliseconds: maxInit.inMilliseconds);
-      final pump = (Duration t) async {
+      Future<void> pump(Duration t) async {
         await tester.pump(t);
         left -= t;
-      };
+      }
 
       await pump(minInit);
       playerTester!.expectMultiTrackIsInitialzing();
       await pump(left ~/ 2);
       playerTester!.expectMultiTrackIsInitialzing();
-      await pump(left - Duration(milliseconds: 1));
+      await pump(left - const Duration(milliseconds: 1));
       playerTester!.expectMultiTrackIsInitialzing();
-      await pump(Duration(milliseconds: 1));
+      await pump(const Duration(milliseconds: 1));
 
       // Now the first medium should have started playing and not be finished
       playerTester!.expectPlayerWidget(mainMediumIndex: 0);
@@ -358,14 +358,14 @@ void main() {
         (WidgetTester tester) async {
       final medium1 = _FakeAudibleSingleMedium(
         'medium1(audible)',
-        size: Size(0.0, 0.0),
-        duration: Duration(seconds: 1),
+        size: const Size(0.0, 0.0),
+        duration: const Duration(seconds: 1),
       );
 
       final medium2 = _FakeAudibleVisualizableSingleMedium(
         'medium2(audible, visualizable)',
-        size: Size(10.0, 20.0),
-        duration: Duration(seconds: 7),
+        size: const Size(10.0, 20.0),
+        duration: const Duration(seconds: 7),
       );
 
       final multiAudibleMainTrackMedium = MultiMedium(
@@ -380,20 +380,20 @@ void main() {
         (WidgetTester tester) async {
       final medium1 = _FakeAudibleVisualizableSingleMedium(
         'medium1(audible, visualizable)',
-        size: Size(20.0, 10.0),
-        duration: Duration(seconds: 7),
+        size: const Size(20.0, 10.0),
+        duration: const Duration(seconds: 7),
       );
 
       final medium2 = _FakeVisualizableSingleMedium(
         'medium2(visualizable)',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
 
       final medium3 = _FakeVisualizableSingleMedium(
         'medium3(visualizable)',
-        size: Size(10.0, 20.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 20.0),
+        duration: const Duration(seconds: 1),
       );
 
       final multiVisualizableMainTrackMedium = MultiMedium(
@@ -410,8 +410,8 @@ void main() {
         (WidgetTester tester) async {
       final medium1 = _FakeAudibleSingleMedium(
         'medium1(audible)',
-        size: Size(0.0, 0.0),
-        duration: Duration(seconds: 1),
+        size: const Size(0.0, 0.0),
+        duration: const Duration(seconds: 1),
       );
 
       final medium = MultiMedium(
@@ -427,8 +427,8 @@ void main() {
         (WidgetTester tester) async {
       final medium1 = _FakeVisualizableSingleMedium(
         'medium1(audible)',
-        size: Size(0.0, 0.0),
-        duration: Duration(seconds: 1),
+        size: const Size(0.0, 0.0),
+        duration: const Duration(seconds: 1),
       );
 
       final medium = MultiMedium(
@@ -443,20 +443,20 @@ void main() {
         (WidgetTester tester) async {
       final medium1 = _FakeAudibleVisualizableSingleMedium(
         'medium1(audible, visualizable)',
-        size: Size(20.0, 10.0),
-        duration: Duration(seconds: 7),
+        size: const Size(20.0, 10.0),
+        duration: const Duration(seconds: 7),
       );
 
       final medium2 = _FakeVisualizableSingleMedium(
         'medium2(visualizable)',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
 
       final medium3 = _FakeVisualizableSingleMedium(
         'medium3(visualizable)',
-        size: Size(10.0, 20.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 20.0),
+        duration: const Duration(seconds: 1),
       );
 
       final multiVisualizableMainTrackMedium = MultiMedium(
@@ -648,8 +648,9 @@ class MediaPlayerTester {
     // Now the first medium should have started playing (and only the first
     // medium) but nothing should have finished yet.
     expect(mainControllers.first.isPlaying, isTrue);
-    mainTrackIndexes.forEach(
-        (n) => expectPlayingStatus(mainMediumIndex: n, finished: false));
+    for (var n in mainTrackIndexes) {
+      expectPlayingStatus(mainMediumIndex: n, finished: false);
+    }
     mainTrackIndexes
         .skip(1)
         .forEach((n) => expect(mainControllers[n].isPlaying, isFalse));
@@ -665,16 +666,23 @@ class MediaPlayerTester {
       // be showing
       expectPlayerWidget(mainMediumIndex: currentIndex);
       // The previous media should have finished and not be playing.
-      prev.forEach((p) => expectPlayingStatus(
-          mainMediumIndex: p, finished: true, stoppedTimes: 0));
-      prev.forEach((n) => expect(mainControllers[n].isPlaying, isFalse));
+      for (var p in prev) {
+        expectPlayingStatus(
+            mainMediumIndex: p, finished: true, stoppedTimes: 0);
+      }
+      for (var n in prev) {
+        expect(mainControllers[n].isPlaying, isFalse);
+      }
       // The current should be playing and not finished.
       expectPlayingStatus(mainMediumIndex: currentIndex, finished: false);
       expect(mainControllers[currentIndex].isPlaying, isTrue);
       // And the following should be neither playing nor finished.
-      next.forEach(
-          (n) => expectPlayingStatus(mainMediumIndex: n, finished: false));
-      next.forEach((n) => expect(mainControllers[n].isPlaying, isFalse));
+      for (var n in next) {
+        expectPlayingStatus(mainMediumIndex: n, finished: false);
+      }
+      for (var n in next) {
+        expect(mainControllers[n].isPlaying, isFalse);
+      }
 
       // Wait until the current finishes playing
       await tester.pump(current.info.duration);
@@ -701,11 +709,13 @@ class MediaPlayerTester {
   void expectMultiTrackIsInitialzing() {
     expectInitializationWidget(mainMediumIndex: 0);
     // All media shouldn't be finished yet
-    mainTrackIndexes.forEach(
-        (n) => expectPlayingStatus(mainMediumIndex: n, finished: false));
+    for (var n in mainTrackIndexes) {
+      expectPlayingStatus(mainMediumIndex: n, finished: false);
+    }
     // and shouldn't be playing
-    mainTrackIndexes
-        .forEach((n) => expect(mainControllers[n].isPlaying, isFalse));
+    for (var n in mainTrackIndexes) {
+      expect(mainControllers[n].isPlaying, isFalse);
+    }
   }
 
   void expectInitializationWidget({int mainMediumIndex = 0}) {
@@ -786,7 +796,7 @@ class _SingleMediumInfo {
             exception == null && size != null),
         initDelay = initDelay ?? const Duration(seconds: 1),
         duration = duration ?? const UnlimitedDuration(),
-        widgetKey = GlobalKey(debugLabel: 'widgetKey(${location}');
+        widgetKey = GlobalKey(debugLabel: 'widgetKey($location');
 }
 
 abstract class _FakeSingleMedium extends SingleMedium {

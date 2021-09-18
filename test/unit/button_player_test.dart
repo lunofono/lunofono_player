@@ -46,7 +46,7 @@ void main() {
     setUp(() {
       fakeButton = FakeButton();
       fakeContext = FakeContext();
-      color = Color(0x12ab4523);
+      color = const Color(0x12ab4523);
 
       ActionPlayer.registry = ActionPlayerRegistry();
       ActionPlayer.registry

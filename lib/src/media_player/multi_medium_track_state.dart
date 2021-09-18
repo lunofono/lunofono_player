@@ -18,11 +18,12 @@ import 'single_medium_state.dart' show SingleMediumState;
 class MultiMediumTrackState with ChangeNotifier, DiagnosticableTreeMixin {
   /// Function used to create [SingleMediumState] instances.
   @visibleForTesting
-  static SingleMediumState Function(SingleMedium medium, {required bool isVisualizable, void Function(BuildContext)? onFinished}) createSingleMediumState = (
-    SingleMedium medium, {
-    required bool isVisualizable,
-    void Function(BuildContext)? onFinished,
-  }) =>
+  static var createSingleMediumState = _createSingleMediumState;
+
+  /// Creates a [SingleMediumState] instance
+  static SingleMediumState _createSingleMediumState(SingleMedium medium,
+          {required bool isVisualizable,
+          void Function(BuildContext)? onFinished}) =>
       SingleMediumState(
         medium,
         isVisualizable: isVisualizable,

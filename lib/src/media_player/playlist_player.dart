@@ -16,7 +16,8 @@ import 'playlist_widget.dart' show PlaylistWidget;
 /// a [PlaylistState] that is provided via a [ChangeNotifierProvider].
 class PlaylistPlayer extends StatelessWidget {
   @visibleForTesting
-  static Widget Function() createPlaylistWidget = () => PlaylistWidget();
+  static var createPlaylistWidget = _createPlaylistWidget;
+  static Widget _createPlaylistWidget() => const PlaylistWidget();
 
   /// The [Playlist] to play by this player.
   final Playlist playlist;

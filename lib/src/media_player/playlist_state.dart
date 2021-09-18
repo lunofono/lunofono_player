@@ -19,10 +19,13 @@ class PlaylistState
     implements PlayableState {
   /// Function used to create the concrete [PlayableState] instances.
   @visibleForTesting
-  static PlayableState Function(
+  static var createPlayableState = _createPlayableState;
+
+  /// Creates an appropriate [PlayableState] instance based on the medium type.
+  static PlayableState _createPlayableState(
     Medium medium, {
     void Function(BuildContext)? onFinished,
-  }) createPlayableState = (medium, {onFinished}) {
+  }) {
     if (medium is SingleMedium) {
       return SingleMediumState(medium,
           onFinished: onFinished, isVisualizable: true);
@@ -31,7 +34,7 @@ class PlaylistState
       return MultiMediumState(medium, onFinished: onFinished);
     }
     throw UnsupportedMediumTypeError();
-  };
+  }
 
   /// The playlist this state represents.
   @override

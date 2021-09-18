@@ -10,7 +10,7 @@ void main() {
 
   testWidgets('test video playing from local assets',
       (WidgetTester tester) async {
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(const MyApp());
 
     await tester.pumpAndSettle();
 

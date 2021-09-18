@@ -328,7 +328,7 @@ class ImagePlayerController extends SingleMediumController {
       key: widgetKey,
     );
 
-    _image.image.resolve(ImageConfiguration()).addListener(
+    _image.image.resolve(const ImageConfiguration()).addListener(
           ImageStreamListener(
             (ImageInfo info, bool _) {
               size = Size(

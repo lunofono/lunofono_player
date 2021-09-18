@@ -28,9 +28,9 @@ void main() {
     tearDown(() => ControllerRegistry.instance = originalRegistry);
 
     final audibleMedium =
-        _FakeAudibleSingleMedium('audible', size: Size(0.0, 0.0));
+        _FakeAudibleSingleMedium('audible', size: const Size(0.0, 0.0));
     final audibleMedium2 =
-        _FakeAudibleSingleMedium('visualizable', size: Size(10.0, 12.0));
+        _FakeAudibleSingleMedium('visualizable', size: const Size(10.0, 12.0));
 
     final audibleMultiMedium = MultiMedium(
         AudibleMultiMediumTrack(<Audible>[audibleMedium, audibleMedium2]));
@@ -39,8 +39,10 @@ void main() {
       AudibleMultiMediumTrack(<Audible>[audibleMedium, audibleMedium2]),
       backgroundTrack: _FakeVisualizableBackgroundMultiMediumTrack(
         <Visualizable>[
-          _FakeVisualizableSingleMedium('visualizable1', size: Size(1.0, 1.0)),
-          _FakeVisualizableSingleMedium('visualizable2', size: Size(2.0, 2.0)),
+          _FakeVisualizableSingleMedium('visualizable1',
+              size: const Size(1.0, 1.0)),
+          _FakeVisualizableSingleMedium('visualizable2',
+              size: const Size(2.0, 2.0)),
         ],
       ),
     );
@@ -52,11 +54,12 @@ void main() {
       expect(finished, isFalse);
       expect(state.isInitialized, isFalse);
       expect(state.backgroundTrackState, isEmpty);
-      state.mainTrackState.mediaState
-          .forEach((s) => expect(s.controller.asFake!.calls, isEmpty));
+      for (var s in state.mainTrackState.mediaState) {
+        expect(s.controller.asFake!.calls, isEmpty);
+      }
 
       var notifyCalled = false;
-      final updateNotifyCalled = () => notifyCalled = true;
+      void updateNotifyCalled() => notifyCalled = true;
       state.addListener(updateNotifyCalled);
 
       await state.initialize(_FakeContext(), startPlaying: true);
@@ -143,15 +146,18 @@ void main() {
         expect(finished, isFalse);
         expect(state.isInitialized, isFalse);
         expect(state.backgroundTrackState, isNotEmpty);
-        state.mainTrackState.mediaState
-            .forEach((s) => expect(s.controller.asFake!.calls, isEmpty));
-        state.backgroundTrackState.mediaState
-            .forEach((s) => expect(s.controller.asFake!.calls, isEmpty));
+        for (var s in state.mainTrackState.mediaState) {
+          expect(s.controller.asFake!.calls, isEmpty);
+        }
+        for (var s in state.backgroundTrackState.mediaState) {
+          expect(s.controller.asFake!.calls, isEmpty);
+        }
 
         var notifyCalled = false;
-        final checkInitialized = () {
+        void checkInitialized() {
           notifyCalled = true;
-        };
+        }
+
         state.addListener(checkInitialized);
 
         await state.initialize(_FakeContext(), startPlaying: true);
@@ -299,7 +305,7 @@ void main() {
 
     test('toString()', () {
       expect(
-        MultiMediumState(multiMedium, onFinished: (context) => null).toString(),
+        MultiMediumState(multiMedium, onFinished: (context) {}).toString(),
         'MultiMediumState(main: MultiMediumTrackState(audible, '
         'current: 0, media: 2), '
         'background: MultiMediumTrackState(visualizable, '
@@ -316,7 +322,7 @@ void main() {
       final identityHash = RegExp(r'#[0-9a-f]{5}');
 
       expect(
-          MultiMediumState(multiMedium, onFinished: (context) => null)
+          MultiMediumState(multiMedium, onFinished: (context) {})
               .toStringDeep()
               .replaceAll(identityHash, ''),
           'MultiMediumState\n'
@@ -399,7 +405,7 @@ class _SingleMediumInfo {
     this.exception,
   })  : assert(exception != null && size == null ||
             exception == null && size != null),
-        widgetKey = GlobalKey(debugLabel: 'widgetKey(${location}');
+        widgetKey = GlobalKey(debugLabel: 'widgetKey($location');
 }
 
 abstract class _FakeSingleMedium extends SingleMedium {
