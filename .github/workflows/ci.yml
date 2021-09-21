@@ -43,7 +43,8 @@ jobs:
       run: tool/ci analyze
 
     - name: Check format
-      run: flutter format -n --set-exit-if-changed lib test example
+      if: matrix.test_type == 'static'
+      run: tool/ci format
 
     - name: Run ${{ matrix.test_type }} tests
       if: matrix.test_type != 'static'
