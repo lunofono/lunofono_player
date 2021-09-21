@@ -27,12 +27,13 @@ cmd_check() {
 }
 
 cmd_analyze() {
-  flutter analyze lib test
+  flutter analyze .
 }
 
 cmd_format() {
   echo "Checking format..."
-  flutter format -n --set-exit-if-changed lib test
+  flutter format -n --set-exit-if-changed .
+}
 
 cmd_mocks_gen() {
   flutter pub run build_runner build
