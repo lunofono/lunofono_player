@@ -17,21 +17,21 @@ class FakeActionPlayer extends ActionPlayer {
   final FakeAction action;
   @override
   void act(BuildContext context, ButtonPlayer button) {}
-  FakeActionPlayer(this.action) : assert(action != null);
+  FakeActionPlayer(this.action);
 }
 
 class FakeButton extends Button {
   FakeButton() : super(FakeAction());
 }
 
-class FakeButtonPlayer extends ButtonPlayer {
+class _FakeButtonPlayer extends ButtonPlayer {
   @override
   final FakeButton button;
 
   @override
   Widget build(BuildContext context) => Container(key: ObjectKey(button));
 
-  FakeButtonPlayer(this.button) : super(button);
+  _FakeButtonPlayer(this.button) : super(button);
 }
 
 class FakeContext extends Fake implements BuildContext {}
@@ -39,14 +39,14 @@ class FakeContext extends Fake implements BuildContext {}
 void main() {
   group('ButtonPlayer', () {
     final oldButtonRegistry = ButtonPlayer.registry;
-    FakeButton fakeButton;
-    FakeContext fakeContext;
-    Color color;
+    FakeButton? fakeButton;
+    late FakeContext fakeContext;
+    Color? color;
 
     setUp(() {
       fakeButton = FakeButton();
       fakeContext = FakeContext();
-      color = Color(0x12ab4523);
+      color = const Color(0x12ab4523);
 
       ActionPlayer.registry = ActionPlayerRegistry();
       ActionPlayer.registry
@@ -58,17 +58,16 @@ void main() {
     test('empty registry is empty', () {
       ButtonPlayer.registry = ButtonPlayerRegistry();
       expect(ButtonPlayer.registry, isEmpty);
-      expect(() => ButtonPlayer.wrap(fakeButton), throwsAssertionError);
+      expect(() => ButtonPlayer.wrap(fakeButton!), throwsAssertionError);
     });
 
     test('registration and base ButtonPlayer implementation works', () {
-      expect(() => FakeButtonPlayer(null), throwsAssertionError);
       ButtonPlayer.registry = ButtonPlayerRegistry();
       ButtonPlayer.registry
-          .register(FakeButton, (b) => FakeButtonPlayer(b as FakeButton));
-      final buttonPlayer = ButtonPlayer.wrap(fakeButton);
+          .register(FakeButton, (b) => _FakeButtonPlayer(b as FakeButton));
+      final buttonPlayer = ButtonPlayer.wrap(fakeButton!);
       expect(buttonPlayer.backgroundColor, isNull);
-      expect(buttonPlayer.action.action, fakeButton.action);
+      expect(buttonPlayer.action.action, fakeButton!.action);
       final widget = buttonPlayer.build(fakeContext);
       expect(widget.key, ObjectKey(fakeButton));
     });

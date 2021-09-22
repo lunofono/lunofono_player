@@ -15,18 +15,16 @@ import 'package:lunofono_player/src/media_player/single_medium_controller.dart';
 import 'single_medium_controller_common.dart';
 import '../../../util/finders.dart' show findSubString;
 
-FakeVideoInfo globalFakeInfo;
+FakeVideoInfo? globalFakeInfo;
+
+class _FakeContext extends Fake implements BuildContext {}
 
 void main() {
   group('VideoPlayerController', () {
     final video = Video(Uri.parse('fake-video.avi'));
 
-    TestVideoPlayerController controller;
-    tearDown(() async => await controller?.dispose());
-
-    test('constructor asserts on null medium', () {
-      expect(() => VideoPlayerController(null), throwsAssertionError);
-    });
+    late TestVideoPlayerController controller;
+    tearDown(() async => await controller.dispose());
 
     test('can instantiate a video_player.VideoPlayerController', () async {
       controller = TestVideoPlayerController(video, null);
@@ -53,10 +51,10 @@ void main() {
         expect(controller.value.isPlaying, false);
 
         await tester.pumpAndSettle();
-        expectError(tester, widget);
-        expect(findSubString(globalFakeInfo.initError), findsOneWidget);
-        expect(hasFinished, false);
+        expectInitError(tester, widget);
+        expect(findSubString(globalFakeInfo!.initError), findsOneWidget);
         expect(controller.value.isPlaying, false);
+        expect(hasFinished, false);
       },
     );
 
@@ -64,9 +62,10 @@ void main() {
       'errors in play()',
       (WidgetTester tester) async {
         var hasFinished = false;
+        final videoInfo = FakeVideoInfo.playError();
         controller = TestVideoPlayerController(
           video,
-          FakeVideoInfo.playError('Play error'),
+          videoInfo,
           onMediumFinished: (context) => hasFinished = true,
           widgetKey: globalSuccessKey,
         );
@@ -77,8 +76,9 @@ void main() {
         expect(controller.value.isPlaying, false);
 
         await tester.pumpAndSettle();
-        expectError(tester, widget);
-        expect(findSubString(globalFakeInfo.playError), findsOneWidget);
+        expectPlayError(tester, widget);
+        expect(globalSize, videoInfo.size);
+        expect(findSubString(globalFakeInfo!.playError), findsOneWidget);
         expect(hasFinished, false);
         expect(controller.value.isPlaying, false);
       },
@@ -88,8 +88,8 @@ void main() {
       'initializes and plays a video until the end',
       (WidgetTester tester) async {
         final videoInfo = FakeVideoInfo(
-          Duration(milliseconds: 1000),
-          Size(10.0, 20.0),
+          const Duration(milliseconds: 1000),
+          const Size(10.0, 20.0),
         );
         var hasFinished = false;
         controller = TestVideoPlayerController(
@@ -108,7 +108,7 @@ void main() {
         // Since loading is emulated, in the next frame it should be ready.
         // Video should start playing.
         final fakeController =
-            controller.controller as FakeVideoPlayerController;
+            controller.controller as _FakeVideoPlayerController;
         await tester.pump(fakeController.initDelay);
         expectSuccess(tester, widget,
             size: videoInfo.size, findWidget: video_player.VideoPlayer);
@@ -116,8 +116,8 @@ void main() {
         expect(controller.value.isPlaying, true);
 
         // Emulate the video almost ended playing
-        final seekPosition =
-            Duration(milliseconds: globalFakeInfo.duration.inMilliseconds - 1);
+        final seekPosition = Duration(
+            milliseconds: globalFakeInfo!.duration!.inMilliseconds - 1);
         fakeController.fakeSeekTo(seekPosition);
         await tester.pump(seekPosition);
         expectSuccess(tester, widget,
@@ -142,13 +142,13 @@ void main() {
       'initializes and plays a video with a maxDuration until the end',
       (WidgetTester tester) async {
         final videoInfo = FakeVideoInfo(
-          Duration(milliseconds: 1000),
-          Size(10.0, 20.0),
+          const Duration(milliseconds: 1000),
+          const Size(10.0, 20.0),
         );
         var hasFinished = false;
         final limitedVideo = Video(
           Uri.parse('fake-video.avi'),
-          maxDuration: Duration(milliseconds: 600),
+          maxDuration: const Duration(milliseconds: 600),
         );
         controller = TestVideoPlayerController(
           limitedVideo,
@@ -164,7 +164,7 @@ void main() {
         expect(controller.value.isPlaying, false);
 
         final fakeController =
-            controller.controller as FakeVideoPlayerController;
+            controller.controller as _FakeVideoPlayerController;
         await tester.pump(fakeController.initDelay);
         expectSuccess(tester, widget,
             size: videoInfo.size, findWidget: video_player.VideoPlayer);
@@ -185,7 +185,7 @@ void main() {
         seekPosition =
             Duration(milliseconds: limitedVideo.maxDuration.inMilliseconds + 1);
         fakeController.fakeSeekTo(seekPosition);
-        await tester.pump(Duration(milliseconds: 2));
+        await tester.pump(const Duration(milliseconds: 2));
 
         // The video should be paused and onMediumFinished called
         expectSuccess(tester, widget, findWidget: video_player.VideoPlayer);
@@ -198,8 +198,8 @@ void main() {
       'initializes and plays a video until the user reacts',
       (WidgetTester tester) async {
         final videoInfo = FakeVideoInfo(
-          Duration(milliseconds: 1000),
-          Size(1024.0, 768.0),
+          const Duration(milliseconds: 1000),
+          const Size(1024.0, 768.0),
         );
         var hasFinished = false;
         controller = TestVideoPlayerController(
@@ -218,7 +218,7 @@ void main() {
         // Since loading is emulated, in the next frame it should be ready.
         // Video should start playing.
         final fakeController =
-            controller.controller as FakeVideoPlayerController;
+            controller.controller as _FakeVideoPlayerController;
         await tester.pump(fakeController.initDelay);
         expectSuccess(tester, widget,
             size: videoInfo.size, findWidget: video_player.VideoPlayer);
@@ -226,8 +226,8 @@ void main() {
         expect(controller.value.isPlaying, true);
 
         // Emulate the video played halfway
-        final seekPosition =
-            Duration(milliseconds: globalFakeInfo.duration.inMilliseconds ~/ 2);
+        final seekPosition = Duration(
+            milliseconds: globalFakeInfo!.duration!.inMilliseconds ~/ 2);
         fakeController.fakeSeekTo(seekPosition);
         await tester.pump(seekPosition);
         expectSuccess(tester, widget,
@@ -239,7 +239,7 @@ void main() {
         // XXX: we have to not await for it because the future is delayed and
         // the passage of time is emulated, so it will never called unless we
         // pump() some time.
-        unawaited(controller.pause(null));
+        unawaited(controller.pause(_FakeContext()));
 
         // Advance the time it takes to pause the video controller, the
         // onMediumFinished callback should not have been called since the video
@@ -257,13 +257,6 @@ void main() {
   group('WebAudioPlayerController', () {
     final audio = Audio(Uri.parse('fake-audio.avi'));
 
-    TestAudioPlayerController controller;
-    tearDown(() async => await controller?.dispose());
-
-    test('constructor asserts on null medium', () {
-      expect(() => WebAudioPlayerController(null), throwsAssertionError);
-    });
-
     test('is a subclass of VideoPlayerController', () async {
       final controller = WebAudioPlayerController(audio);
       expect(controller, isA<VideoPlayerController>());
@@ -272,8 +265,9 @@ void main() {
 
     testWidgets('initializes and plays showing an empty container',
         (WidgetTester tester) async {
-      final videoInfo = FakeVideoInfo(Duration(seconds: 1), Size(0.0, 0.0));
-      controller = TestAudioPlayerController(audio, videoInfo,
+      final videoInfo =
+          FakeVideoInfo(const Duration(seconds: 1), const Size(0.0, 0.0));
+      final controller = TestAudioPlayerController(audio, videoInfo,
           widgetKey: globalSuccessKey);
       final widget = TestWidget(controller);
 
@@ -283,30 +277,34 @@ void main() {
 
       // Since loading is emulated, in the next frame it should be ready.
       // Video should start playing.
-      final fakeController = controller.controller as FakeVideoPlayerController;
+      final fakeController =
+          controller.controller as _FakeVideoPlayerController;
       await tester.pump(fakeController.initDelay);
       final foundWidget = expectSuccess(tester, widget,
-          size: videoInfo.size, findWidget: Container);
+          size: videoInfo.size, findWidget: Container)!;
       expect((foundWidget as Container).child, isNull);
       expect(controller.value.isPlaying, true);
+      addTearDown(() async => await controller.dispose());
     });
   });
 }
 
 class FakeVideoInfo {
-  Duration duration;
-  Size size;
-  String initError;
-  String playError;
+  Duration? duration;
+  Size? size;
+  String? initError;
+  String? playError;
   FakeVideoInfo(this.duration, this.size, {this.initError, this.playError});
   FakeVideoInfo.initError(String errorDescription)
       : this(null, null, initError: errorDescription);
-  FakeVideoInfo.playError(String errorDescription)
-      : this(null, null, playError: errorDescription);
+  FakeVideoInfo.playError(
+      {this.playError = 'Play error',
+      this.duration = const Duration(milliseconds: 1000),
+      this.size = const Size(10.0, 20.0)});
 }
 
 // Only one instance can live at each time
-class FakeVideoPlayerController extends Fake
+class _FakeVideoPlayerController extends Fake
     implements video_player.VideoPlayerController {
   Duration initDelay = Duration.zero;
   Duration playDelay = Duration.zero;
@@ -319,7 +317,7 @@ class FakeVideoPlayerController extends Fake
   @override
   int get textureId => 1;
 
-  FakeVideoPlayerController(this.dataSource) : assert(dataSource != null);
+  _FakeVideoPlayerController(this.dataSource);
 
   @override
   void addListener(VoidCallback listener) => listeners.add(listener);
@@ -339,12 +337,12 @@ class FakeVideoPlayerController extends Fake
   @override
   Future<void> initialize() {
     return Future<void>.delayed(initDelay, () {
-      if (globalFakeInfo.initError != null) {
-        throw Exception(globalFakeInfo.initError);
+      if (globalFakeInfo!.initError != null) {
+        throw Exception(globalFakeInfo!.initError);
       }
       value = value.copyWith(
-        duration: globalFakeInfo.duration,
-        size: globalFakeInfo.size,
+        duration: globalFakeInfo!.duration,
+        size: globalFakeInfo!.size,
       );
       expect(listeners, isNotEmpty);
       notifyListeners();
@@ -354,8 +352,8 @@ class FakeVideoPlayerController extends Fake
   @override
   Future<void> play() {
     return Future<void>.delayed(playDelay, () {
-      if (globalFakeInfo.playError != null) {
-        throw Exception(globalFakeInfo.playError);
+      if (globalFakeInfo!.playError != null) {
+        throw Exception(globalFakeInfo!.playError);
       }
       value = value.copyWith(isPlaying: true);
       expect(listeners, isNotEmpty);
@@ -396,18 +394,18 @@ class FakeVideoPlayerController extends Fake
 class TestVideoPlayerController extends VideoPlayerController {
   TestVideoPlayerController(
     SingleMedium medium,
-    FakeVideoInfo info, {
-    void Function(BuildContext) onMediumFinished,
-    Key widgetKey,
+    FakeVideoInfo? info, {
+    void Function(BuildContext)? onMediumFinished,
+    Key? widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey) {
     globalFakeInfo = info;
   }
 
-  video_player.VideoPlayerValue get value => controller.value;
+  video_player.VideoPlayerValue get value => controller!.value;
 
   @override
   video_player.VideoPlayerController createController() {
-    return FakeVideoPlayerController(medium.toString());
+    return _FakeVideoPlayerController(medium.toString());
   }
 
   video_player.VideoPlayerController testCreateVideoPlayerController() {
@@ -419,16 +417,16 @@ class TestAudioPlayerController extends WebAudioPlayerController {
   TestAudioPlayerController(
     SingleMedium medium,
     FakeVideoInfo info, {
-    void Function(BuildContext) onMediumFinished,
-    Key widgetKey,
+    void Function(BuildContext)? onMediumFinished,
+    Key? widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey) {
     globalFakeInfo = info;
   }
 
-  video_player.VideoPlayerValue get value => controller.value;
+  video_player.VideoPlayerValue get value => controller!.value;
 
   @override
   video_player.VideoPlayerController createController() {
-    return FakeVideoPlayerController(medium.resource.toString());
+    return _FakeVideoPlayerController(medium.resource.toString());
   }
 }

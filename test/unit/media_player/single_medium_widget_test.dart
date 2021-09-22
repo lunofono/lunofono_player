@@ -4,8 +4,7 @@ import 'package:flutter/foundation.dart' show DiagnosticableTreeMixin;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart'
-    show Fake, Mock, any, throwOnMissingStub, when;
+import 'package:mockito/mockito.dart' show Fake, any, throwOnMissingStub, when;
 
 import 'package:provider/provider.dart' show ChangeNotifierProvider;
 
@@ -19,6 +18,8 @@ import 'package:lunofono_player/src/media_player/single_medium_state.dart'
     show SingleMediumState;
 import 'package:lunofono_player/src/media_player/single_medium_widget.dart'
     show SingleMediumWidget;
+
+import 'mocks.mocks.dart' show MockSingleMediumController;
 
 void main() {
   group('SingleMediumWidget', () {
@@ -35,7 +36,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: ChangeNotifierProvider<SingleMediumState>.value(
               value: state,
-              child: SingleMediumWidget(),
+              child: const SingleMediumWidget(),
             ),
           ),
         );
@@ -44,7 +45,7 @@ void main() {
         (WidgetTester tester) async {
       await pumpPlayer(tester, errorState);
 
-      expect(find.byKey(errorState.controller.widgetKey), findsNothing);
+      expect(find.byKey(errorState.controller.widgetKey!), findsNothing);
       expect(find.byType(MediaProgressIndicator), findsNothing);
       expect(find.byType(RotatedBox), findsNothing);
 
@@ -60,7 +61,7 @@ void main() {
 
         await pumpPlayer(tester, state);
         expect(find.byType(MediaPlayerError), findsNothing);
-        expect(find.byKey(state.controller.widgetKey), findsNothing);
+        expect(find.byKey(state.controller.widgetKey!), findsNothing);
         expect(find.byType(RotatedBox), findsNothing);
 
         final progressFinder = find.byType(MediaProgressIndicator);
@@ -84,20 +85,20 @@ void main() {
       ) async {
         await pumpPlayer(tester, state);
         expect(find.byType(MediaPlayerError), findsNothing);
-        expect(find.byKey(errorState.controller.widgetKey), findsNothing);
+        expect(find.byKey(errorState.controller.widgetKey!), findsNothing);
         expect(
-            find.byKey(uninitializedState.controller.widgetKey), findsNothing);
+            find.byKey(uninitializedState.controller.widgetKey!), findsNothing);
         expect(find.byType(MediaProgressIndicator), findsNothing);
 
-        final playerFinder = find.byKey(state.controller.widgetKey);
+        final playerFinder = find.byKey(state.controller.widgetKey!);
         expect(playerFinder, findsOneWidget);
         return tester.widget(playerFinder);
       }
 
       testWidgets('a Container for an initialized non-visualizable state',
           (WidgetTester tester) async {
-        final state =
-            _FakeSingleMediumState(size: Size(2.0, 1.0), isVisualizable: false);
+        final state = _FakeSingleMediumState(
+            size: const Size(2.0, 1.0), isVisualizable: false);
         final playerWidget = await testPlayer(tester, state);
         expect(playerWidget, isA<Container>());
         expect(find.byType(RotatedBox), findsNothing);
@@ -105,36 +106,33 @@ void main() {
 
       testWidgets('the player for a visualizable state',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(1.0, 2.0));
+        final state = _FakeSingleMediumState(size: const Size(1.0, 2.0));
         await testPlayer(tester, state);
       });
 
       testWidgets('no RotatedBox for square media',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(1.0, 1.0));
+        final state = _FakeSingleMediumState(size: const Size(1.0, 1.0));
         await testPlayer(tester, state);
         expect(find.byType(RotatedBox), findsNothing);
       });
 
       testWidgets('no RotatedBox for portrait media',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(1.0, 2.0));
+        final state = _FakeSingleMediumState(size: const Size(1.0, 2.0));
         await testPlayer(tester, state);
         expect(find.byType(RotatedBox), findsNothing);
       });
 
       testWidgets('a RotatedBox for landscape media',
           (WidgetTester tester) async {
-        final state = _FakeSingleMediumState(size: Size(2.0, 1.0));
+        final state = _FakeSingleMediumState(size: const Size(2.0, 1.0));
         await testPlayer(tester, state);
         expect(find.byType(RotatedBox), findsOneWidget);
       });
     });
   });
 }
-
-class _MockSingleMediumController extends Mock
-    implements SingleMediumController {}
 
 class _FakeSingleMediumState extends Fake
     with DiagnosticableTreeMixin, ChangeNotifier
@@ -144,11 +142,11 @@ class _FakeSingleMediumState extends Fake
   @override
   dynamic error;
   @override
-  Size size;
+  Size? size;
   @override
   Future<void> dispose() async => super.dispose();
   @override
-  final controller = _MockSingleMediumController();
+  final SingleMediumController controller = MockSingleMediumController();
   @override
   bool get isInitialized => size != null;
   @override
@@ -163,13 +161,14 @@ class _FakeSingleMediumState extends Fake
     this.error,
     this.size,
     this.isVisualizable = true,
-    Key widgetKey,
+    Key? widgetKey,
   }) {
     // Make sure any non-stubbed interaction throws and stub the build method
     // and widgetKey property.
     final key = widgetKey ?? GlobalKey(debugLabel: 'widgetKey');
-    throwOnMissingStub(controller as _MockSingleMediumController);
-    when(controller.build(any)).thenReturn(Container(key: key));
-    when(controller.widgetKey).thenReturn(key);
+    final mockController = controller as MockSingleMediumController;
+    throwOnMissingStub(mockController);
+    when(mockController.build(any)).thenReturn(Container(key: key));
+    when(mockController.widgetKey).thenReturn(key);
   }
 }

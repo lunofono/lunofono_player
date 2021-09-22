@@ -26,14 +26,15 @@ import 'single_medium_widget.dart' show SingleMediumWidget;
 /// current medium is displayed (or the last if playing is done).
 class PlaylistWidget extends StatelessWidget {
   @visibleForTesting
-  static Widget Function() createSingleMediumWidget =
-      () => SingleMediumWidget();
+  static Widget Function() createSingleMediumWidget = _createSingleMediumWidget;
+  static Widget _createSingleMediumWidget() => const SingleMediumWidget();
 
   @visibleForTesting
-  static Widget Function() createMultiMediumWidget = () => MultiMediumWidget();
+  static Widget Function() createMultiMediumWidget = _createMultiMediumWidget;
+  static Widget _createMultiMediumWidget() => const MultiMediumWidget();
 
   /// Constructs a [MultiMediumTrackWidget].
-  const PlaylistWidget({Key key}) : super(key: key);
+  const PlaylistWidget({Key? key}) : super(key: key);
 
   /// Builds the UI for this widget.
   @override
@@ -55,7 +56,7 @@ class PlaylistWidget extends StatelessWidget {
           }
 
           // Still initializing
-          return MediaProgressIndicator(visualizable: true);
+          return const MediaProgressIndicator(visualizable: true);
         },
       );
 }

@@ -24,14 +24,14 @@ import 'single_medium_widget.dart' show SingleMediumWidget;
 /// initialization is still in progress.
 class MultiMediumTrackWidget extends StatelessWidget {
   /// Constructs a [MultiMediumTrackWidget].
-  const MultiMediumTrackWidget({Key key}) : super(key: key);
+  const MultiMediumTrackWidget({Key? key}) : super(key: key);
 
   /// Creates a [MultiMediumTrackWidget].
   ///
   /// This is mainly useful for testing.
   @protected
   @visibleForTesting
-  Widget createSingleMediumWidget() => SingleMediumWidget();
+  Widget createSingleMediumWidget() => const SingleMediumWidget();
 
   /// Builds the UI for this widget.
   @override

@@ -12,9 +12,7 @@ class ImageButtonPlayer extends ButtonPlayer {
   final ImageButton button;
 
   /// Constructs a [ButtonPlayer] using [button] as the underlaying [Button].
-  ImageButtonPlayer(this.button)
-      : assert(button != null),
-        super(button);
+  ImageButtonPlayer(this.button) : super(button);
 
   /// The background [Color] of the underlaying [button].
   ///
@@ -37,9 +35,7 @@ class ImageButtonWidget extends StatelessWidget {
   final ImageButtonPlayer button;
 
   /// Creates a new [ImageButtonWidget] to display [button].
-  const ImageButtonWidget({@required this.button, Key key})
-      : assert(button != null),
-        super(key: key);
+  const ImageButtonWidget({required this.button, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => GestureDetector(

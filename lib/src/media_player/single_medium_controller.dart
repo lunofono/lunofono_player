@@ -3,8 +3,8 @@ import 'dart:async' show Completer;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
-import 'package:audioplayers/audioplayers.dart' show AudioPlayer, ReleaseMode;
-import 'package:audioplayers/audio_cache.dart' show AudioCache;
+import 'package:audioplayers/audioplayers.dart'
+    show AudioCache, AudioPlayer, ReleaseMode;
 import 'package:video_player/video_player.dart' as video_player;
 
 import 'package:lunofono_bundle/lunofono_bundle.dart'
@@ -21,12 +21,12 @@ abstract class SingleMediumController {
   final SingleMedium medium;
 
   /// The key to use to create the main [Widget] in [build()].
-  final Key widgetKey;
+  final Key? widgetKey;
 
   /// The callback to be called when the medium finishes playing.
   ///
   /// This callback is called when the medium finishes playing by itself.
-  final void Function(BuildContext) onMediumFinished;
+  final void Function(BuildContext)? onMediumFinished;
 
   /// The timer used to finish the medium if it has a maximum duration.
   ///
@@ -36,7 +36,7 @@ abstract class SingleMediumController {
   /// [pause] and [onMediumFinished] when it expires) but it's not started until
   /// [play] is called. Then [play] and [pause] will start and pause the timer.
   @protected
-  PausableTimer maxDurationTimer;
+  PausableTimer? maxDurationTimer;
 
   /// {@template ui_player_media_player_medium_player_controller_initialize}
   /// Initializes this controller, getting the size of the media to be played.
@@ -47,17 +47,23 @@ abstract class SingleMediumController {
   /// The [build()] method should never be called before the initialization is
   /// done.
   /// {@endtemplate}
-  @mustCallSuper
-  Future<Size> initialize(BuildContext context) async {
-    final futureNull = Future.value(null);
-    if (medium.maxDuration == const UnlimitedDuration()) return futureNull;
+  Future<Size> initialize(BuildContext context);
+
+  /// Initializes the maxDurationTimer.
+  ///
+  /// This timer is only initialized if the underlying [medium] has a non-null
+  /// maxDuration.
+  ///
+  /// Any subclass wanting to use this timer must initialize it in their own
+  /// initialize() method.
+  @protected
+  void initializeMaxDurationTimer(BuildContext context) {
+    if (medium.maxDuration == const UnlimitedDuration()) return;
 
     maxDurationTimer = PausableTimer(medium.maxDuration, () async {
       await pause(context);
       onMediumFinished?.call(context);
     });
-
-    return futureNull;
   }
 
   /// Play the [medium] controlled by this controller.
@@ -84,30 +90,31 @@ abstract class SingleMediumController {
   /// If a [widgetKey] is provided, it will be used to create the main player
   /// [Widget] in the [build()] function.
   /// {@endtemplate}
-  SingleMediumController(this.medium, {this.onMediumFinished, this.widgetKey})
-      : assert(medium != null);
+  SingleMediumController(this.medium, {this.onMediumFinished, this.widgetKey});
 }
 
 /// A video player controller.
 class VideoPlayerController extends SingleMediumController {
   /// The video player controller.
-  video_player.VideoPlayerController _controller;
+  video_player.VideoPlayerController? _controller;
 
   /// The video player controller.
   @visibleForTesting
-  video_player.VideoPlayerController get controller => _controller;
+  video_player.VideoPlayerController? get controller => _controller;
 
   /// {@macro ui_player_media_player_medium_player_controller_constructor}
   VideoPlayerController(
     SingleMedium medium, {
-    void Function(BuildContext) onMediumFinished,
-    Key widgetKey,
+    void Function(BuildContext)? onMediumFinished,
+    Key? widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey);
 
   /// Disposes this controller.
   @override
-  Future<void> dispose() => Future.wait(
-      [_controller?.dispose(), super.dispose()].where((f) => f != null));
+  Future<void> dispose() => Future.wait<void>([
+        _controller?.dispose() ?? Future<void>.value(),
+        super.dispose(),
+      ]);
 
   /// Creates a new [video_player.VideoPlayerController].
   ///
@@ -125,46 +132,48 @@ class VideoPlayerController extends SingleMediumController {
   /// {@macro ui_player_media_player_medium_player_controller_initialize}
   @override
   Future<Size> initialize(BuildContext context) async {
-    VoidCallback listener;
+    initializeMaxDurationTimer(context);
+
+    final controller = createController();
+    _controller = controller;
+
+    late final VoidCallback listener;
     listener = () {
-      final value = _controller.value;
+      final value = controller.value;
       // value.duration can be null during initialization
       // If the position reaches the duration (we use >= just to be extra
       // careful) and it is not playing anymore, we assumed it finished playing.
       // Also this should happen once and only once, as we don't expose any
       // seeking or loop playing.
-      if (value.duration != null &&
-          value.position >= value.duration &&
-          !value.isPlaying) {
+      if (value.position >= value.duration && !value.isPlaying) {
         onMediumFinished?.call(context);
-        _controller.removeListener(listener);
+        controller.removeListener(listener);
       }
     };
 
-    _controller = createController();
-    _controller.addListener(listener);
+    controller.addListener(listener);
 
-    await Future.wait([super.initialize(context), _controller.initialize()]);
+    await controller.initialize();
 
-    return _controller.value.size;
+    return controller.value.size;
   }
 
   /// Play the [medium] controlled by this controller.
   @override
   Future<void> play(BuildContext context) =>
-      Future.wait([super.play(context), _controller.play()]);
+      Future.wait([super.play(context), _controller!.play()]);
 
   /// Pause the [medium] controlled by this controller.
   @override
   Future<void> pause(BuildContext context) =>
-      Future.wait([super.pause(context), _controller.pause()]);
+      Future.wait([super.pause(context), _controller!.pause()]);
 
   /// Builds the [Widget] that plays the medium this controller controls.
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: _controller.value.aspectRatio,
-      child: video_player.VideoPlayer(_controller),
+      aspectRatio: _controller!.value.aspectRatio,
+      child: video_player.VideoPlayer(_controller!),
       key: widgetKey,
     );
   }
@@ -183,8 +192,8 @@ class WebAudioPlayerController extends VideoPlayerController {
   /// {@macro ui_player_media_player_medium_player_controller_constructor}
   WebAudioPlayerController(
     SingleMedium medium, {
-    void Function(BuildContext) onMediumFinished,
-    Key widgetKey,
+    void Function(BuildContext)? onMediumFinished,
+    Key? widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey);
 
   /// Builds the [Widget] that plays the medium this controller controls.
@@ -207,12 +216,16 @@ class AudioPlayerController extends SingleMediumController {
   /// {@macro ui_player_media_player_medium_player_controller_constructor}
   AudioPlayerController(
     SingleMedium medium, {
-    void Function(BuildContext) onMediumFinished,
-    Key widgetKey,
+    void Function(BuildContext)? onMediumFinished,
+    Key? widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey);
 
   /// The video player controller.
-  AudioCache _controller;
+  AudioCache? _controller;
+
+  /// The video player controller.
+  @visibleForTesting
+  AudioCache? get controller => _controller;
 
   /// True if playing was started, false otherwise.
   ///
@@ -220,15 +233,13 @@ class AudioPlayerController extends SingleMediumController {
   /// should be used instead of play().
   bool _playStarted = false;
 
-  /// The video player controller.
-  @visibleForTesting
-  AudioCache get controller => _controller;
-
   /// Disposes this controller.
   @override
   Future<void> dispose() {
-    return Future.wait([_controller?.fixedPlayer?.dispose(), super.dispose()]
-        .where((f) => f != null));
+    return Future.wait([
+      _controller?.fixedPlayer?.dispose() ?? Future<void>.value(),
+      super.dispose(),
+    ]);
   }
 
   /// Creates a new [video_player.VideoPlayerController].
@@ -241,21 +252,21 @@ class AudioPlayerController extends SingleMediumController {
   /// {@macro ui_player_media_player_medium_player_controller_initialize}
   @override
   Future<Size> initialize(BuildContext context) async {
-    _controller = createController();
+    initializeMaxDurationTimer(context);
+
+    final controller = createController();
+    _controller = controller;
 
     final player = AudioPlayer();
     player.onPlayerCompletion.listen((_) {
       onMediumFinished?.call(context);
     });
 
-    _controller.fixedPlayer = player;
+    controller.fixedPlayer = player;
 
-    await Future.wait([
-      super.initialize(context),
-      player
-          .setReleaseMode(ReleaseMode.STOP)
-          .then((_) => _controller.load(medium.resource.toString())),
-    ]);
+    await player
+        .setReleaseMode(ReleaseMode.STOP)
+        .then((_) => controller.load(medium.resource.toString()));
 
     return Size.zero;
   }
@@ -264,8 +275,8 @@ class AudioPlayerController extends SingleMediumController {
   @override
   Future<void> play(BuildContext context) {
     final controllerPlayFuture = _playStarted
-        ? _controller.fixedPlayer.resume()
-        : _controller.play(medium.resource.toString());
+        ? _controller!.fixedPlayer!.resume()
+        : _controller!.play(medium.resource.toString());
     _playStarted = true;
     return Future.wait([super.play(context), controllerPlayFuture]);
   }
@@ -273,7 +284,8 @@ class AudioPlayerController extends SingleMediumController {
   /// Pause the [medium] controlled by this controller.
   @override
   Future<void> pause(BuildContext context) {
-    return Future.wait([super.pause(context), _controller.fixedPlayer.pause()]);
+    return Future.wait(
+        [super.pause(context), _controller!.fixedPlayer!.pause()]);
   }
 
   /// Builds the [Widget] that plays the medium this controller controls.
@@ -290,7 +302,7 @@ class AudioPlayerController extends SingleMediumController {
 /// An image player controller.
 class ImagePlayerController extends SingleMediumController {
   /// The image that this controller will [build()].
-  Image _image;
+  late final Image _image;
 
   /// The image that this controller will [build()].
   Image get image => _image;
@@ -298,15 +310,17 @@ class ImagePlayerController extends SingleMediumController {
   /// {@macro ui_player_media_player_medium_player_controller_constructor]
   ImagePlayerController(
     SingleMedium medium, {
-    void Function(BuildContext) onMediumFinished,
-    Key widgetKey,
+    void Function(BuildContext)? onMediumFinished,
+    Key? widgetKey,
   }) : super(medium, onMediumFinished: onMediumFinished, widgetKey: widgetKey);
 
   /// {@macro ui_player_media_player_medium_player_controller_initialize]
   @override
   Future<Size> initialize(BuildContext context) async {
+    initializeMaxDurationTimer(context);
+
     final completer = Completer<void>();
-    Size size;
+    late final Size size;
 
     _image = Image.asset(
       medium.resource.toString(),
@@ -314,20 +328,20 @@ class ImagePlayerController extends SingleMediumController {
       key: widgetKey,
     );
 
-    _image.image.resolve(ImageConfiguration()).addListener(
+    _image.image.resolve(const ImageConfiguration()).addListener(
           ImageStreamListener(
             (ImageInfo info, bool _) {
               size = Size(
                   info.image.width.toDouble(), info.image.height.toDouble());
               completer.complete();
             },
-            onError: (dynamic error, StackTrace stackTrace) {
+            onError: (Object error, StackTrace? stackTrace) {
               completer.completeError(error, stackTrace);
             },
           ),
         );
 
-    await Future.wait([super.initialize(context), completer.future]);
+    await completer.future;
 
     return size;
   }

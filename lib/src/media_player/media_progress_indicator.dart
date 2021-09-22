@@ -10,9 +10,9 @@ class MediaProgressIndicator extends StatelessWidget {
   final bool isVisualizable;
 
   /// Constructs a [MediaProgressIndicator] setting if it's [visualizable].
-  const MediaProgressIndicator({@required bool visualizable})
-      : assert(visualizable != null),
-        isVisualizable = visualizable;
+  const MediaProgressIndicator({required bool visualizable, Key? key})
+      : isVisualizable = visualizable,
+        super(key: key);
 
   /// Builds the widget.
   @override
@@ -21,7 +21,7 @@ class MediaProgressIndicator extends StatelessWidget {
       alignment: Alignment.center,
       children: <Widget>[
         Icon(isVisualizable ? Icons.local_movies : Icons.music_note),
-        CircularProgressIndicator(),
+        const CircularProgressIndicator(),
       ],
     );
   }

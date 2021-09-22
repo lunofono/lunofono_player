@@ -20,13 +20,9 @@ import '../../util/finders.dart' show findSubString;
 // https://github.com/flutter/flutter/issues/65324
 void main() {
   group('SingleMediumPlayer', () {
-    _SingleMediumPlayerTester playerTester;
+    _SingleMediumPlayerTester? playerTester;
 
     tearDown(() => playerTester?.dispose());
-
-    test('constructor asserts on null media', () {
-      expect(() => SingleMediumPlayer(medium: null), throwsAssertionError);
-    });
 
     Future<void> testUnregisteredMedium(
         WidgetTester tester, _FakeSingleMedium medium) async {
@@ -44,7 +40,7 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeAudibleSingleMedium(
         'unregisteredAudibleMedium',
-        size: Size(0.0, 0.0),
+        size: const Size(0.0, 0.0),
       );
       await testUnregisteredMedium(tester, medium);
     });
@@ -54,7 +50,7 @@ void main() {
         (WidgetTester tester) async {
       final medium = _FakeVisualizableSingleMedium(
         'unregisteredVisualizableMedium',
-        size: Size(10.0, 10.0),
+        size: const Size(10.0, 10.0),
       );
       await testUnregisteredMedium(tester, medium);
     });
@@ -62,53 +58,53 @@ void main() {
     testWidgets('tap stops while initializing', (WidgetTester tester) async {
       final tapInitMedium = _FakeVisualizableSingleMedium(
         'tapInitMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
-        initDelay: Duration(milliseconds: 100),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
+        initDelay: const Duration(milliseconds: 100),
       );
       playerTester = _SingleMediumPlayerTester(tester, tapInitMedium);
 
       // The player should be initializing
       await tester.pumpWidget(
-          playerTester.player, tapInitMedium.info.initDelay ~/ 2);
-      playerTester.expectInitializationWidget();
-      playerTester.expectPlayingStatus(finished: false);
+          playerTester!.player, tapInitMedium.info.initDelay ~/ 2);
+      playerTester!.expectInitializationWidget();
+      playerTester!.expectPlayingStatus(finished: false);
 
       // Tap and the reaction should reach the controller
       final widgetToTap = find.byType(CircularProgressIndicator);
       expect(widgetToTap, findsOneWidget);
       await tester.tap(widgetToTap);
       await tester.pump();
-      playerTester.expectInitializationWidget();
-      playerTester.expectPlayingStatus(
-          finished: false, stoppedTimes: 1, paused: true);
+      playerTester!.expectInitializationWidget();
+      playerTester!
+          .expectPlayingStatus(finished: false, stoppedTimes: 1, paused: true);
     });
 
     testWidgets('tap stops while playing', (WidgetTester tester) async {
       final tapPlayMedium = _FakeVisualizableSingleMedium(
         'tapPlayMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = _SingleMediumPlayerTester(tester, tapPlayMedium);
 
-      await playerTester.testInitializationDone();
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(finished: false);
+      await playerTester!.testInitializationDone();
+      playerTester!.expectPlayerWidget();
+      playerTester!.expectPlayingStatus(finished: false);
 
       // Wait until half of the media was played, it should keep playing
       await tester.pump(tapPlayMedium.info.duration ~/ 2);
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(finished: false);
+      playerTester!.expectPlayerWidget();
+      playerTester!.expectPlayingStatus(finished: false);
 
       // Tap and the player should stop
       var widgetToTap = find.byKey(tapPlayMedium.info.widgetKey);
       expect(widgetToTap, findsOneWidget);
       await tester.tap(widgetToTap);
       await tester.pump();
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(
-          finished: false, stoppedTimes: 1, paused: true);
+      playerTester!.expectPlayerWidget();
+      playerTester!
+          .expectPlayingStatus(finished: false, stoppedTimes: 1, paused: true);
 
       // Tap again should do nothing new (but to call the onMediaStopped
       // callback again).
@@ -116,37 +112,37 @@ void main() {
       expect(widgetToTap, findsOneWidget);
       await tester.tap(widgetToTap);
       await tester.pump();
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(
-          finished: false, stoppedTimes: 2, paused: true);
+      playerTester!.expectPlayerWidget();
+      playerTester!
+          .expectPlayingStatus(finished: false, stoppedTimes: 2, paused: true);
     });
 
     testWidgets('tap does nothing when playing is done',
         (WidgetTester tester) async {
       final tapPlayDoneMedium = _FakeVisualizableSingleMedium(
         'tapPlayDoneMedium',
-        size: Size(10.0, 10.0),
-        duration: Duration(seconds: 1),
+        size: const Size(10.0, 10.0),
+        duration: const Duration(seconds: 1),
       );
       playerTester = _SingleMediumPlayerTester(tester, tapPlayDoneMedium);
 
-      await playerTester.testInitializationDone();
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(finished: false);
+      await playerTester!.testInitializationDone();
+      playerTester!.expectPlayerWidget();
+      playerTester!.expectPlayingStatus(finished: false);
 
       // Wait until the media stops playing by itself
       await tester.pump(tapPlayDoneMedium.info.duration);
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(finished: true);
+      playerTester!.expectPlayerWidget();
+      playerTester!.expectPlayingStatus(finished: true);
 
       // Tap again should do nothing but to get a reaction
       final widgetToTap = find.byKey(tapPlayDoneMedium.info.widgetKey);
       expect(widgetToTap, findsOneWidget);
       await tester.tap(widgetToTap);
       await tester.pump();
-      playerTester.expectPlayerWidget();
-      playerTester.expectPlayingStatus(
-          finished: true, paused: true, stoppedTimes: 2);
+      playerTester!.expectPlayerWidget();
+      playerTester!
+          .expectPlayingStatus(finished: true, paused: true, stoppedTimes: 2);
     });
   });
 }
@@ -170,17 +166,15 @@ class _SingleMediumPlayerTester {
 
   // Automatically initialized
   final ControllerRegistry originalRegistry;
-  _FakeSingleMediumController controller;
-  Widget player;
+  _FakeSingleMediumController? controller;
+  late Widget player;
   var playerHasStoppedTimes = 0;
 
   // Constant
   final playerKey = GlobalKey(debugLabel: 'playerKey');
 
   _SingleMediumPlayerTester(this.tester, this.medium)
-      : assert(tester != null),
-        assert(medium != null),
-        originalRegistry = ControllerRegistry.instance {
+      : originalRegistry = ControllerRegistry.instance {
     _registerController();
     player = _createPlayer();
   }
@@ -192,7 +186,7 @@ class _SingleMediumPlayerTester {
 
   void _registerController() {
     SingleMediumController createController(SingleMedium medium,
-        {void Function(BuildContext) onMediumFinished}) {
+        {void Function(BuildContext)? onMediumFinished}) {
       final fakeMedium = medium as _FakeSingleMedium;
       final c = _FakeSingleMediumController(
           fakeMedium, onMediumFinished, fakeMedium.info.widgetKey);
@@ -238,10 +232,8 @@ class _SingleMediumPlayerTester {
   }
 
   void expectInitializationWidget() {
-    assert(medium != null);
     assert(controller != null);
-    assert(controller.medium != null);
-    expect(controller.medium.resource, medium.resource);
+    expect(controller!.medium.resource, medium.resource);
     expect(find.byKey(playerKey), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.byType(MediaPlayerError), findsNothing);
@@ -251,12 +243,12 @@ class _SingleMediumPlayerTester {
   }
 
   void _expectPlayerInitializationDone() {
-    expect(controller.medium.resource, medium.resource);
+    expect(controller!.medium.resource, medium.resource);
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(find.byKey(playerKey), findsOneWidget);
   }
 
-  void expectPlayerWidget({int mainMediumIndex = 0, bool rotated}) {
+  void expectPlayerWidget({int mainMediumIndex = 0, bool? rotated}) {
     _expectPlayerInitializationDone();
     expect(find.byKey(medium.info.widgetKey), findsOneWidget);
     expect(find.byType(MediaPlayerError), findsNothing);
@@ -268,8 +260,8 @@ class _SingleMediumPlayerTester {
 
   void expectPlayingStatus({
     int mainMediumIndex = 0,
-    @required bool finished,
-    int stoppedTimes,
+    required bool finished,
+    int? stoppedTimes,
     bool paused = false,
   }) {
     stoppedTimes = stoppedTimes ?? (finished ? 1 : 0);
@@ -285,33 +277,33 @@ class _SingleMediumPlayerTester {
 }
 
 class _SingleMediumInfo {
-  final Size size;
+  final Size? size;
   final Duration duration;
   final Duration initDelay;
-  final Exception exception;
+  final Exception? exception;
   final Key widgetKey;
   _SingleMediumInfo(
     String location, {
     this.size,
     this.exception,
-    Duration duration,
-    Duration initDelay,
+    Duration? duration,
+    Duration? initDelay,
   })  : assert(exception != null && size == null ||
             exception == null && size != null),
         initDelay = initDelay ?? const Duration(seconds: 1),
         duration = duration ?? const UnlimitedDuration(),
-        widgetKey = GlobalKey(debugLabel: 'widgetKey(${location}');
+        widgetKey = GlobalKey(debugLabel: 'widgetKey($location');
 }
 
 abstract class _FakeSingleMedium extends SingleMedium {
   final _SingleMediumInfo info;
   _FakeSingleMedium(
     String location, {
-    Duration maxDuration,
-    Size size,
-    Exception exception,
-    Duration duration,
-    Duration initDelay,
+    Duration? maxDuration,
+    Size? size,
+    Exception? exception,
+    Duration? duration,
+    Duration? initDelay,
   })  : info = _SingleMediumInfo(location,
             size: size,
             exception: exception,
@@ -323,11 +315,11 @@ abstract class _FakeSingleMedium extends SingleMedium {
 class _FakeAudibleSingleMedium extends _FakeSingleMedium implements Audible {
   _FakeAudibleSingleMedium(
     String location, {
-    Duration maxDuration,
-    Size size,
-    Exception exception,
-    Duration duration,
-    Duration initDelay,
+    Duration? maxDuration,
+    Size? size,
+    Exception? exception,
+    Duration? duration,
+    Duration? initDelay,
   }) : super(location,
             maxDuration: maxDuration,
             size: size,
@@ -340,11 +332,11 @@ class _FakeVisualizableSingleMedium extends _FakeSingleMedium
     implements Visualizable {
   _FakeVisualizableSingleMedium(
     String location, {
-    Duration maxDuration,
-    Size size,
-    Exception exception,
-    Duration duration,
-    Duration initDelay,
+    Duration? maxDuration,
+    Size? size,
+    Exception? exception,
+    Duration? duration,
+    Duration? initDelay,
   }) : super(location,
             maxDuration: maxDuration,
             size: size,
@@ -357,11 +349,11 @@ class _FakeAudibleVisualizableSingleMedium extends _FakeSingleMedium
     implements Audible, Visualizable {
   _FakeAudibleVisualizableSingleMedium(
     String location, {
-    Duration maxDuration,
-    Size size,
-    Exception exception,
-    Duration duration,
-    Duration initDelay,
+    Duration? maxDuration,
+    Size? size,
+    Exception? exception,
+    Duration? duration,
+    Duration? initDelay,
   }) : super(location,
             maxDuration: maxDuration,
             size: size,
@@ -373,9 +365,9 @@ class _FakeAudibleVisualizableSingleMedium extends _FakeSingleMedium
 class _FakeSingleMediumController extends Fake
     implements SingleMediumController {
   // Internal state
-  Timer _initTimer;
+  Timer? _initTimer;
   bool get isInitializing => _initTimer?.isActive ?? false;
-  Timer _playingTimer;
+  Timer? _playingTimer;
   bool get isPlaying => _playingTimer?.isActive ?? false;
   final _initCompleter = Completer<Size>();
   // State to do checks
@@ -387,7 +379,7 @@ class _FakeSingleMediumController extends Fake
   bool _isPaused = false;
   bool get isPaused => _isPaused;
 
-  void Function(BuildContext) playerOnMediaStopped;
+  void Function(BuildContext)? playerOnMediaStopped;
 
   @override
   _FakeSingleMedium medium;
@@ -399,14 +391,14 @@ class _FakeSingleMediumController extends Fake
     this.medium,
     this.playerOnMediaStopped,
     this.widgetKey,
-  ) : assert(medium != null);
+  );
 
   @override
   Future<Size> initialize(BuildContext context) {
     _initTimer = Timer(medium.info.initDelay, () {
       if (initError) {
         try {
-          throw medium.info.exception;
+          throw medium.info.exception!;
         } catch (e, stack) {
           _initCompleter.completeError(e, stack);
         }
@@ -446,9 +438,9 @@ class _FakeSingleMediumController extends Fake
   @override
   void Function(BuildContext) get onMediumFinished => (BuildContext context) {
         _finishedTimes++;
-        playerOnMediaStopped(context);
+        playerOnMediaStopped!(context);
       };
 
   @override
-  Widget build(BuildContext context) => Container(key: widgetKey);
+  Widget build(BuildContext context) => Text('FakeWidget', key: widgetKey);
 }

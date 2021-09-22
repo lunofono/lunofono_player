@@ -28,14 +28,14 @@ import 'multi_medium_track_widget.dart' show MultiMediumTrackWidget;
 class MultiMediumWidget extends StatelessWidget {
   /// Constructs a [MultiMediumWidget].
   const MultiMediumWidget({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   /// Creates a [MultiMediumTrackWidget].
   ///
   /// This is mainly useful for testing.
   @protected
-  MultiMediumTrackWidget createTrackWidget() => MultiMediumTrackWidget();
+  MultiMediumTrackWidget createTrackWidget() => const MultiMediumTrackWidget();
 
   /// Builds the UI for this widget.
   @override

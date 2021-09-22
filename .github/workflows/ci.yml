@@ -7,7 +7,7 @@ on:
     branches: [ main, 'v[0-9]+.[0-9x]+.[0-9x]+*' ]
 
 env:
-  FLUTTER_CHANNEL: beta
+  FLUTTER_CHANNEL: stable
   JAVA_VERSION: 12.x
 
 jobs:
@@ -35,27 +35,16 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    # Analyze step needs different config for pull_request and push, so it is
-    # duplicated with if conditions to use the correct configuration for each
-    - name: Analyze (push)
-      if: github.event_name == 'push' && matrix.test_type == 'static'
-      uses: kitek/dartanalyzer-annotations-action@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        check_name: test
-        commit_sha: ${{ github.sha }}
-    - name: Analyze (pull_request)
-      if: github.event_name == 'pull_request' && matrix.test_type == 'static'
-      uses: kitek/dartanalyzer-annotations-action@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        check_name: test
-        commit_sha: ${{ github.event.pull_request.head.sha }}
+    - name: Generate unit tests mocks
+      run: tool/ci mocks-gen
+
+    - name: Analyze
+      if: matrix.test_type == 'static'
+      run: tool/ci analyze
 
     - name: Check format
-      run: flutter format -n --set-exit-if-changed lib test example
+      if: matrix.test_type == 'static'
+      run: tool/ci format
 
     - name: Run ${{ matrix.test_type }} tests
       if: matrix.test_type != 'static'

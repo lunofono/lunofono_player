@@ -20,8 +20,8 @@ void main() {
 
   _FakeButton fakeButtonRed;
   _FakeButton fakeButtonBlue;
-  GridMenu menu;
-  GridMenuPlayer menuPlayer;
+  late GridMenu menu;
+  GridMenuPlayer? menuPlayer;
 
   setUp(() {
     ActionPlayer.registry = ActionPlayerRegistry();
@@ -53,38 +53,26 @@ void main() {
   group('GridMenuPlayer', () {
     setUp(() {});
 
-    test('constructor asserts if menu is null', () {
-      expect(() => GridMenuPlayer(null), throwsAssertionError);
-    });
-
     testWidgets('build() builds the right widgets',
         (WidgetTester tester) async {
       // Matches the underlaying menu
-      expect(menuPlayer.rows, menu.rows);
-      expect(menuPlayer.columns, menu.columns);
-      expect(menuPlayer.buttons.first.button, menu.buttonAt(0, 0));
+      expect(menuPlayer!.rows, menu.rows);
+      expect(menuPlayer!.columns, menu.columns);
+      expect(menuPlayer!.buttons.first.button, menu.buttonAt(0, 0));
 
       // Build returns a GridMenuWidget
-      final menuWidget = menuPlayer.build(_FakeContext());
+      final menuWidget = menuPlayer!.build(_FakeContext());
       expect(menuWidget, isA<GridMenuWidget>());
       expect((menuWidget as GridMenuWidget).menu, same(menuPlayer));
     });
   });
 
   group('GridMenuWidget', () {
-    test('constructor asserts if menu or padding is null', () {
-      expect(() => GridMenuWidget(menu: null), throwsAssertionError);
-      expect(() => GridMenuWidget(menu: menuPlayer, padding: null),
-          throwsAssertionError);
-    });
-
     testWidgets('shows all buttons', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: Container(
-            child: Builder(
-              builder: (context) => menuPlayer.build(context),
-            ),
+          home: Builder(
+            builder: (context) => menuPlayer!.build(context),
           ),
         ),
       );
@@ -96,16 +84,6 @@ void main() {
   });
 
   group('GridMenuRowWidget', () {
-    test('constructor asserts if menu, row or padding is null', () {
-      expect(
-          () => GridMenuRowWidget(row: null, menu: null), throwsAssertionError);
-      expect(() => GridMenuRowWidget(row: null, menu: menuPlayer),
-          throwsAssertionError);
-      expect(() => GridMenuRowWidget(row: 0, menu: null), throwsAssertionError);
-      expect(() => GridMenuRowWidget(row: 0, menu: menuPlayer, padding: null),
-          throwsAssertionError);
-    });
-
     testWidgets('shows all buttons in the row', (WidgetTester tester) async {
       Widget fakeApp(Widget row) => MaterialApp(
             home: Column(
@@ -114,12 +92,12 @@ void main() {
           );
 
       await tester
-          .pumpWidget(fakeApp(GridMenuRowWidget(menu: menuPlayer, row: 0)));
+          .pumpWidget(fakeApp(GridMenuRowWidget(menu: menuPlayer!, row: 0)));
       expect(find.byKey(ObjectKey(menu.buttons.first)), findsOneWidget);
       expect(find.byKey(ObjectKey(menu.buttons.last)), findsNothing);
 
       await tester
-          .pumpWidget(fakeApp(GridMenuRowWidget(menu: menuPlayer, row: 1)));
+          .pumpWidget(fakeApp(GridMenuRowWidget(menu: menuPlayer!, row: 1)));
       expect(find.byKey(ObjectKey(menu.buttons.first)), findsNothing);
       expect(find.byKey(ObjectKey(menu.buttons.last)), findsOneWidget);
     });
@@ -137,7 +115,7 @@ class _FakeAction extends Action {
 class _FakeActionPlayer extends ActionPlayer {
   @override
   final _FakeAction action;
-  _FakeActionPlayer(this.action) : assert(action != null);
+  _FakeActionPlayer(this.action);
   @override
   void act(BuildContext context, ButtonPlayer button) =>
       action.actCalls.add(button);

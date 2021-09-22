@@ -17,8 +17,7 @@ void main() {
       final widget = MediaPlayerError(exception);
       await tester.pumpWidget(
           Directionality(textDirection: TextDirection.ltr, child: widget));
-      expect(
-          find.text('Media could not be played: ${exception}'), findsWidgets);
+      expect(find.text('Media could not be played: $exception'), findsWidgets);
     });
 
     testWidgets('PlatformException', (WidgetTester tester) async {

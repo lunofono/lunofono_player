@@ -158,7 +158,7 @@ class _FakeSingleMediumState extends Fake
     implements SingleMediumState {
   final String name;
   @override
-  String toStringShort() => '$name';
+  String toStringShort() => name;
   @override
   Future<void> dispose() async => super.dispose();
   _FakeSingleMediumState(this.name);
@@ -168,9 +168,9 @@ class _FakeMultiMediumTrackState extends Fake
     with DiagnosticableTreeMixin, ChangeNotifier
     implements MultiMediumTrackState {
   @override
-  _FakeSingleMediumState current;
+  _FakeSingleMediumState? current;
   @override
-  _FakeSingleMediumState last;
+  _FakeSingleMediumState? last;
   @override
   final bool isVisualizable;
   @override
@@ -185,7 +185,7 @@ class _FakeMultiMediumTrackState extends Fake
       'isVisualizable: $isVisualizable';
   _FakeMultiMediumTrackState({
     this.current,
-    _FakeSingleMediumState last,
+    _FakeSingleMediumState? last,
     this.isVisualizable = false,
   }) : last = last ?? current;
 }
@@ -208,9 +208,9 @@ class _FakeMultiMediumState extends Fake
   @override
   Future<void> dispose() async => super.dispose();
   _FakeMultiMediumState({
-    _FakeMultiMediumTrackState mainTrack,
-    _FakeMultiMediumTrackState backgroundTrack,
-    bool isInitialized,
+    _FakeMultiMediumTrackState? mainTrack,
+    _FakeMultiMediumTrackState? backgroundTrack,
+    bool? isInitialized,
   })  : isInitialized = isInitialized ?? mainTrack != null,
         mainTrack = mainTrack ??
             _FakeMultiMediumTrackState(current: _FakeSingleMediumState('main')),

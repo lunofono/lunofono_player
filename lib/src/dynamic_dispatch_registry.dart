@@ -18,7 +18,7 @@ class DynamicDispatchRegistry<B, T extends Function> {
   ///
   /// If [type] was already registered, it is replaced and the old registered
   /// [fucntion] is returned. Otherwise it returns null.
-  T register(Type type, T function) {
+  T? register(Type type, T function) {
     final old = _registry[type];
     _registry[type] = function;
     return old;
@@ -28,14 +28,14 @@ class DynamicDispatchRegistry<B, T extends Function> {
   ///
   /// Returns the registered [T] function for [type] or null if there was no
   /// function registered.
-  T unregister(Type type) {
+  T? unregister(Type type) {
     return _registry.remove(type);
   }
 
   /// Gets the registered function [T] for [instance.runtimeType].
   ///
   /// If there is no registered function, then null is returned.
-  T getFunction(B instance) => _registry[instance.runtimeType];
+  T? getFunction(B instance) => _registry[instance.runtimeType];
 
   @override
   String toString() {

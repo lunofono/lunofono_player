@@ -9,6 +9,12 @@ A Flutter widget to play content bundles for Lunofono.
 This project is written in [Flutter](https://flutter.dev/). Once you have
 a working Flutter SDK installed, you can test it using `flutter test`.
 
+To run the tests you need to first generate the mocks:
+
+```sh
+flutter pub run build_runner build
+```
+
 ### Git Hooks
 
 This repository provides some useful Git hooks to make sure new commits have

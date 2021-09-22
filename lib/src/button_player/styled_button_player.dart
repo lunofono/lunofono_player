@@ -12,16 +12,14 @@ class StyledButtonPlayer extends ButtonPlayer {
   final StyledButton button;
 
   /// Constructs a [ButtonPlayer] using [button] as the underlaying [Button].
-  StyledButtonPlayer(this.button)
-      : assert(button != null),
-        super(button);
+  StyledButtonPlayer(this.button) : super(button);
 
   /// The background [Color] of the underlaying [button].
   @override
-  Color get backgroundColor => button.backgroundColor;
+  Color? get backgroundColor => button.backgroundColor;
 
   /// The foreground image [Uri] of the underlaying [button].
-  Uri get foregroundImage => button.foregroundImage;
+  Uri? get foregroundImage => button.foregroundImage;
 
   @override
   Widget build(BuildContext context) =>
@@ -34,9 +32,7 @@ class StyledButtonWidget extends StatelessWidget {
   final StyledButtonPlayer button;
 
   /// Creates a new [StyledButtonWidget] to display [button].
-  const StyledButtonWidget({@required this.button, Key key})
-      : assert(button != null),
-        super(key: key);
+  const StyledButtonWidget({required this.button, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -23,7 +23,7 @@ import 'single_medium_state.dart' show SingleMediumState;
 /// is still in progress.
 class SingleMediumWidget extends StatelessWidget {
   /// Creates a [SingleMediumWidget].
-  const SingleMediumWidget({Key key}) : super(key: key);
+  const SingleMediumWidget({Key? key}) : super(key: key);
 
   /// Builds the UI for this widget.
   @override
@@ -34,16 +34,19 @@ class SingleMediumWidget extends StatelessWidget {
           }
 
           if (state.isInitialized) {
+            final controller = state.controller!;
+            final size = state.size!;
+
             // FIXME: This is a bit hacky. At some point it might be better to
             // have 2 build methods in SingleMediumController: buildAudible()
             // and buildVisualizable() and use then depeding on what kind of
             // track we are showing.
             if (!state.isVisualizable) {
-              return Container(key: state.controller.widgetKey);
+              return Container(key: controller.widgetKey);
             }
 
-            var widget = state.controller.build(context);
-            if (state.size.width > state.size.height) {
+            var widget = controller.build(context);
+            if (size.width > size.height) {
               widget = RotatedBox(
                 quarterTurns: 1,
                 child: widget,

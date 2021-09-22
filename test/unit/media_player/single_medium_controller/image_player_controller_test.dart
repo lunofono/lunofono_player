@@ -12,14 +12,12 @@ import 'package:lunofono_player/src/media_player/single_medium_controller.dart';
 
 import 'single_medium_controller_common.dart';
 
+class _FakeContext extends Fake implements BuildContext {}
+
 void main() {
   group('ImagePlayerController', () {
-    ImagePlayerController controller;
-    tearDown(() async => await controller?.dispose());
-
-    test('constructor asserts on null location', () {
-      expect(() => ImagePlayerController(null), throwsAssertionError);
-    });
+    late ImagePlayerController controller;
+    tearDown(() async => await controller.dispose());
 
     testWidgets(
       'initializes with error',
@@ -33,7 +31,7 @@ void main() {
         expectLoading(tester, widget);
 
         await tester.pumpAndSettle();
-        expectError(tester, widget);
+        expectInitError(tester, widget);
       },
     );
 
@@ -51,7 +49,7 @@ void main() {
         await tester.runAsync(() async => await undeadlockAsync()); // XXX!!!
         await tester.pumpAndSettle();
         expectSuccess(tester, widget,
-            size: Size(10.0, 10.0), findWidget: Image);
+            size: const Size(10.0, 10.0), findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
       },
     );
@@ -73,15 +71,15 @@ void main() {
 
         await tester.runAsync(() async => await undeadlockAsync()); // XXX!!!
         await tester.pumpAndSettle();
-        final size = Size(10.0, 10.0);
+        const size = Size(10.0, 10.0);
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
 
         // pause() has not effect when there is no maxDuration.
-        await controller.pause(null);
+        await controller.pause(_FakeContext());
 
-        await tester.pump(Duration(days: 10));
+        await tester.pump(const Duration(days: 10));
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
@@ -94,7 +92,7 @@ void main() {
         var hasStopped = false;
         final image = bundle.Image(
           Uri.parse('assets/10x10-red.png'),
-          maxDuration: Duration(seconds: 1),
+          maxDuration: const Duration(seconds: 1),
         );
         controller = ImagePlayerController(
           image,
@@ -109,7 +107,7 @@ void main() {
 
         await tester.runAsync(() async => await undeadlockAsync()); // XXX!!!
         await tester.pumpAndSettle();
-        final size = Size(10.0, 10.0);
+        const size = Size(10.0, 10.0);
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
@@ -134,7 +132,7 @@ void main() {
         var hasStopped = false;
         final image = bundle.Image(
           Uri.parse('assets/10x10-red.png'),
-          maxDuration: Duration(seconds: 1),
+          maxDuration: const Duration(seconds: 1),
         );
         controller = ImagePlayerController(
           image,
@@ -149,7 +147,7 @@ void main() {
 
         await tester.runAsync(() async => await undeadlockAsync()); // XXX!!!
         await tester.pumpAndSettle();
-        final size = Size(10.0, 10.0);
+        const size = Size(10.0, 10.0);
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
@@ -161,15 +159,15 @@ void main() {
         expect(hasStopped, false);
 
         // Now we pause and let a day go by and it should be still playing
-        await controller.pause(null);
-        await tester.pump(Duration(days: 1));
+        await controller.pause(_FakeContext());
+        await tester.pump(const Duration(days: 1));
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
 
         // Now we resume playing and let the final half of the maxDuration pass
         // and it should have finished
-        await controller.play(null);
+        await controller.play(_FakeContext());
         await tester.pump(image.maxDuration ~/ 2);
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
@@ -183,7 +181,7 @@ void main() {
         var hasStopped = false;
         final image = bundle.Image(
           Uri.parse('assets/10x10-red.png'),
-          maxDuration: Duration(seconds: 1),
+          maxDuration: const Duration(seconds: 1),
         );
         controller = ImagePlayerController(
           image,
@@ -198,7 +196,7 @@ void main() {
 
         await tester.runAsync(() async => await undeadlockAsync()); // XXX!!!
         await tester.pumpAndSettle();
-        final size = Size(10.0, 10.0);
+        const size = Size(10.0, 10.0);
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
@@ -208,7 +206,7 @@ void main() {
         await tester.pump(image.maxDuration * 5);
 
         // Now start playing
-        await controller.play(null);
+        await controller.play(_FakeContext());
         expectSuccess(tester, widget, size: size, findWidget: Image);
         expect(find.byWidget(controller.image), findsOneWidget);
         expect(hasStopped, false);
@@ -302,5 +300,6 @@ Future<void> undeadlockAsync() async {
   ];
   final codec =
       await ui.instantiateImageCodec(Uint8List.fromList(kTransparentImage));
-  return await codec.getNextFrame();
+  await codec.getNextFrame();
+  return;
 }

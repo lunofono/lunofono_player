@@ -19,18 +19,22 @@ class PlaylistState
     implements PlayableState {
   /// Function used to create the concrete [PlayableState] instances.
   @visibleForTesting
-  static PlayableState Function(
+  static var createPlayableState = _createPlayableState;
+
+  /// Creates an appropriate [PlayableState] instance based on the medium type.
+  static PlayableState _createPlayableState(
     Medium medium, {
-    void Function(BuildContext) onFinished,
-  }) createPlayableState = (medium, {onFinished}) {
+    void Function(BuildContext)? onFinished,
+  }) {
     if (medium is SingleMedium) {
-      return SingleMediumState(medium, onFinished: onFinished);
+      return SingleMediumState(medium,
+          onFinished: onFinished, isVisualizable: true);
     }
     if (medium is MultiMedium) {
       return MultiMediumState(medium, onFinished: onFinished);
     }
     throw UnsupportedMediumTypeError();
-  };
+  }
 
   /// The playlist this state represents.
   @override
@@ -51,16 +55,16 @@ class PlaylistState
 
   /// Function to call when the [playlist] finished playing all the media.
   @override
-  final void Function(BuildContext context) onFinished;
+  final void Function(BuildContext context)? onFinished;
 
   /// If true, all the media in this playlist has finished playing.
   bool get isFinished => currentIndex >= mediaState.length;
 
   /// The current [PlayableState] being played, or null if [isFinished].
-  PlayableState get current => isFinished ? null : mediaState[currentIndex];
+  PlayableState? get current => isFinished ? null : mediaState[currentIndex];
 
   /// The last [PlayableState] in this playlist.
-  PlayableState get last => mediaState.last;
+  PlayableState? get last => mediaState.last;
 
   /// Plays the next medium in the [playlist].
   void _playNext(BuildContext context) {
@@ -85,8 +89,7 @@ class PlaylistState
   PlaylistState(
     Playlist playlist, {
     this.onFinished,
-  })  : assert(playlist != null),
-        playable = playlist {
+  }) : playable = playlist {
     mediaState.addAll(playlist.media
         .map((m) => createPlayableState(m, onFinished: _playNext)));
   }
@@ -106,13 +109,13 @@ class PlaylistState
   /// If it's already playing or it finished playing all the media (and
   /// it's not looping), it does nothing.
   @override
-  Future<void> play(BuildContext context) => current?.play(context);
+  Future<void>? play(BuildContext context) => current?.play(context);
 
   /// Pauses the playing of the media in this [playlist].
   ///
   /// It does nothing if it's already paused.
   @override
-  Future<void> pause(BuildContext context) => current?.pause(context);
+  Future<void>? pause(BuildContext context) => current?.pause(context);
 
   /// Disposes all the [PlayableState] in [mediaState].
   @override

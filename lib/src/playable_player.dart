@@ -51,14 +51,14 @@ abstract class PlayablePlayer {
     final wrap = registry.getFunction(playable);
     assert(wrap != null,
         'Unimplemented PlayablePlayer for ${playable.runtimeType}');
-    return wrap(playable);
+    return wrap!(playable);
   }
 
   /// The underlaying model's [Playable].
   Playable get playable;
 
   /// Plays this [Playable] with an optional [backgroundColor].
-  void play(BuildContext context, [Color backgroundColor]);
+  void play(BuildContext context, [Color? backgroundColor]);
 }
 
 class SingleMediumPlayablePlayer extends PlayablePlayer {
@@ -68,7 +68,7 @@ class SingleMediumPlayablePlayer extends PlayablePlayer {
 
   /// Creates a [SingleMediumPlayablePlayer] using [playable] as the underlaying
   /// [Playable].
-  SingleMediumPlayablePlayer(this.playable) : assert(playable != null);
+  SingleMediumPlayablePlayer(this.playable);
 
   /// Plays a [SingleMedium] by pushing a new page with a [SingleMediumPlayer].
   ///
@@ -76,7 +76,7 @@ class SingleMediumPlayablePlayer extends PlayablePlayer {
   /// [SingleMediumPlayer.backgroundColor]. Otherwise, [Colors.black] will be
   /// used.
   @override
-  void play(BuildContext context, [Color backgroundColor]) {
+  void play(BuildContext context, [Color? backgroundColor]) {
     Navigator.push<SingleMediumPlayer>(
       context,
       MaterialPageRoute<SingleMediumPlayer>(
@@ -97,7 +97,7 @@ class PlaylistPlayablePlayer extends PlayablePlayer {
 
   /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
   /// [Playable].
-  PlaylistPlayablePlayer(this.playable) : assert(playable != null);
+  PlaylistPlayablePlayer(this.playable);
 
   /// Plays a [SingleMedium] by pushing a new page with a [PlaylistPlayer].
   ///
@@ -105,7 +105,7 @@ class PlaylistPlayablePlayer extends PlayablePlayer {
   /// [PlaylistPlayer.backgroundColor]. Otherwise, [Colors.black] will be
   /// used.
   @override
-  void play(BuildContext context, [Color backgroundColor]) {
+  void play(BuildContext context, [Color? backgroundColor]) {
     Navigator.push<PlaylistPlayer>(
       context,
       MaterialPageRoute<PlaylistPlayer>(
@@ -126,7 +126,7 @@ class MultiMediumPlayablePlayer extends PlayablePlayer {
 
   /// Constructs a [SingleMediumWidget] using [playable] as the underlaying
   /// [Playable].
-  MultiMediumPlayablePlayer(this.playable) : assert(playable != null);
+  MultiMediumPlayablePlayer(this.playable);
 
   /// Plays a [SingleMedium] by pushing a new page with a [MultiMediumPlayer].
   ///
@@ -134,7 +134,7 @@ class MultiMediumPlayablePlayer extends PlayablePlayer {
   /// [MultiMediumPlayer.backgroundColor]. Otherwise, [Colors.black] will be
   /// used.
   @override
-  void play(BuildContext context, [Color backgroundColor]) {
+  void play(BuildContext context, [Color? backgroundColor]) {
     Navigator.push<MultiMediumPlayer>(
       context,
       MaterialPageRoute<MultiMediumPlayer>(

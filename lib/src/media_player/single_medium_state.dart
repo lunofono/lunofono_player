@@ -25,14 +25,14 @@ class SingleMediumState
 
   /// The function to call when this medium finishes playing.
   @override
-  final void Function(BuildContext context) onFinished;
+  final void Function(BuildContext context)? onFinished;
 
   /// The player controller used to control this medium.
   ///
   /// It can be null if there was an error while creating the controller (if
   /// it is null, error is non-null).
-  SingleMediumController get controller => _controller;
-  SingleMediumController _controller;
+  SingleMediumController? get controller => _controller;
+  SingleMediumController? _controller;
 
   /// If true, the medium needs to be visualized, otherwise it plays in the
   /// background without any visual representation (except for errors or
@@ -49,7 +49,7 @@ class SingleMediumState
   /// The size is only available after [initialize()] is successful, so if this
   /// is non-null, it means the [controller] for this medium was initialized
   /// successfully.
-  Size size;
+  Size? size;
 
   /// True if there was an error ([error] is non-null).
   bool get isErroneous => error != null;
@@ -63,20 +63,17 @@ class SingleMediumState
 
   /// Creates a state from a [medium].
   ///
-  /// The [medium] and [isVisualizable] must be non-null. A [controller] will
-  /// be created using the global [ControllerRegistry.instance]. If there is no
-  /// controller registered for this kind of [medium], then an [error] will
-  /// be set.
+  /// A [controller] will be created using the global
+  /// [ControllerRegistry.instance]. If there is no controller registered for
+  /// this kind of [medium], then an [error] will be set.
   ///
   /// If [onFinished] is provided, it will be called when the medium finishes
   /// playing (if ever).
   SingleMediumState(
     SingleMedium medium, {
-    this.isVisualizable = true,
+    required this.isVisualizable,
     this.onFinished,
-  })  : assert(medium != null),
-        assert(isVisualizable != null),
-        playable = medium {
+  }) : playable = medium {
     final create = ControllerRegistry.instance.getFunction(medium);
     if (create == null) {
       error = 'Unsupported type ${medium.runtimeType} for ${medium.resource}';
@@ -102,7 +99,7 @@ class SingleMediumState
     // error should be already set
     if (controller == null) return;
     try {
-      size = await controller.initialize(context);
+      size = await controller!.initialize(context);
     } catch (e) {
       error = e;
     }
@@ -118,10 +115,11 @@ class SingleMediumState
   // track.
   @override
   Future<void> play(BuildContext context) =>
-      controller?.play(context)?.catchError((dynamic error) {
+      controller?.play(context).catchError((dynamic error) {
         this.error = error;
         notifyListeners();
-      });
+      }) ??
+      Future<void>.value();
 
   /// Pauses this medium using [controller].
   ///
@@ -131,10 +129,11 @@ class SingleMediumState
   // in the track.
   @override
   Future<void> pause(BuildContext context) =>
-      controller?.pause(context)?.catchError((dynamic error) {
+      controller?.pause(context).catchError((dynamic error) {
         this.error = error;
         notifyListeners();
-      });
+      }) ??
+      Future<void>.value();
 
   /// Disposes this medium's [controller].
   ///
@@ -144,14 +143,14 @@ class SingleMediumState
   Future<void> dispose() async {
     await controller
         ?.dispose()
-        ?.catchError((dynamic error) => this.error = error);
+        .catchError((dynamic error) => this.error = error);
     super.dispose();
   }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final sizeStr =
-        size == null ? 'uninitialized' : '${size.width}x${size.height}';
+        size == null ? 'uninitialized' : '${size!.width}x${size!.height}';
     final errorStr = error == null ? '' : 'error: $error';
     return '$runtimeType("${playable.resource}", $sizeStr$errorStr)';
   }
@@ -163,6 +162,6 @@ class SingleMediumState
       ..add(DiagnosticsProperty('playable', playable))
       ..add(DiagnosticsProperty<dynamic>('error', error, defaultValue: null))
       ..add(DiagnosticsProperty('size',
-          size == null ? '<uninitialized>' : '${size.width}x${size.height}'));
+          size == null ? '<uninitialized>' : '${size!.width}x${size!.height}'));
   }
 }

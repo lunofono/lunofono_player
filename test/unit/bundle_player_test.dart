@@ -13,10 +13,6 @@ import 'package:lunofono_player/src/menu_player.dart'
 
 void main() {
   group('BundlePlayer', () {
-    test('constructor asserts on a null bundle', () {
-      expect(() => BundlePlayer(null), throwsAssertionError);
-    });
-
     testWidgets(
       'PlatformServices are called and the rootMenu is built',
       (WidgetTester tester) async {
@@ -52,21 +48,21 @@ class FakeMenu extends Menu {}
 
 class FakeMenuPlayer extends MenuPlayer {
   static Key globalKey = GlobalKey(debugLabel: 'FakeMenuPlayerKey');
-  FakeMenuPlayer(this.menu) : assert(menu != null);
+  FakeMenuPlayer(this.menu);
   @override
   final FakeMenu menu;
   @override
   Widget build(BuildContext context) {
-    return Container(child: Text('FakeMenu'), key: globalKey);
+    return Container(child: const Text('FakeMenu'), key: globalKey);
   }
 }
 
 class FakePlatformServices extends PlatformServices {
-  bool calledFullScreen;
-  Orientation calledOrientation;
-  bool calledInhibitScreenOff;
+  bool? calledFullScreen;
+  Orientation? calledOrientation;
+  bool? calledInhibitScreenOff;
   @override
-  Future<void> setFullScreen({@required bool on}) async {
+  Future<void> setFullScreen({required bool on}) async {
     calledFullScreen = on;
   }
 
@@ -76,7 +72,7 @@ class FakePlatformServices extends PlatformServices {
   }
 
   @override
-  Future<void> inhibitScreenOff({@required bool on}) async {
+  Future<void> inhibitScreenOff({required bool on}) async {
     calledInhibitScreenOff = on;
   }
 }

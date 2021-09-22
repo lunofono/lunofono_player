@@ -25,10 +25,9 @@ class BundlePlayer extends StatefulWidget {
   /// [bundle] cannot be null.
   const BundlePlayer(
     this.bundle, {
-    PlatformServices platformServices,
-    Key key,
-  })  : assert(bundle != null),
-        platformServices = platformServices ?? const PlatformServices(),
+    PlatformServices? platformServices,
+    Key? key,
+  })  : platformServices = platformServices ?? const PlatformServices(),
         super(key: key);
 
   @override
@@ -38,7 +37,7 @@ class BundlePlayer extends StatefulWidget {
 /// A state for a [BundlePlayer].
 class _BundlePlayerState extends State<BundlePlayer> {
   /// The [MenuPlayer] used to play this [widget.menu].
-  MenuPlayer rootMenu;
+  late MenuPlayer rootMenu;
 
   /// Initialized this [_BundlePlayerState].
   ///

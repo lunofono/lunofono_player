@@ -17,11 +17,13 @@ import 'package:lunofono_player/src/media_player/playlist_state.dart'
 import 'package:lunofono_player/src/media_player/single_medium_state.dart'
     show SingleMediumState;
 
+import 'mocks.mocks.dart';
+
 void main() {
   group('PlaylistState.createPlayableState()', () {
     test('creates SingleMediumState for SingleMedium', () {
       final medium = _FakeSingleMedium();
-      final onFinished = (BuildContext context) {};
+      void onFinished(BuildContext context) {}
       final state =
           PlaylistState.createPlayableState(medium, onFinished: onFinished);
       expect(state, isA<SingleMediumState>());
@@ -30,7 +32,7 @@ void main() {
 
     test('creates SingleMediumState for SingleMedium', () {
       final medium = _FakeMultiMedium();
-      final onFinished = (BuildContext context) {};
+      void onFinished(BuildContext context) {}
       final state =
           PlaylistState.createPlayableState(medium, onFinished: onFinished);
       expect(state, isA<MultiMediumState>());
@@ -39,7 +41,7 @@ void main() {
 
     test('throws UnsupportedMediumType on unsupported Medium type', () {
       final medium = _FakeMedium();
-      final onFinished = (BuildContext context) {};
+      void onFinished(BuildContext context) {}
       expect(
           () =>
               PlaylistState.createPlayableState(medium, onFinished: onFinished),
@@ -69,17 +71,19 @@ void main() {
         () => PlaylistState.createPlayableState = originalCreatePlayableState);
 
     void stubAll(List<PlayableState> states) {
-      states.forEach((s) {
+      for (var state in states) {
+        final s = state as _MockPlayableState;
         when(s.initialize(fakeContext, startPlaying: anyNamed('startPlaying')))
             .thenAnswer((_) => Future<void>.value());
         when(s.play(fakeContext)).thenAnswer((_) => Future<void>.value());
         when(s.pause(fakeContext)).thenAnswer((_) => Future<void>.value());
         when(s.dispose()).thenAnswer((_) => Future<void>.value());
-      });
+      }
     }
 
     PlaylistState createPlaylistState(
-        {List<Medium> media, void Function(BuildContext context) onFinished}) {
+        {List<Medium>? media,
+        void Function(BuildContext context)? onFinished}) {
       final state =
           PlaylistState(Playlist(media ?? testMedia), onFinished: onFinished);
       stubAll(state.mediaState);
@@ -87,22 +91,16 @@ void main() {
     }
 
     group('constructor', () {
-      group('asserts on', () {
-        test('null playlist', () {
-          expect(() => PlaylistState(null), throwsAssertionError);
-        });
-      });
-
       void testContructorWithMedia(PlaylistState state, List<Medium> media) {
         expect(state.mediaState.length, media.length);
         expect(state.currentIndex, 0);
         expect(state.isFinished, isFalse);
         expect(state.current, state.mediaState.first);
         expect(state.last, state.mediaState.last);
-        expect(state.current.playable, same(media.first));
-        expect(state.current.onFinished, isNotNull);
-        expect(state.last.playable, same(media.last));
-        expect(state.last.onFinished, isNotNull);
+        expect(state.current!.playable, same(media.first));
+        expect(state.current!.onFinished, isNotNull);
+        expect(state.last!.playable, same(media.last));
+        expect(state.last!.onFinished, isNotNull);
       }
 
       test('create mediaState correctly', () {
@@ -115,12 +113,12 @@ void main() {
       final state = createPlaylistState();
       await state.initialize(fakeContext);
       expect(state.isFinished, isFalse);
-      state.mediaState.forEach((s) {
+      for (var s in state.mediaState) {
         verifyInOrder([
           s.initialize(fakeContext),
         ]);
         verifyNoMoreInteractions(s);
-      });
+      }
     });
 
     test('initialize(startPlaying) initializes media and starts playing',
@@ -153,7 +151,7 @@ void main() {
       expect(onFinished, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
-      verify(state.current.play(fakeContext)).called(1);
+      verify(state.current!.play(fakeContext)).called(1);
       state.mediaState.forEach(verifyNoMoreInteractions);
 
       state.mediaState.forEach(clearInteractions);
@@ -161,7 +159,7 @@ void main() {
       expect(onFinished, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
-      verify(state.current.pause(fakeContext)).called(1);
+      verify(state.current!.pause(fakeContext)).called(1);
       state.mediaState.forEach(verifyNoMoreInteractions);
 
       state.mediaState.forEach(clearInteractions);
@@ -169,21 +167,21 @@ void main() {
       expect(onFinished, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(first));
-      verify(state.current.play(fakeContext)).called(1);
+      verify(state.current!.play(fakeContext)).called(1);
       state.mediaState.forEach(verifyNoMoreInteractions);
 
       // after the current track finished, the next one is played
       state.mediaState.forEach(clearInteractions);
-      state.current.onFinished(fakeContext);
+      state.current!.onFinished!(fakeContext);
       expect(onFinished, false);
       expect(state.isFinished, isFalse);
       expect(state.current, same(state.last));
-      verify(state.current.play(fakeContext)).called(1);
+      verify(state.current!.play(fakeContext)).called(1);
       state.mediaState.forEach(verifyNoMoreInteractions);
 
       // after the last track finished, the controller should be finished
       state.mediaState.forEach(clearInteractions);
-      state.current.onFinished(fakeContext);
+      state.current!.onFinished!(fakeContext);
       expect(onFinished, true);
       expect(state.isFinished, isTrue);
       expect(state.current, isNull);
@@ -192,10 +190,10 @@ void main() {
       // If we dispose the controller,
       state.mediaState.forEach(clearInteractions);
       await state.dispose();
-      state.mediaState.forEach((s) {
+      for (var s in state.mediaState) {
         verify(s.dispose()).called(1);
         verifyNoMoreInteractions(s);
-      });
+      }
     });
 
     test('listening for updates work', () async {
@@ -210,10 +208,10 @@ void main() {
       await state.play(fakeContext);
       expect(notifyCalls, 1);
       // ends first, second starts playing
-      state.current.onFinished(fakeContext);
+      state.current!.onFinished!(fakeContext);
       expect(notifyCalls, 2);
       // ends second, onFinished should be called
-      state.current.onFinished(fakeContext);
+      state.current!.onFinished!(fakeContext);
       expect(notifyCalls, 3);
       await state.pause(fakeContext);
       expect(notifyCalls, 3);
@@ -230,33 +228,64 @@ void main() {
       expect(state.toString(), 'PlaylistState(current: 0, media: 2)');
     });
 
-    test('debugFillProperties() and debugDescribeChildren()', () async {
+    test('debugFillProperties()', () async {
       final state = createPlaylistState();
 
-      final identityHash = RegExp(r'#[0-9a-f]{5}');
+      var builder = DiagnosticPropertiesBuilder();
+      state.debugFillProperties(builder);
       expect(
-        state.toStringDeep().replaceAll(identityHash, ''),
-        'PlaylistState\n'
-        ' │ <uninitialized>\n'
-        ' │ currentIndex: 0\n'
-        ' │ mediaState.length: 2\n'
-        ' │\n'
-        ' ├─0: _MockPlayableState(_FakeMedium(first))\n'
-        ' └─1: _MockPlayableState(_FakeMedium(second))\n'
-        '',
-      );
+          builder.properties.toString(),
+          [
+            FlagProperty('isInitialized',
+                value: false, ifFalse: '<uninitialized>'),
+            IntProperty('currentIndex', 0),
+            IntProperty('mediaState.length', 2),
+          ].toString());
 
       await state.initialize(fakeContext);
+      builder = DiagnosticPropertiesBuilder();
+      state.debugFillProperties(builder);
       expect(
-        state.toStringDeep().replaceAll(identityHash, ''),
-        'PlaylistState\n'
-        ' │ currentIndex: 0\n'
-        ' │ mediaState.length: 2\n'
-        ' │\n'
-        ' ├─0: _MockPlayableState(_FakeMedium(first))\n'
-        ' └─1: _MockPlayableState(_FakeMedium(second))\n'
-        '',
-      );
+          builder.properties.toString(),
+          [
+            FlagProperty('isInitialized',
+                value: true, ifFalse: '<uninitialized>'),
+            IntProperty('currentIndex', 0),
+            IntProperty('mediaState.length', 2),
+          ].toString());
+    });
+
+    test('debugDescribeChildren()', () async {
+      final state = createPlaylistState();
+      final fakeNode = _FakeDiagnosticsNode();
+      for (var s in state.mediaState) {
+        when(s.toDiagnosticsNode(
+                name: captureAnyNamed('name'), style: captureAnyNamed('style')))
+            .thenReturn(fakeNode);
+      }
+
+      expect(state.debugDescribeChildren(), [fakeNode, fakeNode]);
+      state.mediaState.asMap().forEach(
+            (i, s) => expect(
+              verify(s.toDiagnosticsNode(
+                      name: captureAnyNamed('name'),
+                      style: captureThat(isNull, named: 'style')))
+                  .captured,
+              ['$i', null],
+            ),
+          );
+
+      await state.initialize(fakeContext);
+      expect(state.debugDescribeChildren(), [fakeNode, fakeNode]);
+      state.mediaState.asMap().forEach(
+            (i, s) => expect(
+              verify(s.toDiagnosticsNode(
+                      name: captureAnyNamed('name'),
+                      style: captureThat(isNull, named: 'style')))
+                  .captured,
+              ['$i', null],
+            ),
+          );
     });
   });
 }
@@ -264,7 +293,7 @@ void main() {
 class _FakeContext extends Fake implements BuildContext {}
 
 class _FakeMedium extends Fake implements Medium {
-  final String name;
+  final String? name;
   _FakeMedium([this.name]);
 
   @override
@@ -274,7 +303,7 @@ class _FakeMedium extends Fake implements Medium {
 class _FakeSingleMedium extends _FakeMedium implements SingleMedium {
   @override
   Uri get resource => Uri.parse(name ?? '');
-  _FakeSingleMedium([String name]) : super(name);
+  _FakeSingleMedium([String? name]) : super(name);
 }
 
 class _FakeMultiMedium extends _FakeMedium implements MultiMedium {
@@ -283,9 +312,9 @@ class _FakeMultiMedium extends _FakeMedium implements MultiMedium {
       _FakeMultiMediumTrack(_FakeSingleMedium('mainTrack1'));
 
   @override
-  BackgroundMultiMediumTrack get backgroundTrack => NoTrack();
+  BackgroundMultiMediumTrack get backgroundTrack => const NoTrack();
 
-  _FakeMultiMedium([String name]) : super(name);
+  _FakeMultiMedium([String? name]) : super(name);
 }
 
 class _FakeMultiMediumTrack extends Fake implements MultiMediumTrack {
@@ -293,22 +322,24 @@ class _FakeMultiMediumTrack extends Fake implements MultiMediumTrack {
   final List<SingleMedium> media;
 
   _FakeMultiMediumTrack(_FakeSingleMedium medium)
-      : assert(medium != null),
-        media = <SingleMedium>[medium];
+      : media = <SingleMedium>[medium];
 }
 
-class _MockPlayableState extends Mock
-    with DiagnosticableTreeMixin
-    implements PlayableState {
+class _FakeDiagnosticsNode extends Fake implements DiagnosticsNode {
+  @override
+  String toString(
+          {TextTreeConfiguration? parentConfiguration,
+          DiagnosticLevel minLevel = DiagnosticLevel.info}) =>
+      'FakeNode';
+}
+
+class _MockPlayableState extends MockPlayableState {
   @override
   final Medium playable;
   @override
-  final void Function(BuildContext) onFinished;
+  final void Function(BuildContext)? onFinished;
   _MockPlayableState(
     this.playable, {
     this.onFinished,
   });
-
-  @override
-  String toStringShort() => '$runtimeType($playable)';
 }

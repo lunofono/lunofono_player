@@ -28,8 +28,7 @@ class GridMenuPlayer extends MenuPlayer {
   ///
   /// This also wrap all the [menu.buttons] to store [ButtonPlayer]s instead.
   GridMenuPlayer(this.menu)
-      : assert(menu != null),
-        buttons = List<ButtonPlayer>.from(
+      : buttons = List<ButtonPlayer>.from(
             menu.buttons.map<ButtonPlayer>((b) => ButtonPlayer.wrap(b)));
 
   /// Builds the UI for this [menu].
@@ -49,12 +48,10 @@ class GridMenuWidget extends StatelessWidget {
 
   /// Creates a new [GridMenuWidget] for [menu].
   const GridMenuWidget({
-    @required this.menu,
+    required this.menu,
     this.padding = 10.0,
-    Key key,
-  })  : assert(menu != null),
-        assert(padding != null),
-        super(key: key);
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -84,14 +81,11 @@ class GridMenuRowWidget extends StatelessWidget {
 
   /// Creates a new [GridMenuRowWidget] to display the [row] row from [menu].
   const GridMenuRowWidget({
-    @required this.row,
-    @required this.menu,
+    required this.row,
+    required this.menu,
     this.padding = 10.0,
-    Key key,
-  })  : assert(row != null),
-        assert(menu != null),
-        assert(padding != null),
-        super(key: key);
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Expanded(

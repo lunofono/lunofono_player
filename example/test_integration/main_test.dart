@@ -10,7 +10,7 @@ void main() {
 
   testWidgets('test video playing from local assets',
       (WidgetTester tester) async {
-    await tester.pumpWidget(MyApp());
+    await tester.pumpWidget(const MyApp());
 
     await tester.pumpAndSettle();
 
@@ -39,9 +39,9 @@ Finder findSubString(String substring) {
   return find.byWidgetPredicate((widget) {
     if (widget is Text) {
       if (widget.data != null) {
-        return widget.data.contains(substring);
+        return widget.data!.contains(substring);
       }
-      return widget.textSpan.toPlainText().contains(substring);
+      return widget.textSpan!.toPlainText().contains(substring);
     }
     return false;
   });

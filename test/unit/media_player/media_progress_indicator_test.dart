@@ -8,14 +8,8 @@ import 'package:lunofono_player/src/media_player/media_progress_indicator.dart';
 
 void main() {
   group('MediaProgressIndicator', () {
-    testWidgets('constructor asserts if visualizable is null',
-        (WidgetTester tester) async {
-      expect(() => MediaProgressIndicator(visualizable: null),
-          throwsAssertionError);
-    });
-
     Future<void> testInnerWidgets(WidgetTester tester,
-        {@required IconData icon, @required bool visualizable}) async {
+        {required IconData icon, required bool visualizable}) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

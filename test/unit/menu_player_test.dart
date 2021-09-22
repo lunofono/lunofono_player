@@ -37,8 +37,8 @@ void main() {
 
     group('MenuPlayerRegistry', () {
       final oldMenuRegistry = MenuPlayer.registry;
-      _FakeContext fakeContext;
-      _FakeMenu fakeMenu;
+      _FakeContext? fakeContext;
+      late _FakeMenu fakeMenu;
 
       setUp(() {
         fakeContext = _FakeContext();
@@ -58,7 +58,7 @@ void main() {
         MenuPlayer.registry
             .register(_FakeMenu, (m) => _FakeMenuPlayer(m as _FakeMenu));
 
-        final builtWidget = MenuPlayer.wrap(fakeMenu).build(fakeContext);
+        final builtWidget = MenuPlayer.wrap(fakeMenu).build(fakeContext!);
         expect(fakeMenu.buildCalls.length, 1);
         expect(fakeMenu.buildCalls.last.context, same(fakeContext));
         expect(fakeMenu.buildCalls.last.returnedWidget, same(builtWidget));
@@ -96,11 +96,11 @@ class _FakeMenu extends Menu {
 class _FakeMenuPlayer extends MenuPlayer {
   @override
   final _FakeMenu menu;
-  _FakeMenuPlayer(this.menu) : assert(menu != null);
+  _FakeMenuPlayer(this.menu);
   static Key globalKey = GlobalKey(debugLabel: 'FakeMenuPlayerKey');
   @override
   Widget build(BuildContext context) {
-    final widget = Container(child: Text('FakeMenu'), key: globalKey);
+    final widget = Container(child: const Text('FakeMenu'), key: globalKey);
     menu.buildCalls.add(_BuildCall(context, widget));
     return widget;
   }
@@ -115,7 +115,7 @@ class _FakeAction extends Action {
 class _FakeActionPlayer extends ActionPlayer {
   @override
   final _FakeAction action;
-  _FakeActionPlayer(this.action) : assert(action != null);
+  _FakeActionPlayer(this.action);
   @override
   void act(BuildContext context, ButtonPlayer button) =>
       action.actCalls.add(button);

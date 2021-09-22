@@ -13,14 +13,14 @@ import 'package:lunofono_player/src/playable_player.dart';
 void main() {
   group('PlayablePlayer', () {
     final oldPlayableRegistry = PlayablePlayer.registry;
-    FakeContext fakeContext;
-    FakePlayable fakePlayable;
-    Color color;
+    FakeContext? fakeContext;
+    FakePlayable? fakePlayable;
+    Color? color;
 
     setUp(() {
       fakePlayable = FakePlayable();
       fakeContext = FakeContext();
-      color = Color(0x3845bd34);
+      color = const Color(0x3845bd34);
     });
 
     tearDown(() => PlayablePlayer.registry = oldPlayableRegistry);
@@ -28,23 +28,23 @@ void main() {
     test('empty', () {
       PlayablePlayer.registry = PlayablePlayerRegistry();
       expect(PlayablePlayer.registry, isEmpty);
-      expect(() => PlayablePlayer.wrap(fakePlayable), throwsAssertionError);
+      expect(() => PlayablePlayer.wrap(fakePlayable!), throwsAssertionError);
     });
 
     test('registration and calling from empty', () {
       PlayablePlayer.registry = PlayablePlayerRegistry();
       PlayablePlayer.registry.register(FakePlayable,
           (playable) => FakePlayablePlayer(playable as FakePlayable));
-      PlayablePlayer.wrap(fakePlayable).play(fakeContext, color);
-      expect(fakePlayable.calledPlayable, same(fakePlayable));
-      expect(fakePlayable.calledContext, same(fakeContext));
-      expect(fakePlayable.calledColor, same(color));
+      PlayablePlayer.wrap(fakePlayable!).play(fakeContext!, color);
+      expect(fakePlayable!.calledPlayable, same(fakePlayable));
+      expect(fakePlayable!.calledContext, same(fakeContext));
+      expect(fakePlayable!.calledColor, same(color));
     });
 
     group('SingleMedium', () {
       final homeKey = GlobalKey(debugLabel: 'homeKey');
 
-      void testPlayable(WidgetTester tester, Widget homeWidget) async {
+      Future<void> testPlayable(WidgetTester tester, Widget homeWidget) async {
         // We need a MaterialApp to use the Navigator
         await tester.pumpWidget(MaterialApp(home: homeWidget));
         final homeFinder = find.byKey(homeKey);
@@ -58,7 +58,7 @@ void main() {
         // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
         await tester.pump();
         // The second pump we wait a bit because Navigator is animated
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
         final playerFinder = find.byType(SingleMediumPlayer);
         expect(playerFinder, findsOneWidget);
@@ -66,9 +66,9 @@ void main() {
         final context = tester.element(playerFinder);
 
         // The HomeWidget should be back
-        mediaPlayer.onMediaStopped(context); // Should call Navigator.pop()
+        mediaPlayer.onMediaStopped!(context); // Should call Navigator.pop()
         await tester.pump(); // Same with .push() about the double pump()
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
         expect(find.byType(SingleMediumPlayer), findsNothing);
       }
@@ -92,7 +92,7 @@ void main() {
     group('MultiMedium', () {
       final homeKey = GlobalKey(debugLabel: 'homeKey');
 
-      void testPlayable(WidgetTester tester, Widget homeWidget) async {
+      Future<void> testPlayable(WidgetTester tester, Widget homeWidget) async {
         // We need a MaterialApp to use the Navigator
         await tester.pumpWidget(MaterialApp(home: homeWidget));
         final homeFinder = find.byKey(homeKey);
@@ -106,7 +106,7 @@ void main() {
         // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
         await tester.pump();
         // The second pump we wait a bit because Navigator is animated
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
         final playerFinder = find.byType(MultiMediumPlayer);
         expect(playerFinder, findsOneWidget);
@@ -114,9 +114,9 @@ void main() {
         final context = tester.element(playerFinder);
 
         // The HomeWidget should be back
-        mediaPlayer.onMediaStopped(context); // Should call Navigator.pop()
+        mediaPlayer.onMediaStopped!(context); // Should call Navigator.pop()
         await tester.pump(); // Same with .push() about the double pump()
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
         expect(find.byType(MultiMediumPlayer), findsNothing);
       }
@@ -140,7 +140,7 @@ void main() {
     group('Playlist', () {
       final homeKey = GlobalKey(debugLabel: 'homeKey');
 
-      void testPlayable(WidgetTester tester, Widget homeWidget) async {
+      Future<void> testPlayable(WidgetTester tester, Widget homeWidget) async {
         // We need a MaterialApp to use the Navigator
         await tester.pumpWidget(MaterialApp(home: homeWidget));
         final homeFinder = find.byKey(homeKey);
@@ -154,7 +154,7 @@ void main() {
         // https://github.com/flutter/flutter/blob/1.20.3/packages/flutter/test/widgets/navigator_test.dart
         await tester.pump();
         // The second pump we wait a bit because Navigator is animated
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsNothing);
         final playerFinder = find.byType(PlaylistPlayer);
         expect(playerFinder, findsOneWidget);
@@ -162,9 +162,9 @@ void main() {
         final context = tester.element(playerFinder);
 
         // The HomeWidget should be back
-        mediaPlayer.onMediaStopped(context); // Should call Navigator.pop()
+        mediaPlayer.onMediaStopped!(context); // Should call Navigator.pop()
         await tester.pump(); // Same with .push() about the double pump()
-        await tester.pump(Duration(seconds: 1));
+        await tester.pump(const Duration(seconds: 1));
         expect(find.byKey(homeKey), findsOneWidget);
         expect(find.byType(PlaylistPlayer), findsNothing);
       }
@@ -193,28 +193,28 @@ void main() {
 class FakeContext extends Fake implements BuildContext {}
 
 class FakePlayable extends Playable {
-  Playable calledPlayable;
-  BuildContext calledContext;
-  Color calledColor;
+  Playable? calledPlayable;
+  BuildContext? calledContext;
+  Color? calledColor;
 }
 
 class FakePlayablePlayer extends PlayablePlayer {
   @override
   final FakePlayable playable;
   @override
-  void play(BuildContext context, [Color backgroundColor]) {
+  void play(BuildContext context, [Color? backgroundColor]) {
     playable.calledPlayable = playable;
     playable.calledContext = context;
     playable.calledColor = backgroundColor;
   }
 
-  FakePlayablePlayer(this.playable) : assert(playable != null);
+  FakePlayablePlayer(this.playable);
 }
 
 class HomeWidgetPlayable extends StatelessWidget {
   final Color color = Colors.red;
   final PlayablePlayer playable;
-  const HomeWidgetPlayable(this.playable, {Key key}) : super(key: key);
+  const HomeWidgetPlayable(this.playable, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -222,9 +222,7 @@ class HomeWidgetPlayable extends StatelessWidget {
       onTap: () {
         playable.play(context, color);
       },
-      child: Container(
-        child: const Text('home'),
-      ),
+      child: const Text('home'),
     );
   }
 }
